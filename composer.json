@@ -1,0 +1,25 @@
+{
+  "name": "pentagonal/pentagonalci",
+  "description": "Pentagonal Code Igniter",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "version": "1.0",
+  "authors": [
+    {
+      "name": "awan",
+      "email": "nawa@yahoo.com"
+    }
+  ],
+  "require": {
+    "php" : ">=5.4",
+    "gettext/gettext": "^3",
+    "pentagonal/hookable": "1.0",
+    "pentagonal/phpass": "1.0",
+    "aufa/encryption": "1.0",
+    "pentagonal/statichelper": "^1",
+    "phpmailer/phpmailer": "^5.2"
+  },
+  "config": {
+    "vendor-dir": "source/vendor"
+  }
+}
