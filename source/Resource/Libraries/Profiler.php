@@ -98,11 +98,9 @@ class CI_Profiler {
     public function __construct($config = array())
     {
         $this->CI =& get_instance();
-        $this->CI->load->language('profiler');
 
         // default all sections to display
-        foreach ($this->_available_sections as $section)
-        {
+        foreach ($this->_available_sections as $section) {
             if ( ! isset($config[$section]))
             {
                 $this->_compile_{$section} = true;
@@ -173,7 +171,7 @@ class CI_Profiler {
             $output = "\n\n"
                 . '<fieldset id="ci_profiler_benchmarks" style="border:1px solid #900;padding:6px 10px 10px 10px;margin:20px 0 20px 0;background-color:#eee;">'
                 . "\n"
-                . '<legend style="color:#900;">&nbsp;&nbsp;' . $this->CI->lang->line('profiler_benchmarks') . "&nbsp;&nbsp;</legend>"
+                . '<legend style="color:#900;">&nbsp;&nbsp;' . $this->CI->lang->line('BENCHMARKS') . "&nbsp;&nbsp;</legend>"
                 . "\n\n\n<table style=\"width:100%;\">\n";
         }
 
@@ -230,10 +228,10 @@ class CI_Profiler {
             return $useoutput ? "\n\n"
             .'<fieldset id="ci_profiler_queries" style="border:1px solid #0000FF;padding:6px 10px 10px 10px;margin:20px 0 20px 0;background-color:#eee;">'
             ."\n"
-            .'<legend style="color:#0000FF;">&nbsp;&nbsp;'.$this->CI->lang->line('profiler_queries').'&nbsp;&nbsp;</legend>'
+            .'<legend style="color:#0000FF;">&nbsp;&nbsp;'.$this->CI->lang->line('QUERIES').'&nbsp;&nbsp;</legend>'
             ."\n\n\n<table style=\"border:none; width:100%;\">\n"
             .'<tr><td style="width:100%;color:#0000FF;font-weight:normal;background-color:#eee;padding:5px;">'
-            .$this->CI->lang->line('profiler_no_db')
+            .$this->CI->lang->line('Database driver is not currently loaded')
             ."</td></tr>\n</table>\n</fieldset>" : null;
         }
 
@@ -250,16 +248,19 @@ class CI_Profiler {
         {
             if ($useoutput) {
                 $hide_queries = (count($db->queries) > $this->_query_toggle_count) ? ' display:none' : '';
-                $total_time = number_format(array_sum($db->query_times), 4) . ' ' . $this->CI->lang->line('profiler_seconds');
-                $show_hide_js = '(<span style="cursor: pointer;" onclick="var s=document.getElementById(\'ci_profiler_queries_db_' . $count . '\').style;s.display=s.display==\'none\'?\'\':\'none\';this.innerHTML=this.innerHTML==\'' . $this->CI->lang->line('profiler_section_hide') . '\'?\'' . $this->CI->lang->line('profiler_section_show') . '\':\'' . $this->CI->lang->line('profiler_section_hide') . '\';">' . $this->CI->lang->line('profiler_section_hide') . '</span>)';
+                $total_time = number_format(array_sum($db->query_times), 4) . ' ' . $this->CI->lang->line('seconds');
+                $show_hide_js = '(<span style="cursor: pointer;" onclick="var s=document.getElementById(\'ci_profiler_queries_db_' . $count . '\').style;s.display=s.display==\'none\'?\'\':\'none\';this.innerHTML=this.innerHTML==\'' .
+                    $this->CI->lang->line('Hide') . '\'?\'' . $this->CI->lang->line('Show') . '\':\'' . $this->CI->lang->line('Hide') . '\';">' . $this->CI->lang->line('Hide') . '</span>)';
 
                 if ($hide_queries !== '') {
-                    $show_hide_js = '(<span style="cursor: pointer;" onclick="var s=document.getElementById(\'ci_profiler_queries_db_' . $count . '\').style;s.display=s.display==\'none\'?\'\':\'none\';this.innerHTML=this.innerHTML==\'' . $this->CI->lang->line('profiler_section_show') . '\'?\'' . $this->CI->lang->line('profiler_section_hide') . '\':\'' . $this->CI->lang->line('profiler_section_show') . '\';">' . $this->CI->lang->line('profiler_section_show') . '</span>)';
+                    $show_hide_js = '(<span style="cursor: pointer;" onclick="var s=document.getElementById(\'ci_profiler_queries_db_' . $count . '\').style;s.display=s.display==\'none\'?\'\':\'none\';this.innerHTML=this.innerHTML==\'' . $this->CI->lang->line('Show') . '\'?\'' . $this->CI->lang->line('Hide') . '\':\'' . $this->CI->lang->line('Show') . '\';">' . $this->CI->lang->line('Show') . '</span>)';
                 }
                 $output .= '<fieldset style="border:1px solid #0000FF;padding:6px 10px 10px 10px;margin:20px 0 20px 0;background-color:#eee;">'
                     . "\n"
-                    . '<legend style="color:#0000FF;">&nbsp;&nbsp;' . $this->CI->lang->line('profiler_database')
-                    . ':&nbsp; ' . $db->database . ' (' . $name . ')&nbsp;&nbsp;&nbsp;' . $this->CI->lang->line('profiler_queries')
+                    . '<legend style="color:#0000FF;">&nbsp;&nbsp;' . $this->CI->lang->line(
+                        'DATABASE'
+                    )
+                    . ':&nbsp; ' . $db->database . ' (' . $name . ')&nbsp;&nbsp;&nbsp;' . $this->CI->lang->line('QUERIES')
                     . ': ' . count($db->queries) . ' (' . $total_time . ')&nbsp;&nbsp;' . $show_hide_js . "</legend>\n\n\n"
                     . '<table style="width:100%;' . $hide_queries . '" id="ci_profiler_queries_db_' . $count . "\">\n";
             } else {
@@ -324,13 +325,13 @@ class CI_Profiler {
             $output = "\n\n"
                 . '<fieldset id="ci_profiler_get" style="border:1px solid #cd6e00;padding:6px 10px 10px 10px;margin:20px 0 20px 0;background-color:#eee;">'
                 . "\n"
-                . '<legend style="color:#cd6e00;">&nbsp;&nbsp;' . $this->CI->lang->line('profiler_get_data') . "&nbsp;&nbsp;</legend>\n";
+                . '<legend style="color:#cd6e00;">&nbsp;&nbsp;' . $this->CI->lang->line('GET DATA') . "&nbsp;&nbsp;</legend>\n";
         }
 
         if (count($_GET) === 0)
         {
             if ($useoutput) {
-                $output .= '<div style="color:#cd6e00;font-weight:normal;padding:4px 0 4px 0;">' . $this->CI->lang->line('profiler_no_get') . '</div>';
+                $output .= '<div style="color:#cd6e00;font-weight:normal;padding:4px 0 4px 0;">' . $this->CI->lang->line('No GET data exists') . '</div>';
             } else {
                 $output = null;
             }
@@ -377,12 +378,12 @@ class CI_Profiler {
             $output = "\n\n"
                 . '<fieldset id="ci_profiler_post" style="border:1px solid #009900;padding:6px 10px 10px 10px;margin:20px 0 20px 0;background-color:#eee;">'
                 . "\n"
-                . '<legend style="color:#009900;">&nbsp;&nbsp;' . $this->CI->lang->line('profiler_post_data') . "&nbsp;&nbsp;</legend>\n";
+                . '<legend style="color:#009900;">&nbsp;&nbsp;' . $this->CI->lang->line('POST DATA') . "&nbsp;&nbsp;</legend>\n";
         }
         if (count($_POST) === 0 && count($_FILES) === 0)
         {
             if ($useoutput) {
-                $output .= '<div style="color:#009900;font-weight:normal;padding:4px 0 4px 0;">' . $this->CI->lang->line('profiler_no_post') . '</div>';
+                $output .= '<div style="color:#009900;font-weight:normal;padding:4px 0 4px 0;">' . $this->CI->lang->line('No POST data exists') . '</div>';
             } else {
                 $output = null;
             }
@@ -442,10 +443,10 @@ class CI_Profiler {
         return $useoutput ? "\n\n"
         .'<fieldset id="ci_profiler_uri_string" style="border:1px solid #000;padding:6px 10px 10px 10px;margin:20px 0 20px 0;background-color:#eee;">'
         ."\n"
-        .'<legend style="color:#000;">&nbsp;&nbsp;'.$this->CI->lang->line('profiler_uri_string')."&nbsp;&nbsp;</legend>\n"
+        .'<legend style="color:#000;">&nbsp;&nbsp;'.$this->CI->lang->line('URI STRING')."&nbsp;&nbsp;</legend>\n"
         .'<div style="color:#000;font-weight:normal;padding:4px 0 4px 0;">'
-        .($this->CI->uri->uri_string === '' ? $this->CI->lang->line('profiler_no_uri') : $this->CI->uri->uri_string)
-        .'</div></fieldset>' : ($this->CI->uri->uri_string === '' ? $this->CI->lang->line('profiler_no_uri') : $this->CI->uri->uri_string);
+        .($this->CI->uri->uri_string === '' ? $this->CI->lang->line('No URI data exists') : $this->CI->uri->uri_string)
+        .'</div></fieldset>' : ($this->CI->uri->uri_string === '' ? $this->CI->lang->line('No URI data exists') : $this->CI->uri->uri_string);
     }
 
     // --------------------------------------------------------------------
@@ -460,7 +461,7 @@ class CI_Profiler {
         return $useoutput ? "\n\n"
         .'<fieldset id="ci_profiler_controller_info" style="border:1px solid #995300;padding:6px 10px 10px 10px;margin:20px 0 20px 0;background-color:#eee;">'
         ."\n"
-        .'<legend style="color:#995300;">&nbsp;&nbsp;'.$this->CI->lang->line('profiler_controller_info')."&nbsp;&nbsp;</legend>\n"
+        .'<legend style="color:#995300;">&nbsp;&nbsp;'.$this->CI->lang->line('CLASS/METHOD')."&nbsp;&nbsp;</legend>\n"
         .'<div style="color:#995300;font-weight:normal;padding:4px 0 4px 0;">'.$this->CI->router->class.'/'.$this->CI->router->method
         .'</div></fieldset>' : array('class' => $this->CI->router->class, 'method' => $this->CI->router->method);
     }
@@ -479,9 +480,9 @@ class CI_Profiler {
         return $useoutput ? "\n\n"
         .'<fieldset id="ci_profiler_memory_usage" style="border:1px solid #5a0099;padding:6px 10px 10px 10px;margin:20px 0 20px 0;background-color:#eee;">'
         ."\n"
-        .'<legend style="color:#5a0099;">&nbsp;&nbsp;'.$this->CI->lang->line('profiler_memory_usage')."&nbsp;&nbsp;</legend>\n"
+        .'<legend style="color:#5a0099;">&nbsp;&nbsp;'.$this->CI->lang->line('MEMORY USAGE')."&nbsp;&nbsp;</legend>\n"
         .'<div style="color:#5a0099;font-weight:normal;padding:4px 0 4px 0;">'
-        .(($usage = memory_get_usage()) != '' ? number_format($usage).' bytes' : $this->CI->lang->line('profiler_no_memory'))
+        .(($usage = memory_get_usage()) != '' ? number_format($usage).' bytes' : $this->CI->lang->line('Memory Usage Unavailable'))
         .'</div></fieldset>' : (($usage = memory_get_usage()) != '' ? ($usage) : null);
     }
 
@@ -501,8 +502,8 @@ class CI_Profiler {
             $output = "\n\n"
                 . '<fieldset id="ci_profiler_http_headers" style="border:1px solid #000;padding:6px 10px 10px 10px;margin:20px 0 20px 0;background-color:#eee;">'
                 . "\n"
-                . '<legend style="color:#000;">&nbsp;&nbsp;' . $this->CI->lang->line('profiler_headers')
-                . '&nbsp;&nbsp;(<span style="cursor: pointer;" onclick="var s=document.getElementById(\'ci_profiler_httpheaders_table\').style;s.display=s.display==\'none\'?\'\':\'none\';this.innerHTML=this.innerHTML==\'' . $this->CI->lang->line('profiler_section_show') . '\'?\'' . $this->CI->lang->line('profiler_section_hide') . '\':\'' . $this->CI->lang->line('profiler_section_show') . '\';">' . $this->CI->lang->line('profiler_section_show') . "</span>)</legend>\n\n\n"
+                . '<legend style="color:#000;">&nbsp;&nbsp;' . $this->CI->lang->line('HTTP HEADERS')
+                . '&nbsp;&nbsp;(<span style="cursor: pointer;" onclick="var s=document.getElementById(\'ci_profiler_httpheaders_table\').style;s.display=s.display==\'none\'?\'\':\'none\';this.innerHTML=this.innerHTML==\'' . $this->CI->lang->line('Show') . '\'?\'' . $this->CI->lang->line('Hide') . '\':\'' . $this->CI->lang->line('Show') . '\';">' . $this->CI->lang->line('Show') . "</span>)</legend>\n\n\n"
                 . '<table style="width:100%;display:none;" id="ci_profiler_httpheaders_table">' . "\n";
         }
 
@@ -536,7 +537,7 @@ class CI_Profiler {
             $output = "\n\n"
                 . '<fieldset id="ci_profiler_config" style="border:1px solid #000;padding:6px 10px 10px 10px;margin:20px 0 20px 0;background-color:#eee;">'
                 . "\n"
-                . '<legend style="color:#000;">&nbsp;&nbsp;' . $this->CI->lang->line('profiler_config') . '&nbsp;&nbsp;(<span style="cursor: pointer;" onclick="var s=document.getElementById(\'ci_profiler_config_table\').style;s.display=s.display==\'none\'?\'\':\'none\';this.innerHTML=this.innerHTML==\'' . $this->CI->lang->line('profiler_section_show') . '\'?\'' . $this->CI->lang->line('profiler_section_hide') . '\':\'' . $this->CI->lang->line('profiler_section_show') . '\';">' . $this->CI->lang->line('profiler_section_show') . "</span>)</legend>\n\n\n"
+                . '<legend style="color:#000;">&nbsp;&nbsp;' . $this->CI->lang->line('CONFIG VARIABLES') . '&nbsp;&nbsp;(<span style="cursor: pointer;" onclick="var s=document.getElementById(\'ci_profiler_config_table\').style;s.display=s.display==\'none\'?\'\':\'none\';this.innerHTML=this.innerHTML==\'' . $this->CI->lang->line('Show') . '\'?\'' . $this->CI->lang->line('Hide') . '\':\'' . $this->CI->lang->line('Show') . '\';">' . $this->CI->lang->line('Show') . "</span>)</legend>\n\n\n"
                 . '<table style="width:100%;display:none;" id="ci_profiler_config_table">' . "\n";
         }
         foreach ($this->CI->config->config as $config => $val)
@@ -572,7 +573,7 @@ class CI_Profiler {
         $output = array();
         if ($useoutput) {
             $output = '<fieldset id="ci_profiler_csession" style="border:1px solid #000;padding:6px 10px 10px 10px;margin:20px 0 20px 0;background-color:#eee;">'
-                . '<legend style="color:#000;">&nbsp;&nbsp;' . $this->CI->lang->line('profiler_session_data') . '&nbsp;&nbsp;(<span style="cursor: pointer;" onclick="var s=document.getElementById(\'ci_profiler_session_data\').style;s.display=s.display==\'none\'?\'\':\'none\';this.innerHTML=this.innerHTML==\'' . $this->CI->lang->line('profiler_section_show') . '\'?\'' . $this->CI->lang->line('profiler_section_hide') . '\':\'' . $this->CI->lang->line('profiler_section_show') . '\';">' . $this->CI->lang->line('profiler_section_show') . '</span>)</legend>'
+                . '<legend style="color:#000;">&nbsp;&nbsp;' . $this->CI->lang->line(SESSION DATA') . '&nbsp;&nbsp;(<span style="cursor: pointer;" onclick="var s=document.getElementById(\'ci_profiler_session_data\').style;s.display=s.display==\'none\'?\'\':\'none\';this.innerHTML=this.innerHTML==\'' . $this->CI->lang->line('Show') . '\'?\'' . $this->CI->lang->line('Hide') . '\':\'' . $this->CI->lang->line('Show') . '\';">' . $this->CI->lang->line('Show') . '</span>)</legend>'
                 . '<table style="width:100%;display:none;" id="ci_profiler_session_data">';
         }
         foreach ($this->CI->session->userdata() as $key => $val)
@@ -633,7 +634,7 @@ class CI_Profiler {
 
             if ($fields_displayed === 0) {
                 $output .= '<p style="border:1px solid #5a0099;padding:10px;margin:20px 0;background-color:#eee;">'
-                    . $this->CI->lang->line('profiler_no_profiles') . '</p>';
+                    . $this->CI->lang->line('No Profile data - all Profiler sections have been disabled.') . '</p>';
             }
         }
 

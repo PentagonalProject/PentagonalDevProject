@@ -28,7 +28,7 @@ class Processor
             'index_page' => 'index.php',
             'uri_protocol' => 'REQUEST_URI',
             'url_suffix' => '',
-            'language'	=> 'english',
+            'language'	=> 'id',
             'charset' => 'UTF-8',
             'enable_hooks' => false,
             'subclass_prefix' => 'Pentagonal',
@@ -630,6 +630,7 @@ class Processor
             'platform' => array(),
         ),
     );
+
     /**
      * Object instance
      *
@@ -673,7 +674,15 @@ class Processor
         if ($type === null) {
             return $instance::$config;
         }
-        if (is_string($type) && isset(self::$config)) {
+        if ($type !== 'app') {
+            if (isset(self::$config[$type])
+                && empty(self::$config[$type])
+                && isset($this->config_default[$type])
+            ) {
+                self::$config[$type] = $this->config_default[$type];
+            }
+        }
+        if (is_string($type) && isset(self::$config[$type])) {
             if ($key === null) {
                 return self::$config[$type];
             } elseif (is_string($key) && array_key_exists($key, self::$config[$type])) {
@@ -1001,6 +1010,7 @@ class Processor
                 );
             }
         }, $class_mustBeExist);
+
         return $this;
     }
     private function setEnvironment()

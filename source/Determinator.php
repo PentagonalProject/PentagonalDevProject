@@ -120,7 +120,7 @@ namespace {
     $modelpath = 'Models';
     $temppath = 'Temp';
     $module = 'Modules';
-    $language = 'Language';
+    $templates = 'templates';
     $system = 'system';
     if (isset($config) && !empty($config['path']) && is_array($config['path'])) {
         if (!empty($config['path']['system'])) {
@@ -204,14 +204,14 @@ namespace {
                 $module = preg_replace('/(\\\|\/)/', DIRECTORY_SEPARATOR, $config['path']['module']);
             }
         }
-        if (!empty($config['path']['language'])) {
-            if (!is_string($config['path']['language'])) {
+        if (!empty($config['path']['template'])) {
+            if (!is_string($config['path']['template'])) {
                 header('HTTP/1.1 503 Service Unavailable.', true, 503);
-                echo 'Invalid setting for `language` path';
+                echo 'Invalid setting for `templates` path';
                 exit(3); // EXIT_CONFIG
             }
-            if (trim($config['path']['language']) != '') {
-                $language = preg_replace('/(\\\|\/)/', DIRECTORY_SEPARATOR, $config['path']['language']);
+            if (trim($config['path']['template']) != '') {
+                $templates = preg_replace('/(\\\|\/)/', DIRECTORY_SEPARATOR, $config['path']['template']);
             }
         }
     }
@@ -223,7 +223,7 @@ namespace {
     define('VIEWPATH', SOURCEPATH . DIRECTORY_SEPARATOR . $views . DIRECTORY_SEPARATOR);
     define('CONFIGPATH', SOURCEPATH . $configpath . DIRECTORY_SEPARATOR);
     define('MODULEPATH', SOURCEPATH . $module . DIRECTORY_SEPARATOR);
-    define('LANGUAGEPATH', SOURCEPATH . $module . DIRECTORY_SEPARATOR);
+    define('LANGUAGEPATH', SOURCEPATH . 'Languages' . DIRECTORY_SEPARATOR);
 
     // alias an application path
     define('RESOURCEPATH', SOURCE . DIRECTORY_SEPARATOR . $resource .DIRECTORY_SEPARATOR);
@@ -233,6 +233,17 @@ namespace {
     define('FCPATH', dirname(realpath(ROOT)) . DIRECTORY_SEPARATOR);// Path to the front controller (this file) directory
     define('BASEPATH', RESOURCEPATH . $system . DIRECTORY_SEPARATOR);// Path to the system directory
     define('SYSDIR', basename(BASEPATH)); // Name of the "system" directory
+    if (substr($templates,0, 1) == '/') {
+        $template_ = realpath($templates);
+        if ($template_) {
+            $templates = $template_;
+        } else {
+            $templates = FCPATH . $templates . DIRECTORY_SEPARATOR;
+        }
+        define('TEMPLATEPATH', $templates);
+    } else {
+        define('TEMPLATEPATH', FCPATH . $templates . DIRECTORY_SEPARATOR);
+    }
 
     if ($temppath != 'Temp') {
         $temppath = SOURCEPATH . $temppath;
@@ -288,6 +299,11 @@ namespace {
     if (!is_dir(LANGUAGEPATH)) {
         header('HTTP/1.1 503 Service Unavailable.', true, 503);
         echo 'Directory language Does Not exist. Please check your configuration or your folder on source';
+        exit(3); // EXIT_CONFIG
+    }
+    if (!is_dir(TEMPLATEPATH)) {
+        header('HTTP/1.1 503 Service Unavailable.', true, 503);
+        echo 'Directory templates Does Not exist. Please check your configuration or your folder on source';
         exit(3); // EXIT_CONFIG
     }
 

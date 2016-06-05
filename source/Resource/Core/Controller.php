@@ -19,7 +19,7 @@ class CI_Controller
      *
      * @return	void
      */
-    public function __construct()
+    final public function __construct()
     {
         self::$instance =& $this;
         foreach (is_loaded() as $var => $class) {
@@ -29,6 +29,11 @@ class CI_Controller
         $this->load =& load_class('Loader', 'core');
         $this->{'module@list'} = array();
         $this->load->initialize();
+        $this->load->helper(
+            array(
+                'language'
+            )
+        );
         log_message('info', 'Controller Class Initialized');
     }
 
@@ -40,17 +45,26 @@ class CI_Controller
      * @static
      * @return	object
      */
-    public static function &get_instance()
+    final public static function &get_instance()
     {
         return self::$instance;
     }
 
-    public function getModule($name = null)
+    /**
+     * Getting module
+     *
+     * @param string|null $name
+     * @return mixed
+     */
+    final public function getModule($name = null)
     {
         if ($name === null) {
             return $this->{'module@list'};
         }
-        $retval = isset($this->{'module@list'}[$name]) ? $this->{'module@list'}[$modules] : null;
-        return $retval;
+        if (!is_string($name)) {
+            return null;
+        }
+
+        return isset($this->{'module@list'}[$name]) ? $this->{'module@list'}[$name] : null;
     }
 }

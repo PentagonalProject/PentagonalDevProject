@@ -20,7 +20,6 @@ class Welcome extends CI_Controller {
 	 */
 	public function index()
 	{
-		$this->output->enable_profiler(true);
 		$this->load->module('post');
 		$this->load->view('welcome_message');
 	}

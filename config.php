@@ -4,6 +4,7 @@ return array(
         'system' => 'system',
         'resource' => 'Resource',
         'views' => 'Views',
+        'template' => 'templates',
     ),
     'app' => array(
         'environment' => 'development',

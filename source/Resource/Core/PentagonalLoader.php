@@ -359,11 +359,11 @@ class PentagonalLoader extends CI_Loader
     {
         foreach ($this->_ci_prep_filename($helpers, '_helper') as $helper)
         {
-            if (isset($this->_ci_helpers[$helper]))
-            {
+            if (isset($this->_ci_helpers[$helper])) {
                 continue;
             }
 
+            $helpers = 'Helper';
             // Is this a helper extension request?
             $ext_helper = config_item('subclass_prefix').$helper;
             $ext_loaded = false;
@@ -373,13 +373,13 @@ class PentagonalLoader extends CI_Loader
                     $ext_loaded = true;
                 } elseif (file_exists($path.'helpers/'.$ext_helper.'.php')) {
                     include_once($path.'helpers/'.$ext_helper.'.php');
+                    $helpers = 'helpers';
                     $ext_loaded = true;
                 }
             }
 
             // If we have loaded extensions - check if the base one is here
-            if ($ext_loaded === true)
-            {
+            if ($ext_loaded === true) {
                 $base_helper = BASEPATH.'helpers/'.$helper.'.php';
                 if ( ! file_exists($base_helper))  {
                     show_error('Unable to load the requested file: helpers/'.$helper.'.php');
@@ -388,26 +388,28 @@ class PentagonalLoader extends CI_Loader
                 include_once($base_helper);
                 $this->_ci_helpers[$helper] = true;
                 log_message('info', 'Helper loaded: '.$helper);
-                continue;
+                continue; // break in here
             }
 
             // No extensions found ... try loading regular helpers and/or overrides
-            foreach ($this->_ci_helper_paths as $path)
-            {
-                if (file_exists($path.'helpers/'.$helper.'.php'))
-                {
-                    include_once($path.'helpers/'.$helper.'.php');
-
+            foreach ($this->_ci_helper_paths as $path) {
+                if (file_exists($path.'Helpers/'.$helper.'.php')) {
+                    include_once($path.'Helpers/'.$helper.'.php');
                     $this->_ci_helpers[$helper] = true;
                     log_message('info', 'Helper loaded: '.$helper);
+                    break;
+                } elseif (file_exists($path.'helpers/'.$helper.'.php')) {
+                    include_once($path.'helpers/'.$helper.'.php');
+                    $this->_ci_helpers[$helper] = true;
+                    log_message('info', 'Helper loaded: '.$helper);
+                    $helpers = 'helpers';
                     break;
                 }
             }
 
             // unable to load the helper
-            if ( ! isset($this->_ci_helpers[$helper]))
-            {
-                show_error('Unable to load the requested file: helpers/'.$helper.'.php');
+            if ( ! isset($this->_ci_helpers[$helper])) {
+                show_error('Unable to load the requested file: '.$helpers.'/'.$helper.'.php');
             }
         }
 
