@@ -121,7 +121,7 @@ namespace {
     $temppath = 'Temp';
     $module = 'Modules';
     $templates = 'templates';
-    $system = 'system';
+    $system = 'System';
     if (isset($config) && !empty($config['path']) && is_array($config['path'])) {
         if (!empty($config['path']['system'])) {
             if (!is_string($config['path']['system'])) {

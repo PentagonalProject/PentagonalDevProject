@@ -163,4 +163,3 @@ composer.phar
 # add exclude vendor
 vendor/
 source/vendor/
-source/Resource/system/
