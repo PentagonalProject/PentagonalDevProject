@@ -1,7 +1,7 @@
 <?php
 return array(
     'path' => array(
-        'system' => 'system',
+        'system' => 'System',
         'resource' => 'Resource',
         'views' => 'Views',
         'template' => 'templates',

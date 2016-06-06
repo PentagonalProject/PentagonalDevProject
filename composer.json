@@ -20,6 +20,6 @@
     "phpmailer/phpmailer": "^5.2"
   },
   "config": {
-    "vendor-dir": "source/vendor"
+    "vendor-dir": "Engine/vendor"
   }
 }

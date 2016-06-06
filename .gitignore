@@ -162,4 +162,4 @@ composer.phar
 
 # add exclude vendor
 vendor/
-source/vendor/
+Engine/vendor/
