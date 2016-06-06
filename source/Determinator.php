@@ -130,7 +130,7 @@ namespace {
                 exit(3); // EXIT_CONFIG
             }
             if (trim($config['path']['system']) != '') {
-                $system = preg_replace('/(\\\|\/)/', DIRECTORY_SEPARATOR, $config['path']['system']);
+                $system = preg_replace('/(\\\|\/)+/', DIRECTORY_SEPARATOR, $config['path']['system']);
             }
         }
         if (!empty($config['path']['resource'])) {
@@ -140,7 +140,7 @@ namespace {
                 exit(3); // EXIT_CONFIG
             }
             if (trim($config['path']['resource']) != '') {
-                $resource = preg_replace('/(\\\|\/)/', DIRECTORY_SEPARATOR, $config['path']['resource']);
+                $resource = preg_replace('/(\\\|\/)+/', DIRECTORY_SEPARATOR, $config['path']['resource']);
             }
         }
         if (!empty($config['path']['views'])) {
@@ -150,7 +150,7 @@ namespace {
                 exit(3); // EXIT_CONFIG
             }
             if (trim($config['path']['views']) != '') {
-                $views = preg_replace('/(\\\|\/)/', DIRECTORY_SEPARATOR, $config['path']['views']);
+                $views = preg_replace('/(\\\|\/)+/', DIRECTORY_SEPARATOR, $config['path']['views']);
             }
         }
 
@@ -161,7 +161,7 @@ namespace {
                 exit(3); // EXIT_CONFIG
             }
             if (trim($config['path']['controller']) != '') {
-                $controller = preg_replace('/(\\\|\/)/', DIRECTORY_SEPARATOR, $config['path']['controller']);
+                $controller = preg_replace('/(\\\|\/)+/', DIRECTORY_SEPARATOR, $config['path']['controller']);
             }
         }
         if (!empty($config['path']['model'])) {
@@ -171,7 +171,7 @@ namespace {
                 exit(3); // EXIT_CONFIG
             }
             if (trim($config['path']['model']) != '') {
-                $modelpath = preg_replace('/(\\\|\/)/', DIRECTORY_SEPARATOR, $config['path']['model']);
+                $modelpath = preg_replace('/(\\\|\/)+/', DIRECTORY_SEPARATOR, $config['path']['model']);
             }
         }
         if (!empty($config['path']['config'])) {
@@ -181,7 +181,7 @@ namespace {
                 exit(3); // EXIT_CONFIG
             }
             if (trim($config['path']['controller']) != '') {
-                $configpath = preg_replace('/(\\\|\/)/', DIRECTORY_SEPARATOR, $config['path']['config']);
+                $configpath = preg_replace('/(\\\|\/)+/', DIRECTORY_SEPARATOR, $config['path']['config']);
             }
         }
         if (!empty($config['path']['temp'])) {
@@ -191,7 +191,7 @@ namespace {
                 exit(3); // EXIT_CONFIG
             }
             if (trim($config['path']['temp']) != '') {
-                $configpath = preg_replace('/(\\\|\/)/', DIRECTORY_SEPARATOR, $config['path']['temp']);
+                $configpath = preg_replace('/(\\\|\/)+/', DIRECTORY_SEPARATOR, $config['path']['temp']);
             }
         }
         if (!empty($config['path']['module'])) {
@@ -201,7 +201,7 @@ namespace {
                 exit(3); // EXIT_CONFIG
             }
             if (trim($config['path']['module']) != '') {
-                $module = preg_replace('/(\\\|\/)/', DIRECTORY_SEPARATOR, $config['path']['module']);
+                $module = preg_replace('/(\\\|\/)+/', DIRECTORY_SEPARATOR, $config['path']['module']);
             }
         }
         if (!empty($config['path']['template'])) {
@@ -211,7 +211,7 @@ namespace {
                 exit(3); // EXIT_CONFIG
             }
             if (trim($config['path']['template']) != '') {
-                $templates = preg_replace('/(\\\|\/)/', DIRECTORY_SEPARATOR, $config['path']['template']);
+                $templates = preg_replace('/(\\\|\/)+/', DIRECTORY_SEPARATOR, $config['path']['template']);
             }
         }
     }
@@ -224,9 +224,11 @@ namespace {
     define('CONFIGPATH', SOURCEPATH . $configpath . DIRECTORY_SEPARATOR);
     define('MODULEPATH', SOURCEPATH . $module . DIRECTORY_SEPARATOR);
     define('LANGUAGEPATH', SOURCEPATH . 'Languages' . DIRECTORY_SEPARATOR);
-
+    // admin templates
+    define('ADMINTEMPLATEPATH', SOURCEPATH . 'AdminTemplates' . DIRECTORY_SEPARATOR);
     // alias an application path
     define('RESOURCEPATH', SOURCE . DIRECTORY_SEPARATOR . $resource .DIRECTORY_SEPARATOR);
+
     define('APPPATH', RESOURCEPATH);
 
     // root
@@ -291,6 +293,7 @@ namespace {
         echo 'Directory model Does Not exist. Please check your configuration or your folder on source';
         exit(3); // EXIT_CONFIG
     }
+
     if (!is_dir(MODULEPATH)) {
         header('HTTP/1.1 503 Service Unavailable.', true, 503);
         echo 'Directory module Does Not exist. Please check your configuration or your folder on source';
@@ -301,6 +304,13 @@ namespace {
         echo 'Directory language Does Not exist. Please check your configuration or your folder on source';
         exit(3); // EXIT_CONFIG
     }
+
+    if (!is_dir(ADMINTEMPLATEPATH)) {
+        header('HTTP/1.1 503 Service Unavailable.', true, 503);
+        echo 'Directory Admin Templates Does Not exist. Please check your configuration or your folder on source';
+        exit(3); // EXIT_CONFIG
+    }
+
     if (!is_dir(TEMPLATEPATH)) {
         header('HTTP/1.1 503 Service Unavailable.', true, 503);
         echo 'Directory templates Does Not exist. Please check your configuration or your folder on source';

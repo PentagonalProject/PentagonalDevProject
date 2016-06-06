@@ -14,74 +14,103 @@ class PentagonalLoader extends CI_Loader
      *
      * @var	array
      */
-    protected $_ci_view_paths =	array(VIEWPATH	=> true);
+    protected $_ci_view_paths =    array(VIEWPATH    => true);
 
     /**
      * List of paths to load libraries from
      *
      * @var	array
      */
-    protected $_ci_library_paths =	array(APPPATH, BASEPATH);
+    protected $_ci_library_paths =    array(APPPATH, BASEPATH);
 
     /**
      * List of paths to load models from
      *
      * @var	array
      */
-    protected $_ci_model_paths =	array(APPPATH);
+    protected $_ci_model_paths =    array(APPPATH);
     /**
      * List of paths to load modules from
      *
      * @var	array
      */
-    protected $_ci_module_paths =	array(MODULEPATH);
+    protected $_ci_module_paths =    array(MODULEPATH);
 
     /**
      * List of paths to load helpers from
      *
      * @var	array
      */
-    protected $_ci_helper_paths =	array(APPPATH, BASEPATH);
+    protected $_ci_helper_paths =    array(APPPATH, BASEPATH);
 
     /**
      * List of cached variables
      *
      * @var	array
      */
-    protected $_ci_cached_vars =	array();
+    protected $_ci_cached_vars =    array();
 
     /**
      * List of loaded classes
      *
      * @var	array
      */
-    protected $_ci_classes =	array();
+    protected $_ci_classes =    array();
 
     /**
      * List of loaded models
      *
      * @var	array
      */
-    protected $_ci_models =	array();
+    protected $_ci_models =    array();
 
     /**
      * List of loaded helpers
      *
      * @var	array
      */
-    protected $_ci_helpers =	array();
+    protected $_ci_helpers =    array();
 
     /**
      * List of class name mappings
      *
      * @var	array
      */
-    protected $_ci_varmap =	array(
+    protected $_ci_varmap =    array(
         'unit_test' => 'unit',
         'user_agent' => 'agent'
     );
 
+    protected $active_theme;
+
     // --------------------------------------------------------------------
+
+    /**
+     * set Active Theme
+     *
+     * @param $name
+     */
+    public function setActiveTheme($name)
+    {
+        if (is_string($name)) {
+            $name = preg_replace('/(\\\|\/)+/', DIRECTORY_SEPARATOR, $name);
+            $name = rtrim($name, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+            if (($name !== TEMPLATEPATH && $name !== ADMINTEMPLATEPATH)
+                && (strpos($name, TEMPLATEPATH) !== false || strpos($name, ADMINTEMPLATEPATH) !== false)
+                && is_dir($name)
+            ) {
+                $this->active_theme = $name;
+            }
+        }
+    }
+
+    /**
+     * @return null|mixed
+     */
+    public function getActiveTheme()
+    {
+        return $this->active_theme;
+    }
 
     /**
      * Model Loader
@@ -98,8 +127,7 @@ class PentagonalLoader extends CI_Loader
         if (empty($model)) {
             return $this;
         } elseif (is_array($model)) {
-            foreach ($model as $key => $value)
-            {
+            foreach ($model as $key => $value) {
                 is_int($key) ? $this->model($value, '', $db_conn) : $this->model($key, $value, $db_conn);
             }
 
@@ -109,8 +137,7 @@ class PentagonalLoader extends CI_Loader
         $path = '';
 
         // Is the model in a sub-folder? If so, parse out the filename and path.
-        if (($last_slash = strrpos($model, '/')) !== false)
-        {
+        if (($last_slash = strrpos($model, '/')) !== false) {
             // The path is in front of the last slash
             $path = substr($model, 0, ++$last_slash);
 
@@ -147,34 +174,31 @@ class PentagonalLoader extends CI_Loader
         //       to cache them for later use and that prevents
         //       MY_Model from being an abstract class and is
         //       sub-optimal otherwise anyway.
-        if ( ! class_exists('CI_Model', false))
-        {
+        if (! class_exists('CI_Model', false)) {
             $app_path = APPPATH.'Core'.DIRECTORY_SEPARATOR;
-            if (file_exists($app_path.'Model.php'))
-            {
+            if (file_exists($app_path.'Model.php')) {
                 require_once($app_path.'Model.php');
-                if ( ! class_exists('CI_Model', false))
-                {
+                if (! class_exists('CI_Model', false)) {
                     throw new RuntimeException($app_path."Model.php exists, but doesn't declare class CI_Model");
                 }
-            } elseif ( ! class_exists('CI_Model', false)) {
+            } elseif (! class_exists('CI_Model', false)) {
                 require_once(BASEPATH.'core'.DIRECTORY_SEPARATOR.'Model.php');
             }
 
             $class = config_item('subclass_prefix').'Model';
             if (file_exists($app_path.$class.'.php')) {
                 require_once($app_path.$class.'.php');
-                if ( ! class_exists($class, false)) {
+                if (! class_exists($class, false)) {
                     throw new RuntimeException($app_path.$class.".php exists, but doesn't declare class ".$class);
                 }
             }
         }
 
         $model = ucfirst($model);
-        if ( ! class_exists($model, false)) {
-            if (file_exists(MODELPATH . $path . $model . '.php' )) {
-                require_once(MODELPATH . $path . $model . '.php' );
-                if ( ! class_exists($model, false)) {
+        if (! class_exists($model, false)) {
+            if (file_exists(MODELPATH . $path . $model . '.php')) {
+                require_once(MODELPATH . $path . $model . '.php');
+                if (! class_exists($model, false)) {
                     throw new RuntimeException(MODELPATH . $path . $model . ".php exists, but doesn't declare class ".$model);
                 }
             } else {
@@ -192,10 +216,10 @@ class PentagonalLoader extends CI_Loader
                 }
             }
 
-            if ( ! class_exists($model, false)) {
+            if (! class_exists($model, false)) {
                 throw new RuntimeException('Unable to locate the model you have specified: '.$model);
             }
-        } elseif ( ! is_subclass_of($model, 'CI_Model')) {
+        } elseif (! is_subclass_of($model, 'CI_Model')) {
             throw new RuntimeException("Class ".$model." already exists and doesn't extend CI_Model");
         }
 
@@ -209,8 +233,7 @@ class PentagonalLoader extends CI_Loader
         if (empty($module)) {
             return $this;
         } elseif (is_array($module)) {
-            foreach ($module as $key => $value)
-            {
+            foreach ($module as $key => $value) {
                 is_int($key) ? $this->model($value, '', $db_conn) : $this->model($key, $value, $db_conn);
             }
 
@@ -220,8 +243,7 @@ class PentagonalLoader extends CI_Loader
         $path = '';
 
         // Is the model in a sub-folder? If so, parse out the filename and path.
-        if (($last_slash = strrpos($module, '/')) !== false)
-        {
+        if (($last_slash = strrpos($module, '/')) !== false) {
             // The path is in front of the last slash
             $path = substr($module, 0, ++$last_slash);
 
@@ -259,8 +281,7 @@ class PentagonalLoader extends CI_Loader
         //       to cache them for later use and that prevents
         //       MY_Model from being an abstract class and is
         //       sub-optimal otherwise anyway.
-        if ( ! class_exists('Module', false))
-        {
+        if (! class_exists('Module', false)) {
             $app_path = RESOURCEPATH.'Core'.DIRECTORY_SEPARATOR;
             if (file_exists($app_path.'Module.php')) {
                 require_once($app_path . 'Module.php');
@@ -279,7 +300,7 @@ class PentagonalLoader extends CI_Loader
                 || file_exists($path = MODULEPATH . lcfirst($module) . DIRECTORY_SEPARATOR . $path . lcfirst($module) . '.php')
             ) {
                 require_once($path);
-                if ( ! class_exists($module, false)) {
+                if (! class_exists($module, false)) {
                     throw new RuntimeException($path . " exists, but doesn't declare class ".$module);
                 }
             } else {
@@ -297,10 +318,10 @@ class PentagonalLoader extends CI_Loader
                 }
             }
 
-            if ( ! class_exists($module, false)) {
+            if (! class_exists($module, false)) {
                 throw new RuntimeException('Unable to locate the model you have specified: '.$module);
             }
-        } elseif ( ! is_subclass_of($module, 'CI_Module')) {
+        } elseif (! is_subclass_of($module, 'CI_Module')) {
             throw new RuntimeException("Class ".$module." already exists and doesn't extend Module");
         }
 
@@ -357,8 +378,7 @@ class PentagonalLoader extends CI_Loader
      */
     public function helper($helpers = array())
     {
-        foreach ($this->_ci_prep_filename($helpers, '_helper') as $helper)
-        {
+        foreach ($this->_ci_prep_filename($helpers, '_helper') as $helper) {
             if (isset($this->_ci_helpers[$helper])) {
                 continue;
             }
@@ -381,7 +401,7 @@ class PentagonalLoader extends CI_Loader
             // If we have loaded extensions - check if the base one is here
             if ($ext_loaded === true) {
                 $base_helper = BASEPATH.'helpers/'.$helper.'.php';
-                if ( ! file_exists($base_helper))  {
+                if (! file_exists($base_helper)) {
                     show_error('Unable to load the requested file: helpers/'.$helper.'.php');
                 }
 
@@ -408,7 +428,7 @@ class PentagonalLoader extends CI_Loader
             }
 
             // unable to load the helper
-            if ( ! isset($this->_ci_helpers[$helper])) {
+            if (! isset($this->_ci_helpers[$helper])) {
                 show_error('Unable to load the requested file: '.$helpers.'/'.$helper.'.php');
             }
         }
@@ -444,10 +464,27 @@ class PentagonalLoader extends CI_Loader
      * @param	string		Language name
      * @return	object
      */
-    public function language($files, $lang = '')
+    public function loadTextDomain($textdomain, $path)
     {
-        get_instance()->lang->load($files, $lang);
+        get_instance()->lang->loadTextDomain($textdomain, $path);
         return $this;
+    }
+
+    /**
+     * Language Loader
+     *
+     * Register Text Domain
+     *
+     * @param	string	$textdomain	List of language file names to load
+     * @param	string	$path full directory
+     * @return	object
+     */
+    public function language($textdomain, $path = '')
+    {
+        if ($path == '') {
+            return $this;
+        }
+        return $this->loadTextDomain($textdomain, $path);
     }
 
     // --------------------------------------------------------------------
@@ -484,16 +521,11 @@ class PentagonalLoader extends CI_Loader
      */
     public function driver($library, $params = null, $object_name = null)
     {
-        if (is_array($library))
-        {
-            foreach ($library as $key => $value)
-            {
-                if (is_int($key))
-                {
+        if (is_array($library)) {
+            foreach ($library as $key => $value) {
+                if (is_int($key)) {
                     $this->driver($value, $params);
-                }
-                else
-                {
+                } else {
                     $this->driver($key, $params, $value);
                 }
             }
@@ -503,15 +535,14 @@ class PentagonalLoader extends CI_Loader
             return false;
         }
 
-        if ( ! class_exists('CI_Driver_Library', false)) {
+        if (! class_exists('CI_Driver_Library', false)) {
             // We aren't instantiating an object here, just making the base class available
             require BASEPATH.'libraries/Driver.php';
         }
 
         // We can save the loader some time since Drivers will *always* be in a subfolder,
         // and typically identically named to the library
-        if ( ! strpos($library, '/'))
-        {
+        if (! strpos($library, '/')) {
             $library = ucfirst($library).'/'.$library;
         }
 
@@ -594,10 +625,8 @@ class PentagonalLoader extends CI_Loader
             array_pop($config->_config_paths);
         } else {
             $path = rtrim($path, '/').'/';
-            foreach (array('_ci_library_paths', '_ci_model_paths', '_ci_helper_paths') as $var)
-            {
-                if (($key = array_search($path, $this->{$var})) !== false)
-                {
+            foreach (array('_ci_library_paths', '_ci_model_paths', '_ci_helper_paths') as $var) {
+                if (($key = array_search($path, $this->{$var})) !== false) {
                     unset($this->{$var}[$key]);
                 }
             }
@@ -662,11 +691,9 @@ class PentagonalLoader extends CI_Loader
         }
 
         // Let's search for the requested library file and load it.
-        foreach ($this->_ci_library_paths as $path)
-        {
+        foreach ($this->_ci_library_paths as $path) {
             // BASEPATH has already been checked for
-            if ($path === BASEPATH)
-            {
+            if ($path === BASEPATH) {
                 continue;
             }
 
@@ -677,16 +704,13 @@ class PentagonalLoader extends CI_Loader
             }
 
             // Safety: Was the class already loaded by a previous call?
-            if (class_exists($class, false))
-            {
+            if (class_exists($class, false)) {
                 // Before we deem this to be a duplicate request, let's see
                 // if a custom object name is being supplied. If so, we'll
                 // return a new instance of the object
-                if ($object_name !== null)
-                {
+                if ($object_name !== null) {
                     $CI =& get_instance();
-                    if ( ! isset($CI->$object_name))
-                    {
+                    if (! isset($CI->$object_name)) {
                         return $this->_ci_init_library($class, '', $params, $object_name);
                     }
                 }
@@ -695,8 +719,7 @@ class PentagonalLoader extends CI_Loader
                 return;
             }
             // Does the file exist? No? Bummer...
-            elseif ( ! file_exists($filepath))
-            {
+            elseif (! file_exists($filepath)) {
                 continue;
             }
 
@@ -705,8 +728,7 @@ class PentagonalLoader extends CI_Loader
         }
 
         // One last attempt. Maybe the library is in a subdirectory, but it wasn't specified?
-        if ($subdir === '')
-        {
+        if ($subdir === '') {
             return $this->_ci_load_library($class.'/'.$class, $params, $object_name);
         }
 
@@ -733,21 +755,17 @@ class PentagonalLoader extends CI_Loader
     {
         $prefix = 'CI_';
 
-        if (class_exists($prefix.$library_name, false))
-        {
-            if (class_exists(config_item('subclass_prefix').$library_name, false))
-            {
+        if (class_exists($prefix.$library_name, false)) {
+            if (class_exists(config_item('subclass_prefix').$library_name, false)) {
                 $prefix = config_item('subclass_prefix');
             }
 
             // Before we deem this to be a duplicate request, let's see
             // if a custom object name is being supplied. If so, we'll
             // return a new instance of the object
-            if ($object_name !== null)
-            {
+            if ($object_name !== null) {
                 $CI =& get_instance();
-                if ( ! isset($CI->$object_name))
-                {
+                if (! isset($CI->$object_name)) {
                     return $this->_ci_init_library($library_name, $prefix, $params, $object_name);
                 }
             }
@@ -761,19 +779,15 @@ class PentagonalLoader extends CI_Loader
         array_pop($paths); // APPPATH (needs to be the first path checked)
         array_unshift($paths, APPPATH);
 
-        foreach ($paths as $path)
-        {
+        foreach ($paths as $path) {
             if (file_exists($path = $path.'Libraries/'.$file_path.$library_name.'.php')
                 || file_exists($path = $path.'libraries/'.$file_path.$library_name.'.php')
             ) {
                 // Override
                 include_once($path);
-                if (class_exists($prefix.$library_name, false))
-                {
+                if (class_exists($prefix.$library_name, false)) {
                     return $this->_ci_init_library($library_name, $prefix, $params, $object_name);
-                }
-                else
-                {
+                } else {
                     log_message('debug', $path.' exists, but does not declare '.$prefix.$library_name);
                 }
             }
@@ -783,10 +797,8 @@ class PentagonalLoader extends CI_Loader
 
         // Check for extensions
         $subclass = config_item('subclass_prefix').$library_name;
-        foreach ($paths as $path)
-        {
-
-             if (file_exists($path = $path.'Libraries/'.$file_path.$subclass.'.php')
+        foreach ($paths as $path) {
+            if (file_exists($path = $path.'Libraries/'.$file_path.$subclass.'.php')
                 || file_exists($path = $path.'libraries/'.$file_path.$subclass.'.php')
             ) {
                 include_once($path);
@@ -822,13 +834,11 @@ class PentagonalLoader extends CI_Loader
     protected function _ci_init_library($class, $prefix, $config = false, $object_name = null)
     {
         // Is there an associated config file for this class? Note: these should always be lowercase
-        if ($config === null)
-        {
+        if ($config === null) {
             // Fetch the config paths containing any package paths
             $config_component = $this->_ci_get_component('config');
 
-            if (is_array($config_component->_config_paths))
-            {
+            if (is_array($config_component->_config_paths)) {
                 $found = false;
                 foreach ($config_component->_config_paths as $path) {
                     // We test for both uppercase and lowercase, for servers that
@@ -886,7 +896,7 @@ class PentagonalLoader extends CI_Loader
         $class_name = $prefix.$class;
 
         // Is the class name valid?
-        if ( ! class_exists($class_name, false)) {
+        if (! class_exists($class_name, false)) {
             log_message('error', 'Non-existent class: '.$class_name);
             show_error('Non-existent class: '.$class_name);
         }
@@ -895,8 +905,7 @@ class PentagonalLoader extends CI_Loader
         // Was a custom class name supplied? If so we'll use it
         if (empty($object_name)) {
             $object_name = strtolower($class);
-            if (isset($this->_ci_varmap[$object_name]))
-            {
+            if (isset($this->_ci_varmap[$object_name])) {
                 $object_name = $this->_ci_varmap[$object_name];
             }
         }
@@ -904,8 +913,7 @@ class PentagonalLoader extends CI_Loader
         // Don't overwrite existing properties
         $CI =& get_instance();
         if (isset($CI->$object_name)) {
-            if ($CI->$object_name instanceof $class_name)
-            {
+            if ($CI->$object_name instanceof $class_name) {
                 log_message('debug', $class_name." has already been instantiated as '".$object_name."'. Second attempt aborted.");
                 return;
             }
@@ -922,6 +930,181 @@ class PentagonalLoader extends CI_Loader
             : new $class_name();
     }
 
+    /**
+     * Internal CI Data Loader
+     *
+     * Used to load views and files.
+     *
+     * Variables are prefixed with _ci_ to avoid symbol collision with
+     * variables made available to view files.
+     *
+     * @used-by	CI_Loader::view()
+     * @used-by	CI_Loader::file()
+     * @param	array	$_ci_data	Data to load
+     * @return	object
+     */
+    protected function _ci_load($_ci_data)
+    {
+        // Set the default data variables
+        foreach (array('_ci_view', '_ci_vars', '_ci_path', '_ci_return') as $_ci_val) {
+            $$_ci_val = isset($_ci_data[$_ci_val]) ? $_ci_data[$_ci_val] : false;
+        }
+
+        $file_exists = false;
+
+        // Set the path to the requested file
+        if (is_string($_ci_path) && $_ci_path !== '') {
+            $_ci_x = explode('/', $_ci_path);
+            $_ci_file = end($_ci_x);
+        } else {
+            $_ci_ext = pathinfo($_ci_view, PATHINFO_EXTENSION);
+            $_ci_file = ($_ci_ext === '') ? $_ci_view.'.php' : $_ci_view;
+            /**
+             * Customize the view Path
+             * add template directory
+             */
+            $the_view_path = $this->_ci_view_paths;
+            if (is_string($this->getActiveTheme()) && $this->getActiveTheme() != '') {
+                $path = $this->getActiveTheme();
+                if ($path && ($path = realpath($path))) {
+                    if (($path !== TEMPLATEPATH && $path !== ADMINTEMPLATEPATH)
+                        && (strpos($path, TEMPLATEPATH) !== false || strpos($path, ADMINTEMPLATEPATH) !== false)
+                        && is_dir($path)
+                    ) {
+                        $path .= DIRECTORY_SEPARATOR;
+                        $the_view_path = array_merge(
+                            array(
+                                $path => true
+                            ),
+                            $the_view_path
+                        );
+                    }
+                }
+            }
+
+            foreach ($the_view_path as $_ci_view_file => $cascade) {
+                if (file_exists($_ci_view_file.$_ci_file)) {
+                    $_ci_path = $_ci_view_file.$_ci_file;
+                    $file_exists = true;
+                    break;
+                }
+
+                if ( ! $cascade) {
+                    break;
+                }
+            }
+        }
+
+        if ( ! $file_exists && ! file_exists($_ci_path)) {
+            show_error('Unable to load the requested file: '.$_ci_file);
+        }
+
+        // This allows anything loaded using $this->load (views, files, etc.)
+        // to become accessible from within the Controller and Model functions.
+        $_ci_CI =& get_instance();
+        foreach (get_object_vars($_ci_CI) as $_ci_key => $_ci_var) {
+            if ( ! isset($this->$_ci_key)) {
+                $this->$_ci_key =& $_ci_CI->$_ci_key;
+            }
+        }
+
+        /*
+         * Extract and cache variables
+         *
+         * You can either set variables using the dedicated $this->load->vars()
+         * function or via the second parameter of this function. We'll merge
+         * the two types and cache them so that views that are embedded within
+         * other views can have access to these variables.
+         */
+        if (is_array($_ci_vars)) {
+            foreach (array_keys($_ci_vars) as $key) {
+                if (strncmp($key, '_ci_', 4) === 0) {
+                    unset($_ci_vars[$key]);
+                }
+            }
+
+            $this->_ci_cached_vars = array_merge($this->_ci_cached_vars, $_ci_vars);
+        }
+        extract($this->_ci_cached_vars);
+
+        /*
+         * Buffer the output
+         *
+         * We buffer the output for two reasons:
+         * 1. Speed. You get a significant speed boost.
+         * 2. So that the final rendered template can be post-processed by
+         *	the output class. Why do we need post processing? For one thing,
+         *	in order to show the elapsed page load time. Unless we can
+         *	intercept the content right before it's sent to the browser and
+         *	then stop the timer it won't be accurate.
+         */
+        ob_start();
+
+        // If the PHP installation does not support short tags we'll
+        // do a little string replacement, changing the short tags
+        // to standard PHP echo statements.
+        if ( ! is_php('5.4') && ! ini_get('short_open_tag') && config_item('rewrite_short_tags') === true) {
+            echo eval('?>'.preg_replace('/;*\s*\?>/', '; ?>', str_replace('<?=', '<?php echo ', file_get_contents($_ci_path))));
+        } else {
+            include($_ci_path); // include() vs include_once() allows for multiple views with the same name
+        }
+
+        log_message('info', 'File loaded: '.$_ci_path);
+
+        // Return the file data if requested
+        if ($_ci_return === true) {
+            $buffer = ob_get_contents();
+            @ob_end_clean();
+            return $buffer;
+        }
+
+        /*
+         * Flush the buffer... or buff the flusher?
+         *
+         * In order to permit views to be nested within
+         * other views, we need to flush the content back out whenever
+         * we are beyond the first level of output buffering so that
+         * it can be seen and included properly by the first included
+         * template and any subsequent ones. Oy!
+         */
+        if (ob_get_level() > $this->_ci_ob_level + 1) {
+            ob_end_flush();
+        } else {
+            $_ci_CI->output->append_output(ob_get_contents());
+            @ob_end_clean();
+        }
+
+        return $this;
+    }
+
+    /**
+     * View Loader
+     *
+     * Loads "view" files.
+     *
+     * @param	string	$view	View name
+     * @param	array	$vars	An associative array of data
+     *				to be extracted for use in the view
+     * @param	bool	$return	Whether to return the view output
+     *				or leave it to the Output class
+     * @return	object|string
+     */
+    public function view($view, $vars = array(), $return = false)
+    {
+        return $this->_ci_load(
+            array('_ci_view' => $view,
+                  '_ci_vars' => $this->_ci_object_to_array($vars),
+                  '_ci_return' => $return
+            )
+        );
+    }
+    public function get($name)
+    {
+        $CI =& get_instance();
+        if (isset($CI->$name)) {
+            return $CI->$name;
+        }
+    }
     // --------------------------------------------------------------------
 
     /**

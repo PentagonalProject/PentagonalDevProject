@@ -11,14 +11,13 @@
  */
 function lang($line, $for = '', $attributes = array())
 {
-	$line = get_instance()->lang->translate($line);
+    $line = __($line);
 
-	if ($for !== '')
-	{
-		$line = '<label for="'.$for.'"'._stringify_attributes($attributes).'>'.$line.'</label>';
-	}
+    if ($for !== '') {
+        $line = '<label for="'.$for.'"'._stringify_attributes($attributes).'>'.$line.'</label>';
+    }
 
-	return $line;
+    return $line;
 }
 
 /**
@@ -28,10 +27,17 @@ function lang($line, $for = '', $attributes = array())
  */
 function __($line, $textdomain = null)
 {
-	if (!is_string($line)) {
-		return $line;
-	}
-	return get_instance()->lang->translate($line, $textdomain);
+    if (!is_string($line)) {
+        return $line;
+    }
+    /**
+     * Get Mapped Object
+     */
+    $lang = get_instance()->getMapped('lang');
+    if (!is_object($lang) || method_exists($lang, 'traslate')) {
+        show_error('Language object does not exists!');
+    }
+    return $lang->translate($line, $textdomain);
 }
 
 /**
@@ -41,5 +47,5 @@ function __($line, $textdomain = null)
  */
 function _e($line, $textdomain = null)
 {
-	echo __($line, $textdomain);
+    echo __($line, $textdomain);
 }

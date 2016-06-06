@@ -17,12 +17,21 @@ class PentagonalRouter extends CI_Router
         // default_controller would be empty ...
         if (file_exists(CONFIGPATH.'routes.php')) {
             /** @noinspection PhpIncludeInspection */
-            include(CONFIGPATH.'routes.php');
+            $route_tmp = include(CONFIGPATH.'routes.php');
         }
 
         if (file_exists(CONFIGPATH. ENVIRONMENT . '/routes.php')) {
             /** @noinspection PhpIncludeInspection */
-            include(CONFIGPATH. ENVIRONMENT . '/routes.php');
+            $route_tmp = include(CONFIGPATH. ENVIRONMENT . '/routes.php');
+        }
+
+        /**
+         * Fix re route variable
+         */
+        if (isset($route_tmp)) {
+            if (is_array($route_tmp)) {
+                $route = $route_tmp;
+            }
         }
 
         // Validate & get reserved routes
@@ -30,6 +39,7 @@ class PentagonalRouter extends CI_Router
             isset($route['default_controller']) && $this->default_controller = $route['default_controller'];
             isset($route['translate_uri_dashes']) && $this->translate_uri_dashes = $route['translate_uri_dashes'];
             unset($route['default_controller'], $route['translate_uri_dashes']);
+            $route['404_override'] = 'Controller404';
             $this->routes = $route;
         }
 
@@ -38,7 +48,7 @@ class PentagonalRouter extends CI_Router
         // If this feature is enabled, we will gather the directory/class/method a little differently
         if ($this->enable_query_strings) {
             // If the directory is set at this time, it means an override exists, so skip the checks
-            if ( ! isset($this->directory)) {
+            if (! isset($this->directory)) {
                 $_d = $this->config->item('directory_trigger');
                 $_d = isset($_GET[$_d]) ? trim($_GET[$_d], " \t\n\r\0\x0B/") : '';
 
@@ -49,13 +59,12 @@ class PentagonalRouter extends CI_Router
             }
 
             $_c = trim($this->config->item('controller_trigger'));
-            if ( ! empty($_GET[$_c])) {
+            if (! empty($_GET[$_c])) {
                 $this->uri->filter_uri($_GET[$_c]);
                 $this->set_class($_GET[$_c]);
 
                 $_f = trim($this->config->item('function_trigger'));
-                if ( ! empty($_GET[$_f]))
-                {
+                if (! empty($_GET[$_f])) {
                     $this->uri->filter_uri($_GET[$_f]);
                     $this->set_method($_GET[$_f]);
                 }
@@ -99,7 +108,7 @@ class PentagonalRouter extends CI_Router
             $method = 'index';
         }
 
-        if ( ! file_exists(CONTROLLERPATH . $this->directory.ucfirst($class).'.php')) {
+        if (! file_exists(CONTROLLERPATH . $this->directory.ucfirst($class).'.php')) {
             // This will trigger 404 later
             return;
         }
@@ -136,8 +145,8 @@ class PentagonalRouter extends CI_Router
             $test = $this->directory
                 .ucfirst($this->translate_uri_dashes === true ? str_replace('-', '_', $segments[0]) : $segments[0]);
 
-            if ( ! file_exists(CONTROLLERPATH . $test.'.php')
-                && $directory_override === FALSE
+            if (! file_exists(CONTROLLERPATH . $test.'.php')
+                && $directory_override === false
                 && is_dir(CONTROLLERPATH . $this->directory.$segments[0])
             ) {
                 $this->set_directory(array_shift($segments), true);
@@ -162,16 +171,13 @@ class PentagonalRouter extends CI_Router
     {
         // Turn the segment array into a URI string
         $uri = implode('/', $this->uri->segments);
-
         // Get HTTP verb
         $http_verb = isset($_SERVER['REQUEST_METHOD']) ? strtolower($_SERVER['REQUEST_METHOD']) : 'cli';
 
         // Loop through the route array looking for wildcards
-        foreach ($this->routes as $key => $val)
-        {
+        foreach ($this->routes as $key => $val) {
             // Check if route format is using HTTP verbs
-            if (is_array($val))
-            {
+            if (is_array($val)) {
                 $val = array_change_key_case($val, CASE_LOWER);
                 if (isset($val[$http_verb])) {
                     $val = $val[$http_verb];
@@ -186,8 +192,7 @@ class PentagonalRouter extends CI_Router
             // Does the RegEx match?
             if (preg_match('#^'.$key.'$#', $uri, $matches)) {
                 // Are we using callbacks to process back-references?
-                if ( ! is_string($val) && is_callable($val))
-                {
+                if (! is_string($val) && is_callable($val)) {
                     // Remove the original string from the matches array.
                     array_shift($matches);
 
@@ -195,8 +200,7 @@ class PentagonalRouter extends CI_Router
                     $val = call_user_func_array($val, $matches);
                 }
                 // Are we using the default routing method for back-references?
-                elseif (strpos($val, '$') !== FALSE && strpos($key, '(') !== FALSE)
-                {
+                elseif (strpos($val, '$') !== false && strpos($key, '(') !== false) {
                     $val = preg_replace('#^'.$key.'$#', $val, $uri);
                 }
 

@@ -1,0 +1,10 @@
+{
+  "template_name" : "Mocha",
+  "template_url" : "https://www.pentagonal.org",
+  "template_author" : "nawa",
+  "template_author_url" : "https://www.pentagonal.com",
+  "template_version" : "v1.0",
+  "template_license" : "CC BY ND",
+  "template_license_url" : "http://creativecommons.org/licenses/by-nd/4.0/",
+  "template_description" : "This is short description."
+}

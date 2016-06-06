@@ -1,5 +1,6 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+print_r(admin_notice_info());
 ?><!DOCTYPE html>
 <html lang="en">
 <head>

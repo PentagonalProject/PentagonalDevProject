@@ -2,16 +2,16 @@
 /**
  * Initialize the database
  *
- * @category	Database
- * @author	EllisLab Dev Team
- * @link	https://codeigniter.com/user_guide/database/
+ * @category    Database
+ * @author  EllisLab Dev Team
+ * @link    https://codeigniter.com/user_guide/database/
  *
- * @param 	string|string[]	$params
- * @param 	bool		$query_builder_override
- *				Determines if query builder should be used or not
+ * @param   string|string[] $params
+ * @param   bool        $query_builder_override
+ *              Determines if query builder should be used or not
  * @return object
  */
-function &DB($params = '', $query_builder_override = NULL)
+function &DB($params = '')
 {
     // Load the DB config file if a DSN string wasn't passed
     if (is_string($params) && strpos($params, '://') === false) {
@@ -43,7 +43,7 @@ function &DB($params = '', $query_builder_override = NULL)
             $active_group = $params;
         }
 
-        if ( ! isset($active_group)) {
+        if (! isset($active_group)) {
             show_error('You have not specified a database connection group via $active_group in your configuration.');
         } elseif (! isset($db[$active_group])) {
             show_error('You have specified an invalid database connection group ('.$active_group.') in your configuration.');
@@ -61,16 +61,16 @@ function &DB($params = '', $query_builder_override = NULL)
          * $dsn = 'driver://username:password@hostname/database';
          */
         if (($dsn = @parse_url($params)) === false) {
-            show_error('Invalid DB Connection String');
+            show_error('Invalid Database Connection String');
         }
 
         $params = array(
-            'dbdriver'	=> $dsn['scheme'],
-            'hostname'	=> isset($dsn['host']) ? rawurldecode($dsn['host']) : '',
-            'port'		=> isset($dsn['port']) ? rawurldecode($dsn['port']) : '',
-            'username'	=> isset($dsn['user']) ? rawurldecode($dsn['user']) : '',
-            'password'	=> isset($dsn['pass']) ? rawurldecode($dsn['pass']) : '',
-            'database'	=> isset($dsn['path']) ? rawurldecode(substr($dsn['path'], 1)) : ''
+            'dbdriver'  => $dsn['scheme'],
+            'hostname'  => isset($dsn['host']) ? rawurldecode($dsn['host']) : '',
+            'port'      => isset($dsn['port']) ? rawurldecode($dsn['port']) : '',
+            'username'  => isset($dsn['user']) ? rawurldecode($dsn['user']) : '',
+            'password'  => isset($dsn['pass']) ? rawurldecode($dsn['pass']) : '',
+            'database'  => isset($dsn['path']) ? rawurldecode(substr($dsn['path'], 1)) : ''
         );
 
         // Were additional config items set?
@@ -92,47 +92,26 @@ function &DB($params = '', $query_builder_override = NULL)
         show_error('You have not selected a database type to connect to.');
     }
 
-    // Load the DB classes. Note: Since the query builder class is optional
-    // we need to dynamically create a class that extends proper parent class
-    // based on whether we're using the query builder class or not.
-    if ($query_builder_override !== null)
-    {
-        $query_builder = $query_builder_override;
-    }
-    // Backwards compatibility work-around for keeping the
-    // $active_record config variable working. Should be
-    // removed in v3.1
-    elseif ( ! isset($query_builder) && isset($active_record))
-    {
-        $query_builder = $active_record;
-    }
-
-    require_once(BASEPATH.'database/DB_driver.php');
-
-    if ( ! isset($query_builder) || $query_builder === true) {
-        require_once(BASEPATH.'database/DB_query_builder.php');
-        if ( ! class_exists('CI_DB', false)) {
+    !class_exists('CI_DB_driver') && require_once(BASEPATH.'database/DB_driver.php');
+    !class_exists('CI_DB_query_builder') && require_once(BASEPATH.'database/DB_query_builder.php');
+    if (! class_exists('CI_DB', false)) {
             /**
              * CI_DB
              *
              * Acts as an alias for both CI_DB_driver and CI_DB_query_builder.
              *
-             * @see	CI_DB_query_builder
-             * @see	CI_DB_driver
+             * @see     CI_DB_query_builder
+             * @see     CI_DB_driver
              */
-            class CI_DB extends CI_DB_query_builder { }
+        class CI_DB extends CI_DB_query_builder
+        {
         }
-    } elseif ( ! class_exists('CI_DB', false)) {
-        /**
-         * @ignore
-         */
-        class CI_DB extends CI_DB_driver { }
     }
 
     // Load the DB driver
     $driver_file = BASEPATH.'database/drivers/'.$params['dbdriver'].'/'.$params['dbdriver'].'_driver.php';
+    file_exists($driver_file) || show_error('Invalid DB driver');
 
-    file_exists($driver_file) OR show_error('Invalid DB driver');
     require_once($driver_file);
 
     // Instantiate the DB adapter
@@ -140,12 +119,10 @@ function &DB($params = '', $query_builder_override = NULL)
     $DB = new $driver($params);
 
     // Check for a subdriver
-    if ( ! empty($DB->subdriver))
-    {
+    if (! empty($DB->subdriver)) {
         $driver_file = BASEPATH.'database/drivers/'.$DB->dbdriver.'/subdrivers/'.$DB->dbdriver.'_'.$DB->subdriver.'_driver.php';
 
-        if (file_exists($driver_file))
-        {
+        if (file_exists($driver_file)) {
             require_once($driver_file);
             $driver = 'CI_DB_'.$DB->dbdriver.'_'.$DB->subdriver.'_driver';
             $DB = new $driver($params);

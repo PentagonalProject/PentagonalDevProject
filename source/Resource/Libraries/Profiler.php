@@ -1,41 +1,4 @@
 <?php
-/**
- * CodeIgniter
- *
- * An open source resource development framework for PHP
- *
- * This content is released under the MIT License (MIT)
- *
- * Copyright (c) 2014 - 2016, British Columbia Institute of Technology
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *
- * @package	CodeIgniter
- * @author	EllisLab Dev Team
- * @copyright	Copyright (c) 2008 - 2014, EllisLab, Inc. (https://ellislab.com/)
- * @copyright	Copyright (c) 2014 - 2016, British Columbia Institute of Technology (http://bcit.ca/)
- * @license	http://opensource.org/licenses/MIT	MIT License
- * @link	https://codeigniter.com
- * @since	Version 1.0.0
- * @filesource
- */
-defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * CodeIgniter Profiler Class
@@ -52,7 +15,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @author		EllisLab Dev Team
  * @link		https://codeigniter.com/user_guide/general/profiling.html
  */
-class CI_Profiler {
+class CI_Profiler
+{
 
     /**
      * List of profiler sections available to show
@@ -101,9 +65,9 @@ class CI_Profiler {
 
         // default all sections to display
         foreach ($this->_available_sections as $section) {
-            if ( ! isset($config[$section]))
-            {
-                $this->_compile_{$section} = true;
+            if (! isset($config[$section])) {
+                $this->_compile_{$section}
+                = true;
             }
         }
 
@@ -123,17 +87,15 @@ class CI_Profiler {
      */
     public function set_sections($config)
     {
-        if (isset($config['query_toggle_count']))
-        {
+        if (isset($config['query_toggle_count'])) {
             $this->_query_toggle_count = (int) $config['query_toggle_count'];
             unset($config['query_toggle_count']);
         }
 
-        foreach ($config as $method => $enable)
-        {
-            if (in_array($method, $this->_available_sections))
-            {
-                $this->_compile_{$method} = ($enable !== FALSE);
+        foreach ($config as $method => $enable) {
+            if (in_array($method, $this->_available_sections)) {
+                $this->_compile_{$method}
+                = ($enable !== false);
             }
         }
     }
@@ -153,13 +115,11 @@ class CI_Profiler {
     protected function _compile_benchmarks($useoutput = true)
     {
         $profile = array();
-        foreach ($this->CI->benchmark->marker as $key => $val)
-        {
+        foreach ($this->CI->benchmark->marker as $key => $val) {
             // We match the "end" marker so that the list ends
             // up in the order that it was defined
             if (preg_match('/(.+?)_end$/i', $key, $match)
-                && isset($this->CI->benchmark->marker[$match[1].'_end'], $this->CI->benchmark->marker[$match[1].'_start']))
-            {
+                && isset($this->CI->benchmark->marker[$match[1].'_end'], $this->CI->benchmark->marker[$match[1].'_start'])) {
                 $profile[$match[1]] = $this->CI->benchmark->elapsed_time($match[1].'_start', $key);
             }
         }
@@ -175,8 +135,7 @@ class CI_Profiler {
                 . "\n\n\n<table style=\"width:100%;\">\n";
         }
 
-        foreach ($profile as $key => $val)
-        {
+        foreach ($profile as $key => $val) {
             if ($useoutput) {
                 $key = ucwords(str_replace(array('_', '-'), ' ', $key));
                 $output .= '<tr><td style="padding:5px;width:50%;color:#000;font-weight:bold;background-color:#ddd;">'
@@ -202,20 +161,13 @@ class CI_Profiler {
         $dbs = array();
 
         // Let's determine which databases are currently connected to
-        foreach (get_object_vars($this->CI) as $name => $cobject)
-        {
-            if (is_object($cobject))
-            {
-                if ($cobject instanceof CI_DB)
-                {
+        foreach (get_object_vars($this->CI) as $name => $cobject) {
+            if (is_object($cobject)) {
+                if ($cobject instanceof CI_DB) {
                     $dbs[get_class($this->CI).':$'.$name] = $cobject;
-                }
-                elseif ($cobject instanceof CI_Model)
-                {
-                    foreach (get_object_vars($cobject) as $mname => $mobject)
-                    {
-                        if ($mobject instanceof CI_DB)
-                        {
+                } elseif ($cobject instanceof CI_Model) {
+                    foreach (get_object_vars($cobject) as $mname => $mobject) {
+                        if ($mobject instanceof CI_DB) {
                             $dbs[get_class($cobject).':$'.$mname] = $mobject;
                         }
                     }
@@ -223,8 +175,7 @@ class CI_Profiler {
             }
         }
 
-        if (count($dbs) === 0)
-        {
+        if (count($dbs) === 0) {
             return $useoutput ? "\n\n"
             .'<fieldset id="ci_profiler_queries" style="border:1px solid #0000FF;padding:6px 10px 10px 10px;margin:20px 0 20px 0;background-color:#eee;">'
             ."\n"
@@ -244,8 +195,7 @@ class CI_Profiler {
         $output  = "\n\n";
         $count = 0;
 
-        foreach ($dbs as $name => $db)
-        {
+        foreach ($dbs as $name => $db) {
             if ($useoutput) {
                 $hide_queries = (count($db->queries) > $this->_query_toggle_count) ? ' display:none' : '';
                 $total_time = number_format(array_sum($db->query_times), 4) . ' ' . $this->CI->lang->line('seconds');
@@ -272,17 +222,13 @@ class CI_Profiler {
                 );
             }
 
-            if (count($db->queries) === 0)
-            {
+            if (count($db->queries) === 0) {
                 if ($useoutput) {
                     $output .= '<tr><td style="width:100%;color:#0000FF;font-weight:normal;background-color:#eee;padding:5px;">'
                         . $this->CI->lang->line('profiler_no_queries') . "</td></tr>\n";
                 }
-            }
-            else
-            {
-                foreach ($db->queries as $key => $val)
-                {
+            } else {
+                foreach ($db->queries as $key => $val) {
                     $time = number_format($db->query_times[$key], 4);
                     if ($useoutput) {
                         $val = highlight_code($val);
@@ -328,8 +274,7 @@ class CI_Profiler {
                 . '<legend style="color:#cd6e00;">&nbsp;&nbsp;' . $this->CI->lang->line('GET DATA') . "&nbsp;&nbsp;</legend>\n";
         }
 
-        if (count($_GET) === 0)
-        {
+        if (count($_GET) === 0) {
             if ($useoutput) {
                 $output .= '<div style="color:#cd6e00;font-weight:normal;padding:4px 0 4px 0;">' . $this->CI->lang->line('No GET data exists') . '</div>';
             } else {
@@ -340,11 +285,10 @@ class CI_Profiler {
                 $output .= "\n\n<table style=\"width:100%;border:none;\">\n";
             }
 
-            foreach ($_GET as $key => $val)
-            {
+            foreach ($_GET as $key => $val) {
                 if ($useoutput) {
-                    is_int($key) OR $key = "'" . htmlspecialchars($key, ENT_QUOTES, config_item('charset')) . "'";
-                    $val = (is_array($val) OR is_object($val))
+                    is_int($key) or $key = "'" . htmlspecialchars($key, ENT_QUOTES, config_item('charset')) . "'";
+                    $val = (is_array($val) or is_object($val))
                         ? '<pre>' . htmlspecialchars(print_r($val, true), ENT_QUOTES, config_item('charset'))
                         : htmlspecialchars($val, ENT_QUOTES, config_item('charset'));
 
@@ -380,24 +324,20 @@ class CI_Profiler {
                 . "\n"
                 . '<legend style="color:#009900;">&nbsp;&nbsp;' . $this->CI->lang->line('POST DATA') . "&nbsp;&nbsp;</legend>\n";
         }
-        if (count($_POST) === 0 && count($_FILES) === 0)
-        {
+        if (count($_POST) === 0 && count($_FILES) === 0) {
             if ($useoutput) {
                 $output .= '<div style="color:#009900;font-weight:normal;padding:4px 0 4px 0;">' . $this->CI->lang->line('No POST data exists') . '</div>';
             } else {
                 $output = null;
             }
-        }
-        else
-        {
+        } else {
             if ($useoutput) {
                 $output .= "\n\n<table style=\"width:100%;\">\n";
             }
-            foreach ($_POST as $key => $val)
-            {
+            foreach ($_POST as $key => $val) {
                 if ($useoutput) {
-                    is_int($key) OR $key = "'".htmlspecialchars($key, ENT_QUOTES, config_item('charset'))."'";
-                    $val = (is_array($val) OR is_object($val))
+                    is_int($key) or $key = "'".htmlspecialchars($key, ENT_QUOTES, config_item('charset'))."'";
+                    $val = (is_array($val) or is_object($val))
                         ? '<pre>'.htmlspecialchars(print_r($val, true), ENT_QUOTES, config_item('charset'))
                         : htmlspecialchars($val, ENT_QUOTES, config_item('charset'));
                     $output .= '<tr><td style="width:50%;padding:5px;color:#000;background-color:#ddd;">&#36;_POST['
@@ -408,11 +348,10 @@ class CI_Profiler {
                 }
             }
 
-            foreach ($_FILES as $key => $val)
-            {
+            foreach ($_FILES as $key => $val) {
                 if ($useoutput) {
-                    is_int($key) OR $key = "'" . htmlspecialchars($key, ENT_QUOTES, config_item('charset')) . "'";
-                    $val = (is_array($val) OR is_object($val))
+                    is_int($key) or $key = "'" . htmlspecialchars($key, ENT_QUOTES, config_item('charset')) . "'";
+                    $val = (is_array($val) or is_object($val))
                         ? '<pre>' . htmlspecialchars(print_r($val, true), ENT_QUOTES, config_item('charset'))
                         : htmlspecialchars($val, ENT_QUOTES, config_item('charset'));
 
@@ -434,9 +373,8 @@ class CI_Profiler {
     // --------------------------------------------------------------------
 
     /**
-     * Show query string
-     *
-     * @return	string
+     * @param bool $useoutput
+     * @return string
      */
     protected function _compile_uri_string($useoutput = true)
     {
@@ -446,7 +384,11 @@ class CI_Profiler {
         .'<legend style="color:#000;">&nbsp;&nbsp;'.$this->CI->lang->line('URI STRING')."&nbsp;&nbsp;</legend>\n"
         .'<div style="color:#000;font-weight:normal;padding:4px 0 4px 0;">'
         .($this->CI->uri->uri_string === '' ? $this->CI->lang->line('No URI data exists') : $this->CI->uri->uri_string)
-        .'</div></fieldset>' : ($this->CI->uri->uri_string === '' ? $this->CI->lang->line('No URI data exists') : $this->CI->uri->uri_string);
+        .'</div></fieldset>' : (
+            $this->CI->uri->uri_string === ''
+                ? $this->CI->lang->line('No URI data exists')
+                : $this->CI->uri->uri_string
+        );
     }
 
     // --------------------------------------------------------------------
@@ -507,8 +449,7 @@ class CI_Profiler {
                 . '<table style="width:100%;display:none;" id="ci_profiler_httpheaders_table">' . "\n";
         }
 
-        foreach (array('HTTP_ACCEPT', 'HTTP_USER_AGENT', 'HTTP_CONNECTION', 'SERVER_PORT', 'SERVER_NAME', 'REMOTE_ADDR', 'SERVER_SOFTWARE', 'HTTP_ACCEPT_LANGUAGE', 'SCRIPT_NAME', 'REQUEST_METHOD',' HTTP_HOST', 'REMOTE_HOST', 'CONTENT_TYPE', 'SERVER_PROTOCOL', 'QUERY_STRING', 'HTTP_ACCEPT_ENCODING', 'HTTP_X_FORWARDED_FOR', 'HTTP_DNT') as $header)
-        {
+        foreach (array('HTTP_ACCEPT', 'HTTP_USER_AGENT', 'HTTP_CONNECTION', 'SERVER_PORT', 'SERVER_NAME', 'REMOTE_ADDR', 'SERVER_SOFTWARE', 'HTTP_ACCEPT_LANGUAGE', 'SCRIPT_NAME', 'REQUEST_METHOD', ' HTTP_HOST', 'REMOTE_HOST', 'CONTENT_TYPE', 'SERVER_PROTOCOL', 'QUERY_STRING', 'HTTP_ACCEPT_ENCODING', 'HTTP_X_FORWARDED_FOR', 'HTTP_DNT') as $header) {
             $val = isset($_SERVER[$header]) ? htmlspecialchars($_SERVER[$header], ENT_QUOTES, config_item('charset')) : '';
             if ($useoutput) {
                 $output .= '<tr><td style="vertical-align:top;width:50%;padding:5px;color:#900;background-color:#ddd;">'
@@ -540,10 +481,8 @@ class CI_Profiler {
                 . '<legend style="color:#000;">&nbsp;&nbsp;' . $this->CI->lang->line('CONFIG VARIABLES') . '&nbsp;&nbsp;(<span style="cursor: pointer;" onclick="var s=document.getElementById(\'ci_profiler_config_table\').style;s.display=s.display==\'none\'?\'\':\'none\';this.innerHTML=this.innerHTML==\'' . $this->CI->lang->line('Show') . '\'?\'' . $this->CI->lang->line('Hide') . '\':\'' . $this->CI->lang->line('Show') . '\';">' . $this->CI->lang->line('Show') . "</span>)</legend>\n\n\n"
                 . '<table style="width:100%;display:none;" id="ci_profiler_config_table">' . "\n";
         }
-        foreach ($this->CI->config->config as $config => $val)
-        {
-            if (is_array($val) OR is_object($val))
-            {
+        foreach ($this->CI->config->config as $config => $val) {
+            if (is_array($val) or is_object($val)) {
                 $val = print_r($val, true);
             }
             if ($useoutput) {
@@ -566,25 +505,23 @@ class CI_Profiler {
      */
     protected function _compile_session_data($useoutput = true)
     {
-        if ( ! isset($this->CI->session))
-        {
+        if (! isset($this->CI->session)) {
             return;
         }
         $output = array();
         if ($useoutput) {
             $output = '<fieldset id="ci_profiler_csession" style="border:1px solid #000;padding:6px 10px 10px 10px;margin:20px 0 20px 0;background-color:#eee;">'
-                . '<legend style="color:#000;">&nbsp;&nbsp;' . $this->CI->lang->line(SESSION DATA') . '&nbsp;&nbsp;(<span style="cursor: pointer;" onclick="var s=document.getElementById(\'ci_profiler_session_data\').style;s.display=s.display==\'none\'?\'\':\'none\';this.innerHTML=this.innerHTML==\'' . $this->CI->lang->line('Show') . '\'?\'' . $this->CI->lang->line('Hide') . '\':\'' . $this->CI->lang->line('Show') . '\';">' . $this->CI->lang->line('Show') . '</span>)</legend>'
+                . '<legend style="color:#000;">&nbsp;&nbsp;' . $this->CI->lang->line('SESSION DATA') . '&nbsp;&nbsp;(<span style="cursor: pointer;" onclick="var s=document.getElementById(\'ci_profiler_session_data\').style;s.display=s.display==\'none\'?\'\':\'none\';this.innerHTML=this.innerHTML==\'' . $this->CI->lang->line('Show') . '\'?\'' . $this->CI->lang->line('Hide') . '\':\'' . $this->CI->lang->line('Show') . '\';">' . $this->CI->lang->line('Show') . '</span>)</legend>'
                 . '<table style="width:100%;display:none;" id="ci_profiler_session_data">';
         }
-        foreach ($this->CI->session->userdata() as $key => $val)
-        {
-            if (is_array($val) OR is_object($val))
-            {
+        foreach ($this->CI->session->userdata() as $key => $val) {
+            if (is_array($val) or is_object($val)) {
                 $val = print_r($val, true);
             }
             if ($useoutput) {
                 $output .= '<tr><td style="padding:5px;vertical-align:top;color:#900;background-color:#ddd;">'
-                    . $key . '&nbsp;&nbsp;</td><td style="padding:5px;color:#000;background-color:#ddd;">' . htmlspecialchars($val) . "</td></tr>\n";
+                    . $key
+                    . '&nbsp;&nbsp;</td><td style="padding:5px;color:#000;background-color:#ddd;">' . htmlspecialchars($val) . "</td></tr>\n";
             } else {
                 $output[$key] = $val;
             }
@@ -617,7 +554,7 @@ class CI_Profiler {
                 }
             }
             ob_start();
-            call_user_func(function($section) use ($path) {
+            call_user_func(function ($section) use ($path) {
                 require $path;
             }, ($sections));
             $output .= ob_get_clean();
@@ -640,5 +577,4 @@ class CI_Profiler {
 
         return $output.'</div>';
     }
-
 }

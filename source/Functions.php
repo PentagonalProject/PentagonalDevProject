@@ -90,25 +90,39 @@ function &load_class($class, $directory = 'libraries', $param = null)
     {
         if (file_exists($path.$directory.'/'.$class.'.php')) {
             $name = 'CI_'.$class;
+            if (class_exists($name, false) === false) {
+                require_once($path.$directory.'/'.$class.'.php');
+            }
+
+            break;
+        }
+        if (file_exists($path.ucfirst($directory).'/'.$class.'.php')) {
+            $name = 'CI_'.$class;
 
             if (class_exists($name, false) === false)
             {
-                require_once($path.$directory.'/'.$class.'.php');
+                require_once($path.ucfirst($directory).'/'.$class.'.php');
             }
 
             break;
         }
     }
 
-    // Is the request a class extension? If so we load it too
-    if (file_exists(APPPATH.$directory.'/'.config_item('subclass_prefix').$class.'.php')) {
-        $name = config_item('subclass_prefix').$class;
+    if (config_item('subclass_prefix')) {
+        // Is the request a class extension? If so we load it too
+        if (file_exists(APPPATH . $directory . '/' . config_item('subclass_prefix') . $class . '.php')) {
+            $name = config_item('subclass_prefix') . $class;
+            if (class_exists($name, false) === false) {
+                require_once(APPPATH . $directory . '/' . $name . '.php');
+            }
+        } elseif (file_exists(APPPATH . ucfirst($directory) . '/' . config_item('subclass_prefix') . $class . '.php')) {
+            $name = config_item('subclass_prefix') . $class;
 
-        if (class_exists($name, false) === false) {
-            require_once(APPPATH.$directory.'/'.$name.'.php');
+            if (class_exists($name, false) === false) {
+                require_once(APPPATH . ucfirst($directory) . '/' . $name . '.php');
+            }
         }
     }
-
     // Did we find the class?
     if ($name === false) {
         // Note: We use exit() rather than show_error() in order to avoid a
@@ -124,6 +138,8 @@ function &load_class($class, $directory = 'libraries', $param = null)
     $_classes[$class] = isset($param)
         ? new $name($param)
         : new $name();
+
+
     return $_classes[$class];
 }
 
@@ -184,19 +200,8 @@ function config_item($item)
  */
 function &get_mimes()
 {
-    static $_mimes;
-
-    if (empty($_mimes)) {
-        if (is_file(APPPATH.'config/'.ENVIRONMENT.'/mimes.php')) {
-            $_mimes = include APPPATH.'config/'.ENVIRONMENT.'/mimes.php';
-        } elseif (is_file(APPPATH.'config/mimes.php')) {
-            $_mimes = include APPPATH.'config/mimes.php';
-        } else {
-            $_mimes = array();
-        }
-    }
-
-    return $_mimes;
+    $mimes = (array) Processor::config('mime_type');
+    return $mimes;
 }
 
 /**
@@ -265,7 +270,15 @@ function show_error($message, $status_code = 500, $heading = 'An Error Was Encou
     }
 
     $_error =& load_class('Exceptions', 'core');
-    echo $_error->show_error($heading, $message, 'error_general', $status_code);
+    $retval = $_error->show_error($heading, $message, 'error_general', $status_code);
+
+    if (!is_cli() && function_exists('get_instance')) {
+        $ci = get_instance();
+        $ci->output->set_output($retval);
+        $ci->output->_display();
+    } else {
+        echo $retval;
+    }
     exit($exit_status);
 }
 
@@ -618,4 +631,71 @@ function function_usable($function_name)
     }
 
     return false;
+}
+
+/**
+ * @return array
+ */
+function admin_notice_info()
+{
+    ob_start();
+    $notice = Hook::apply('admin_notice_info', array());
+    ob_end_clean();
+    if (!is_array($notice)) {
+        Hook::removeAll('admin_notice_info');
+        $notice = Hook::apply('admin_notice_info', array());
+    }
+
+    return $notice;
+}
+
+/* ------------------------------------------------
+ * CONTEXT SITE
+ * ------------------------------------------------
+ */
+
+/**
+ * check if is on admin area
+ *
+ * @return bool
+ */
+function is_admin_area()
+{
+    $ci = get_instance();
+    if (isset($ci->router) && $ci->router->class == 'AdminController') {
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * Getting Header.php
+ */
+function get_header()
+{
+    $file = get_instance()->load->getActiveTheme();
+    if (!$file) {
+        return;
+    }
+    $file = $file .DIRECTORY_SEPARATOR . 'header.php';
+    if (file_exists($file)) {
+        get_instance()->load->file($file);
+    }
+}
+
+/**
+ * Getting Footer.php
+ */
+function get_footer()
+{
+    $file = get_instance()->load->getActiveTheme();
+    if (!$file) {
+        return;
+    }
+
+    $file = $file . DIRECTORY_SEPARATOR . 'footer.php';
+    if (file_exists($file)) {
+        get_instance()->load->file($file);
+    }
 }

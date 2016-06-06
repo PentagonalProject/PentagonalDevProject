@@ -1,18 +1,21 @@
 <?php
-
-class CI_Unit_test {
+/**
+ * Class CI_Unit_test
+ */
+class CI_Unit_test
+{
 
     /**
      * Active flag
      *
-     * @var	bool
+     * @var bool
      */
     public $active = true;
 
     /**
      * Test results
      *
-     * @var	array
+     * @var array
      */
     public $results = array();
 
@@ -21,30 +24,30 @@ class CI_Unit_test {
      *
      * Whether to use === or == when comparing
      *
-     * @var	bool
+     * @var bool
      */
     public $strict = false;
 
     /**
      * Template
      *
-     * @var	string
+     * @var string
      */
     protected $_template = null;
 
     /**
      * Template rows
      *
-     * @var	string
+     * @var string
      */
     protected $_template_rows = null;
 
     /**
      * List of visible test items
      *
-     * @var	array
+     * @var array
      */
-    protected $_test_items_visible	= array(
+    protected $_test_items_visible    = array(
         'test_name',
         'test_datatype',
         'res_datatype',
@@ -59,7 +62,7 @@ class CI_Unit_test {
     /**
      * Constructor
      *
-     * @return	void
+     * @return  void
      */
     public function __construct()
     {
@@ -73,13 +76,12 @@ class CI_Unit_test {
      *
      * Runs the supplied tests
      *
-     * @param	array	$items
-     * @return	void
+     * @param   array   $items
+     * @return  void
      */
     public function set_test_items($items)
     {
-        if ( ! empty($items) && is_array($items))
-        {
+        if (! empty($items) && is_array($items)) {
             $this->_test_items_visible = $items;
         }
     }
@@ -91,24 +93,36 @@ class CI_Unit_test {
      *
      * Runs the supplied tests
      *
-     * @param	mixed	$test
-     * @param	mixed	$expected
-     * @param	string	$test_name
-     * @param	string	$notes
-     * @return	string
+     * @param   mixed   $test
+     * @param   mixed   $expected
+     * @param   string  $test_name
+     * @param   string  $notes
+     * @return  string
      */
     public function run($test, $expected = true, $test_name = 'undefined', $notes = '')
     {
-        if ($this->active === false)
-        {
+        if ($this->active === false) {
             return false;
         }
 
         if (in_array(
-                $expected,
-                array('is_object', 'is_string', 'is_bool', 'is_true', 'is_false', 'is_int', 'is_numeric', 'is_float', 'is_double', 'is_array', 'is_null', 'is_resource'),
-                true
-            )
+            $expected,
+            array(
+                    'is_object',
+                    'is_string',
+                    'is_bool',
+                    'is_true',
+                    'is_false',
+                    'is_int',
+                    'is_numeric',
+                    'is_float',
+                    'is_double',
+                    'is_array',
+                    'is_null',
+                    'is_resource'
+            ),
+            true
+        )
         ) {
             $expected = str_replace('is_double', 'is_float', $expected);
             $result = $expected($test);
@@ -120,7 +134,7 @@ class CI_Unit_test {
 
         $back = $this->_backtrace();
 
-        $report = array (
+        $report = array(
             'test_name'     => $test_name,
             'test_datatype' => gettype($test),
             'res_datatype'  => $extype,
@@ -142,18 +156,16 @@ class CI_Unit_test {
      *
      * Displays a table with the test data
      *
-     * @param	array	 $result
-     * @return	string
+     * @param   array    $result
+     * @return  string
      */
     public function report($result = array())
     {
-        if (count($result) === 0)
-        {
+        if (count($result) === 0) {
             $result = $this->result();
         }
 
         $CI =& get_instance();
-        $CI->load->language('en', 'system');
 
         $lang['ut_test_name'] = 'Test Name';
         $lang['ut_test_datatype'] = 'Test Datatype';
@@ -178,8 +190,7 @@ class CI_Unit_test {
         $this->_parse_template();
 
         $r = '';
-        foreach ($result as $res)
-        {
+        foreach ($result as $res) {
             $table = '';
 
             foreach ($res as $key => $val) {
@@ -211,8 +222,8 @@ class CI_Unit_test {
      *
      * Causes the evaluation to use === rather than ==
      *
-     * @param	bool	$state
-     * @return	void
+     * @param   bool    $state
+     * @return  void
      */
     public function use_strict($state = true)
     {
@@ -226,8 +237,8 @@ class CI_Unit_test {
      *
      * Enables/disables unit testing
      *
-     * @param	bool
-     * @return	void
+     * @param   bool
+     * @return  void
      */
     public function active($state = true)
     {
@@ -241,22 +252,20 @@ class CI_Unit_test {
      *
      * Returns the raw result data
      *
-     * @param	array	$results
-     * @return	array
+     * @param   array   $results
+     * @return  array
      */
     public function result($results = array())
     {
-        if (count($results) === 0)
-        {
+        if (count($results) === 0) {
             $results = $this->results;
         }
 
         $retval = array();
-        foreach ($results as $result)
-        {
+        foreach ($results as $result) {
             $temp = array();
             foreach ($result as $key => $val) {
-                if ( ! in_array($key, $this->_test_items_visible)) {
+                if (! in_array($key, $this->_test_items_visible)) {
                     continue;
                 } elseif (in_array($key, array('test_name', 'test_datatype', 'test_res_datatype', 'result'), true)) {
                     $val = 'ut_'.$val;
@@ -278,8 +287,8 @@ class CI_Unit_test {
      *
      * This lets us set the template to be used to display results
      *
-     * @param	string
-     * @return	void
+     * @param   string
+     * @return  void
      */
     public function set_template($template)
     {
@@ -293,7 +302,7 @@ class CI_Unit_test {
      *
      * This lets us show file names and line numbers
      *
-     * @return	array
+     * @return  array
      */
     protected function _backtrace()
     {
@@ -309,7 +318,7 @@ class CI_Unit_test {
     /**
      * Get Default Template
      *
-     * @return	string
+     * @return  string
      */
     protected function _default_template()
     {
@@ -326,17 +335,15 @@ class CI_Unit_test {
      *
      * Harvests the data within the template {pseudo-variables}
      *
-     * @return	void
+     * @return  void
      */
     protected function _parse_template()
     {
-        if ($this->_template_rows !== null)
-        {
+        if ($this->_template_rows !== null) {
             return;
         }
 
-        if ($this->_template === null OR ! preg_match('/\{rows\}(.*?)\{\/rows\}/si', $this->_template, $match))
-        {
+        if ($this->_template === null or ! preg_match('/\{rows\}(.*?)\{\/rows\}/si', $this->_template, $match)) {
             $this->_default_template();
             return;
         }
@@ -344,14 +351,13 @@ class CI_Unit_test {
         $this->_template_rows = $match[1];
         $this->_template = str_replace($match[0], '{rows}', $this->_template);
     }
-
 }
 
 /**
  * Helper function to test boolean true
  *
- * @param	mixed	$test
- * @return	bool
+ * @param   mixed   $test
+ * @return  bool
  */
 function is_true($test)
 {
@@ -361,8 +367,8 @@ function is_true($test)
 /**
  * Helper function to test boolean false
  *
- * @param	mixed	$test
- * @return	bool
+ * @param   mixed   $test
+ * @return  bool
  */
 function is_false($test)
 {

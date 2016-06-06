@@ -1,6 +1,5 @@
 <?php
-if ( ! function_exists('byte_format'))
-{
+if (! function_exists('byte_format')) {
     /**
      * Formats a numbers as bytes, based on size, and adds the appropriate suffix
      *
@@ -11,8 +10,7 @@ if ( ! function_exists('byte_format'))
     function byte_format($num, $precision = 1)
     {
         $CI =& get_instance();
-        if ($num >= 1000000000000)
-        {
+        if ($num >= 1000000000000) {
             $num = round($num / 1099511627776, $precision);
             $unit = $CI->lang->line('TB');
         } elseif ($num >= 1000000000) {

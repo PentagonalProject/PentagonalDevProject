@@ -21,7 +21,7 @@ class PentagonalLog extends CI_Log
 
         file_exists($this->_log_path) || mkdir($this->_log_path, 0755, true);
 
-        if ( ! is_dir($this->_log_path) || ! is_really_writable($this->_log_path)) {
+        if (! is_dir($this->_log_path) || ! is_really_writable($this->_log_path)) {
             $this->_enabled = false;
         }
 
@@ -32,11 +32,11 @@ class PentagonalLog extends CI_Log
             $this->_threshold_array = array_flip($config['log_threshold']);
         }
 
-        if ( ! empty($config['log_date_format'])) {
+        if (! empty($config['log_date_format'])) {
             $this->_date_fmt = $config['log_date_format'];
         }
 
-        if ( ! empty($config['log_file_permissions']) && is_int($config['log_file_permissions'])) {
+        if (! empty($config['log_file_permissions']) && is_int($config['log_file_permissions'])) {
             $this->_file_permissions = $config['log_file_permissions'];
         }
     }

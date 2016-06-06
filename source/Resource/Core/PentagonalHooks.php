@@ -28,12 +28,11 @@ class PentagonalHooks extends CI_Hooks
         }
 
         // If there are no hooks, we're done.
-        if ( ! isset($hook) || ! is_array($hook)) {
+        if (! isset($hook) || ! is_array($hook)) {
             return;
         }
 
         $this->hooks =& $hook;
         $this->enabled = true;
     }
-
 }

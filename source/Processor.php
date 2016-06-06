@@ -25,7 +25,7 @@ class Processor
         'app' => array(
             'environment' => 'production',
             'base_url' => '',
-            'index_page' => 'index.php',
+            'index_page' => '',
             'uri_protocol' => 'REQUEST_URI',
             'url_suffix' => '',
             'language'	=> 'id',
@@ -677,9 +677,9 @@ class Processor
         if ($type !== 'app') {
             if (isset(self::$config[$type])
                 && empty(self::$config[$type])
-                && isset($this->config_default[$type])
+                && isset($instance->config_default[$type])
             ) {
-                self::$config[$type] = $this->config_default[$type];
+                self::$config[$type] = $instance->config_default[$type];
             }
         }
         if (is_string($type) && isset(self::$config[$type])) {
@@ -700,10 +700,9 @@ class Processor
     {
         foreach ($replace as $key => $value) {
             // dont allow change subclass_prefix
-            if ($key == 'subclass_prefix') {
-                continue;
-            }
-            if ($key == 'composer_autoload' && !is_string($value) && ! file_exists($value)) {
+            if ($key == 'subclass_prefix' || $key = 'sess_match_ip'
+                || ($key == 'composer_autoload' && !is_string($value) && ! file_exists($value))
+            ) {
                 continue;
             }
             self::$config['app'][$key] = $value;
@@ -958,9 +957,15 @@ class Processor
             $config_new['app'],
             $config_new['user_agent']
         );
+
         // set additional values
         foreach ($config_new as $key => $value) {
-            self::$config[$key] = $value;
+            if (!is_array($value)) {
+                continue;
+            }
+            foreach ($value as $k => $v) {
+                self::$config[$key][$k] = $v;
+            }
         }
         unset($config_new);
         return $this;
@@ -1214,7 +1219,6 @@ class Processor
          * Create Instance
          */
         $this->createInstance();
-
         // Set a mark point for benchmarking
         $benchmark_class->mark('loading_time:_base_classes_end');
         /*
@@ -1246,7 +1250,7 @@ class Processor
             $e404 = true;
         } else {
             /** @noinspection PhpIncludeInspection */
-            require_once(SOURCEPATH.'controller/'.$router_class->directory.$class.'.php');
+            require_once(CONTROLLERPATH.$router_class->directory.$class.'.php');
             if ( ! class_exists($class, false) || $method[0] === '_' || method_exists('CI_Controller', $method)) {
                 $e404 = true;
             } elseif (method_exists($class, '_remap')) {
@@ -1262,12 +1266,11 @@ class Processor
         }
 
         if ($e404) {
-            if ( ! empty($router_class->routes['404_override'])) {
+            if (! empty($router_class->routes['404_override'])) {
                 $error_method = null;
                 if (sscanf($router_class->routes['404_override'], '%[^/]/%s', $error_class, $error_method) !== 2) {
                     $error_method = 'index';
                 }
-
                 $error_class = ucfirst($error_class);
                 if ( ! class_exists($error_class, false)) {
                     if (file_exists(CONTROLLERPATH . $router_class->directory.$error_class.'.php')) {
@@ -1297,7 +1300,6 @@ class Processor
                 }
                 $class = $error_class;
                 $method = $error_method;
-
                 $uri_class->rsegments = array(
                     1 => $class,
                     2 => $method

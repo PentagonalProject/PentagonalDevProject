@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * Beta
+ */
 use Gettext\Translator;
 use Gettext\Translations;
 
@@ -10,21 +12,53 @@ class CI_Lang
      *
      * @var	array
      */
-    public $language =	array();
+    public $language = array();
+
+    public $current_language = 'en';
 
     /**
      * List of loaded language files
      *
      * @var	array
      */
-    public $is_loaded =	array();
+    public $is_loaded = array();
+
+    /**
+     * Predefined System Text Domain
+     * this is reserved text domain and not allowed to use
+     *
+     * @cont string
+     */
+    const SYSTEM_TEXTDOMAIN = '__system__reserved__';
 
     /**
      * @var string
      */
-    protected $predefined_text_domain = 'system';
+    const DEFAULT_TEXTDOMAIN = '__default__reserved__';
 
-    protected $textDomain;
+    /**
+     * @var array
+     */
+    protected $reserved_text_domain = array(
+        'calendar',
+        'date',
+        'db',
+        'email',
+        'form_validation',
+        'ftp',
+        'imglib',
+        'migration',
+        'number',
+        'pagination',
+        'profiler',
+        'unit_test',
+        'upload',
+    );
+
+    /**
+     * @var array
+     */
+    protected $textDomain = array();
 
     /**
      * Class constructor
@@ -34,8 +68,30 @@ class CI_Lang
     public function __construct()
     {
         log_message('info', 'Language Class Initialized');
+        $this->current_language = config_item('language');
+        if (!$this->current_language || !is_string($this->current_language) || trim($this->current_language) == '') {
+            get_config(array('language' => 'en'));
+            $this->current_language  = 'en';
+        }
+        $this->textDomain[self::SYSTEM_TEXTDOMAIN] = LANGUAGEPATH . 'System' . DIRECTORY_SEPARATOR;
+        $this->load(self::SYSTEM_TEXTDOMAIN);
     }
 
+    /**
+     * @return string
+     */
+    public function getCurrentLanguage() {
+        return $this->current_language;
+    }
+
+    /**
+     * Translate
+     *
+     * @param string $language
+     * @param null   $text_domain
+     *
+     * @return mixed
+     */
     public function translate($language, $text_domain = null)
     {
         if (!$text_domain) {
@@ -44,33 +100,41 @@ class CI_Lang
 
         return $language;
     }
-
-    public function load($langfile, $altPath = '', $textdomain = null)
+    /**
+     * Load language text domain just for backwards compatibility
+     *
+     * @param string $langfile
+     * @param string $altPath
+     * @param string $textdomain
+     *
+     * @return bool|void
+     */
+    public function load($textdomain = null, $force = false)
     {
         // override the language files to do
-        if (is_string($langfile) && file_exists(BASEPATH . 'language/english/'.$langfile . '_helper.php')) {
-            $textdomain = 'system';
-            if (empty($this->is_loaded[$this->predefined_text_domain])) {
-                $langfile = config_item('language');
-            }
+        if (! $textdomain || is_string($textdomain) && file_exists(BASEPATH . 'language/english/'.$textdomain . '_helper.php')) {
+            $textdomain = self::SYSTEM_TEXTDOMAIN;
         }
-
-        if ($textdomain == 'system' && ! empty($this->is_loaded[$this->predefined_text_domain])) {
+        if ($textdomain && !is_string($textdomain)) {
+            return false;
+        }
+        $language = $this->getCurrentLanguage();
+        if ($textdomain == self::SYSTEM_TEXTDOMAIN && ! empty($this->is_loaded[self::SYSTEM_TEXTDOMAIN])) {
             return true;
         }
-
-        if (is_array($langfile))
-        {
-            foreach ($langfile as $value) {
-                $this->load($value, $altPath);
+        if ($textdomain != self::SYSTEM_TEXTDOMAIN) {
+            if (! empty($this->is_loaded[$textdomain])
+                && (
+                    $this->is_loaded[$textdomain] !== true && $force
+                    || false
+                )
+            ) {
+                return 1;
             }
-
-            return;
         }
 
-        $langfile = str_ireplace('.po', '.mo', $langfile);
-        if (($idiom = strpos($langfile, '_')) !== false) {
-            $ex = explode('_', $langfile);
+        if (($idiom = strpos($language, '_')) !== false) {
+            $ex = explode('_', $language);
             do {
                 $idiom = reset($ex);
                 if (trim($idiom) == '') {
@@ -85,175 +149,168 @@ class CI_Lang
         /**
          * Load system first
          */
-        if (empty($this->language[$this->predefined_text_domain])
-            && empty($this->is_loaded[$this->predefined_text_domain])
+        if (empty($this->language[self::SYSTEM_TEXTDOMAIN])
+            && empty($this->is_loaded[self::SYSTEM_TEXTDOMAIN])
         ) {
-            $file_path = LANGUAGEPATH . 'System'. DIRECTORY_SEPARATOR;
-            if (!file_exists($file = $file_path . $langfile . '.mo')) {
-                if (!file_exists($file = $file_path . $langfile . '.po')) {
+            $file_path = $this->getPathFor(self::SYSTEM_TEXTDOMAIN);
+            if (!file_exists($file = $file_path . $language . '.mo')) {
+                if (!file_exists($file = $file_path . $language . '.po')) {
                     if (!file_exists($file = $file_path . $idiom . '.mo')) {
                         $file = $file_path . $idiom . '.po';
                     }
                 }
             }
+
             if (file_exists($file)) {
                 $ext = pathinfo($file, PATHINFO_EXTENSION);
+                $this->language[self::SYSTEM_TEXTDOMAIN] = new Translator();
                 if ($ext == 'mo') {
                     $translation = Translations::fromMoFile($file);
-                    $translation->setDomain($this->predefined_text_domain);
-                    $this->language[$this->predefined_text_domain] = new Translator();
-                    $this->language[$this->predefined_text_domain]->loadTranslations($translation);
+                    $translation->setDomain(self::SYSTEM_TEXTDOMAIN);
+                    $this->language[self::SYSTEM_TEXTDOMAIN]->loadTranslations($translation);
                 } else {
+                    /**
+                     * @var \Gettext\Translations
+                     */
                     $translation = Translations::fromPoFile($file);
-                    $translation->setDomain($this->predefined_text_domain);
-                    $this->language[$this->predefined_text_domain] = new Translator();
-                    $this->language[$this->predefined_text_domain]->loadTranslations($translation);
+                    $translation->setDomain(self::SYSTEM_TEXTDOMAIN);
+                    $this->language[self::SYSTEM_TEXTDOMAIN]->loadTranslations($translation);
                 }
-                $this->is_loaded[$this->predefined_text_domain] = basename($file);
+                $this->is_loaded[self::SYSTEM_TEXTDOMAIN] = basename($file);
             } else {
-                $this->is_loaded[$this->predefined_text_domain] = true;
+                $this->is_loaded[self::SYSTEM_TEXTDOMAIN] = true;
             }
         }
 
-        if ($textdomain == 'system') {
+        /**
+         * Check if text domain is system
+         */
+        if ($textdomain == self::SYSTEM_TEXTDOMAIN) {
             return true;
         }
 
-        return false;
+        $file_path = $this->getPathFor(self::SYSTEM_TEXTDOMAIN);
+        if (!$file_path) {
+            return false;
+        }
+        if (!file_exists($file = $file_path . $language . '.mo')) {
+            if (!file_exists($file = $file_path . $language . '.po')) {
+                if (!file_exists($file = $file_path . $idiom . '.mo')) {
+                    if (!file_exists($file = $file_path . $idiom . '.po')) {
+                        $this->is_loaded[$textdomain] = true;
+                        return false;
+                    }
+                }
+            }
+        }
+
+        $ext = pathinfo($file, PATHINFO_EXTENSION);
+        $this->language[$textdomain] = new Translator();
+        if ($ext == 'mo') {
+            $translation = Translations::fromMoFile($file);
+            $translation->setDomain($textdomain);
+            $this->language[$textdomain]->loadTranslations($translation);
+        } else {
+            /**
+             * @var \Gettext\Translations
+             */
+            $translation = Translations::fromPoFile($file);
+            $translation->setDomain($textdomain);
+            $this->language[$textdomain]->loadTranslations($translation);
+        }
+
+        $this->is_loaded[$textdomain] = basename($file);
+
+        return true;
     }
 
+    /**
+     * Translate system language
+     *
+     * @param string $language
+     *
+     * @return mixed
+     */
     public function translateSystem($language)
     {
         if (!is_string($language)) {
             return $language;
         }
-        if (empty($this->is_loaded[$this->predefined_text_domain])) {
-            $this->load(config_item('language'), null, 'system');
-        }
-        if (!empty($this->language[$this->predefined_text_domain])) {
-            $language = $this->language[$this->predefined_text_domain]->gettext($language);
+        if (!empty($this->language[self::SYSTEM_TEXTDOMAIN])) {
+            $language = $this->language[self::SYSTEM_TEXTDOMAIN]->gettext($language);
         }
 
         return $language;
     }
 
-    public function setTextDomain($textDomain)
+    /**
+     * Load the text domain
+     *
+     * @param string $textDomain
+     * @return boolean
+     */
+    public function loadTextDomain($textDomain, $path)
     {
-        $this->textDomain = $textDomain;
-    }
+        if ($textDomain == self::SYSTEM_TEXTDOMAIN) {
+            trigger_error(
+                sprintf(
+                    'Invalid text domain set. %s is system text domain ,not allowed to used.',
+                    $textDomain
+                ),
+                E_USER_WARNING
+            );
+            return false;
+        }
+        if (!is_string($textDomain)) {
+            trigger_error(
+                'Invalid text domain set. Text domain must be as string.',
+                E_USER_WARNING
+            );
+            return false;
+        }
+        $textDomain = trim($textDomain);
+        if (in_array($textDomain, $this->reserved_text_domain)) {
+            trigger_error(
+                sprintf(
+                    'Invalid text domain set. %s is system text domain ,not allowed to used.',
+                    $textDomain
+                ),
+                E_USER_WARNING
+            );
+            return false;
+        }
 
-    // --------------------------------------------------------------------
+        if (is_string($path)) {
+            $path = rtrim(preg_replace('/(\\\|\/)+/', DIRECTORY_SEPARATOR, $path), DIRECTORY_SEPARATOR);
+            $path .= DIRECTORY_SEPARATOR;
+            $this->textDomain[$textDomain] = $path;
+            return $this->load($textDomain);
+        } else {
+            trigger_error(
+                sprintf(
+                    'Invalid path for text domain %s.Path must be as string',
+                    $textDomain
+                ),
+                E_USER_NOTICE
+            );
+            return false;
+        }
+    }
 
     /**
-     * Load a language file
+     * Get Path text domain
+     * @param string $textdomain
      *
-     * @param	mixed	$langfile	Language file name
-     * @param	string	$idiom		Language name (english, etc.)
-     * @param	bool	$return		Whether to return the loaded array of translations
-     * @param 	bool	$add_suffix	Whether to add suffix to $langfile
-     * @param 	string	$alt_path	Alternative path to look for the language file
-     *
-     * @return	void|string[]	Array containing translations, if $return is set to true
+     * @return string|null
      */
-    public function loads($langfile, $idiom = '', $return = false, $add_suffix = true, $alt_path = '')
+    public function getPathFor($textdomain)
     {
-        if (is_array($langfile))
-        {
-            foreach ($langfile as $value)
-            {
-                $this->load($value, $idiom, $return, $add_suffix, $alt_path);
-            }
-
-            return;
+        if (isset($this->textDomain[$textdomain]) && is_dir($this->textDomain[$textdomain])) {
+            return $this->textDomain[$textdomain];
         }
 
-        $langfile = str_replace('.php', '', $langfile);
-
-        if ($add_suffix === true)
-        {
-            $langfile = preg_replace('/_lang$/', '', $langfile).'_lang';
-        }
-
-        $langfile .= '.php';
-
-        if (empty($idiom) OR ! preg_match('/^[a-z_-]+$/i', $idiom))
-        {
-            $config =& get_config();
-            $idiom = empty($config['language']) ? 'english' : $config['language'];
-        }
-
-        if ($return === false && isset($this->is_loaded[$langfile]) && $this->is_loaded[$langfile] === $idiom)
-        {
-            return;
-        }
-
-        // Load the base file, so any others found can override it
-        $basepath = BASEPATH.'language/'.$idiom.'/'.$langfile;
-        if (($found = file_exists($basepath)) === true) {
-            include($basepath);
-        }
-
-        if (file_exists(LANGUAGEPATH .$idiom .$langfile)) {
-            include(LANGUAGEPATH .$idiom . $langfile);
-            $found = true;
-        }
-
-        // Do we have an alternative path to look in?
-        if ($alt_path !== '')
-        {
-            $alt_path .= 'language/'.$idiom.'/'.$langfile;
-            if (file_exists($alt_path))
-            {
-                include($alt_path);
-                $found = true;
-            }
-        } else {
-            foreach (get_instance()->load->get_package_paths(true) as $package_path)
-            {
-                $path = $package_path . 'language/'.$idiom.'/'.$langfile;
-                if ($basepath !== $path) {
-                    if (file_exists($path)) {
-                        $path = $package_path . 'Languages/'.$idiom.'/'.$langfile;
-                    }
-                    if (file_exists($path)) {
-                        include($package_path);
-                        $found = true;
-                        break;
-                    }
-                }
-            }
-        }
-
-        if ($found !== true)
-        {
-            show_error('Unable to load the requested language file: language/'.$idiom.'/'.$langfile);
-        }
-
-        if ( ! isset($lang) OR ! is_array($lang))
-        {
-            log_message('error', 'Language file contains no data: language/'.$idiom.'/'.$langfile);
-
-            if ($return === true)
-            {
-                return array();
-            }
-
-            return;
-        }
-
-        if ($return === true)
-        {
-            return $lang;
-        }
-
-        $this->is_loaded[$langfile] = $idiom;
-        $this->language = array_merge($this->language, $lang);
-
-        log_message('info', 'Language file loaded: language/'.$idiom.'/'.$langfile);
-        return true;
+        return null;
     }
-
-    // --------------------------------------------------------------------
 
     /**
      * Language line
@@ -264,11 +321,13 @@ class CI_Lang
      * @param	bool	$log_errors	Whether to log an error message if the line is not found
      * @return	string	Translation
      */
-    public function line($line, $log_errors = true)
+    public function line($line, $textdomain = null, $log_errors = true)
     {
         if (!is_string($line)) {
             $log_errors === true && log_message('error', 'Could not find the language line "'.$line.'"');
             return $line;
         }
+
+        return $this->translate($line, $textdomain);
     }
 }
