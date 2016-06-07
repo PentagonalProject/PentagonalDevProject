@@ -3,7 +3,7 @@ return array(
     'path' => array(
         'system' => 'System',
         'resource' => 'Resource',
-        'views' => 'Views',
+        'view' => 'Views',
         'template' => 'Template',
     ),
     'app' => array(

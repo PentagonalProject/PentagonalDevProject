@@ -23,9 +23,10 @@ class TemplateModel extends CI_Model
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('DataModel', 'model.option');
-        $this->load->helper('language');
-        $this->active_template = $this->load->get('model.option')->get(self::OPTIONNAME, null);
+        $CI =& get_instance();
+        $CI->load->model('DataModel', 'model.option');
+        $CI->load->helper('language');
+        $this->active_template = $CI->load->get('model.option')->get(self::OPTIONNAME, null);
         if (!$this->isValidTemplate($this->active_template)) {
             $template = $this->getActiveTemplate();
             Hook::add('admin_notice_info', function ($args) use ($template) {
@@ -196,7 +197,7 @@ class TemplateModel extends CI_Model
         if (strpos($json, '}') === false && strpos($json, '[') === false) {
             return null;
         }
-        // remove templates comments
+        // remove template comments
         if (strpos($json, '/') !== false) {
             $json = preg_replace_callback('/"(.*?)"/s', function ($c) {
                 $c[1] = str_replace('//', '\/\/', $c[1]);

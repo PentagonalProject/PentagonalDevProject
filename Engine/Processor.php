@@ -30,7 +30,7 @@ class Processor
             'url_suffix' => '',
             'language'	=> 'id',
             'charset' => 'UTF-8',
-            'enable_hooks' => false,
+            'enable_hooks' => true,
             'subclass_prefix' => 'Pentagonal',
             'composer_autoload' => true,
             'permitted_uri_chars' => '',
@@ -700,7 +700,7 @@ class Processor
     {
         foreach ($replace as $key => $value) {
             // dont allow change subclass_prefix
-            if ($key == 'subclass_prefix' || $key = 'sess_match_ip'
+            if ($key == 'subclass_prefix' || $key = 'sess_match_ip' || $key = 'enable_hooks'
                 || ($key == 'composer_autoload' && !is_string($value) && ! file_exists($value))
             ) {
                 continue;
@@ -1082,19 +1082,6 @@ class Processor
 
         /*
          * ------------------------------------------------------
-         *  Instantiate the hooks class
-         * ------------------------------------------------------
-         */
-        $hooks_class =& load_class('Hooks', 'core');
-
-        /*
-         * ------------------------------------------------------
-         *  Is there a "pre_system" hook?
-         * ------------------------------------------------------
-         */
-        $hooks_class->call_hook('pre_system');
-        /*
-         * ------------------------------------------------------
          *  Instantiate the config class
          * ------------------------------------------------------
          *
@@ -1195,14 +1182,6 @@ class Processor
          * ------------------------------------------------------
          */
         $out =& load_class('Output', 'core');
-        /*
-         * ------------------------------------------------------
-         *	Is there a valid cache file? If so, we're done...
-         * ------------------------------------------------------
-         */
-        if ($hooks_class->call_hook('cache_override') === false && $out->_display_cache($cfg, $uri_class) === true) {
-            exit(0);
-        }
 
         /*
          * -----------------------------------------------------
@@ -1214,11 +1193,59 @@ class Processor
         load_class('Security', 'core');
         load_class('Input', 'core');
         load_class('Lang', 'core');
-
         /**
          * Create Instance
          */
         $this->createInstance();
+        $CI = get_instance();
+        $option = $CI->load->get('model.option');
+        $active_module = $option->get('system.active.modules', null);
+        if (!is_array($active_module)) {
+            $active_module = array();
+            $option->set('system.active.modules', $active_module);
+        }
+
+        if (!empty($active_module)) {
+            $tmp_module = $active_module;
+            foreach ($active_module as $key => $value) {
+                if (! is_string($value)) {
+                    unset($active_module[$key]);
+                    continue;
+                }
+                $module = $this->loadModule($value);
+                if (!is_object($module)) {
+                    unset($active_module[$key]);
+                    continue;
+                }
+            }
+            $active_module = array_values($active_module);
+            if ($tmp_module !== $active_module) {
+                $option->set('system.active.modules', $active_module);
+            }
+        }
+
+        $module = $CI->getModule();
+        if (is_array($module)) {
+            foreach ($module as $value) {
+                if (is_object($value)) {
+                    $value->initial();
+                }
+            }
+        }
+
+        /**
+         * call to set routing
+         */
+        $router_class->setRouting();
+        /*
+         * ------------------------------------------------------
+         *	Is there a valid cache file? If so, we're done...
+         * ------------------------------------------------------
+         */
+        if ($out->_display_cache($cfg, $uri_class) === true) {
+            exit(0);
+        }
+
         // Set a mark point for benchmarking
         $benchmark_class->mark('loading_time:_base_classes_end');
         /*
@@ -1313,12 +1340,8 @@ class Processor
             $params = array_slice($uri_class->rsegments, 2);
         }
 
-        /*
-         * ------------------------------------------------------
-         *  Is there a "pre_controller" hook?
-         * ------------------------------------------------------
-         */
-        $hooks_class->call_hook('pre_controller');
+        // doing before controller
+        Hook::apply('processor_before_controller', null);
 
         /*
          * ------------------------------------------------------
@@ -1330,14 +1353,7 @@ class Processor
 
         $codeIgniter = new $class();
 
-        /*
-         * ------------------------------------------------------
-         *  Is there a "post_controller_constructor" hook?
-         * ------------------------------------------------------
-         */
-        $hooks_class->call_hook('post_controller_constructor');
-
-        /*
+         /*
          * ------------------------------------------------------
          *  Call the requested method
          * ------------------------------------------------------
@@ -1346,35 +1362,30 @@ class Processor
             $params = array();
         }
 
-        call_user_func_array(array(&$codeIgniter, $method), $params);
+        Hook::apply(
+            'processor_calling_controller',
+            call_user_func_array(array(&$codeIgniter, $method), $params)
+        );
 
         // Mark a benchmark end point
         $benchmark_class->mark('controller_execution_time_( '.$class.' / '.$method.' )_end');
 
         /*
          * ------------------------------------------------------
-         *  Is there a "post_controller" hook?
-         * ------------------------------------------------------
-         */
-        $hooks_class->call_hook('post_controller');
-
-        /*
-         * ------------------------------------------------------
          *  Send the final rendered output to the browser
          * ------------------------------------------------------
          */
-        if ($hooks_class->call_hook('display_override') === false) {
-            $out->_display();
-        }
+         echo Hook::apply('processor_final_output', $this->hookFinal());
 
-        /*
-         * ------------------------------------------------------
-         *  Is there a "post_system" hook?
-         * ------------------------------------------------------
-         */
-        $hooks_class->call_hook('post_system');
+         return $this;
+    }
 
-        return $this;
+    public function hookFinal()
+    {
+        ob_start();
+        $out =& load_class('Output', 'core');
+        $out->_display();
+        return ob_get_clean();
     }
 
     private function createInstance()
@@ -1403,6 +1414,110 @@ class Processor
             return CI_Controller::get_instance();
         }
 
+    }
+
+    /**
+     * List of loaded modules
+     *
+     * @var	array
+     */
+    protected static $_ci_module = array();
+    /**
+     * List of paths to load modules from
+     *
+     * @var	array
+     */
+    protected $_ci_module_paths =  array(MODULEPATH);
+
+    /**
+     * @param        $module
+     * @param string $name
+     *
+     * @return $this|object
+     */
+    private function loadModule($module, $name = '')
+    {
+        if (empty($module)) {
+            return $this;
+        } elseif (is_array($module)) {
+            foreach ($module as $key => $value) {
+                is_int($key) ? $this->loadModule($value, '') : $this->loadModule($key, $value);
+            }
+
+            return $this;
+        }
+
+        $path = '';
+
+        // Is the model in a sub-folder? If so, parse out the filename and path.
+        if (($last_slash = strrpos($module, '/')) !== false) {
+            // The path is in front of the last slash
+            $path = substr($module, 0, ++$last_slash);
+
+            // And the model name behind it
+            $module = substr($module, $last_slash);
+        }
+
+        if (empty($name)) {
+            $name = $module;
+        }
+
+        $name = strtolower($name);
+        if (in_array($name, self::$_ci_module, true)) {
+            return $this;
+        }
+
+        $CI =& get_instance();
+        if ($CI->getModule($name)) {
+            return 'The module name you are loading is the name of a resource that is already being used: '.$name;
+        }
+        if (! class_exists('Module', false)) {
+            $app_path = RESOURCEPATH.'Core'.DS;
+            if (file_exists($app_path.'Module.php')) {
+                require_once($app_path . 'Module.php');
+                if (!class_exists('CI_Module', false)) {
+                    throw new RuntimeException($app_path . "Module.php exists, but doesn't declare class CI_Module");
+                }
+            } else {
+                throw new RuntimeException($app_path . "Module.php does not exists");
+            }
+        }
+
+        $module = ucfirst($module);
+        if (! class_exists($module, false)) {
+            if (file_exists($path = MODULEPATH . $module . DS . $path . $module . '.php')
+                || file_exists($path = MODULEPATH . lcfirst($module) . DS . $path . $module . '.php')
+                || file_exists($path = MODULEPATH . lcfirst($module) . DS . $path . lcfirst($module) . '.php')
+            ) {
+                require_once($path);
+                if (! class_exists($module, false)) {
+                    return $path . " exists, but doesn't declare class " . $module;
+                }
+            } else {
+                foreach ($this->_ci_module_paths as $mod_path) {
+                    if (file_exists($path = $mod_path . 'Module/' . DS . $module . $path . $module . '.php')
+                        || file_exists($path = $mod_path . 'Module/' . DS . lcfirst($module) . $path . $module . '.php')
+                        || file_exists($path = $mod_path . 'Module/' . DS . lcfirst($module) . $path . lcfirst($module) . '.php')
+                    ) {
+                        require_once($path);
+                        if (!class_exists($module, false)) {
+                            return $path . " exists, but doesn't declare class " . $module;
+                        }
+                        break;
+                    }
+                }
+            }
+
+            if (! class_exists($module, false)) {
+                return 'Unable to locate the model you have specified: ' . $module;
+            }
+        } elseif (! is_subclass_of($module, 'CI_Module')) {
+            return "Class " . $module . " already exists and doesn't extend Module";
+        }
+
+        self::$_ci_module[] = $name;
+        $CI->{'module@list'}[$name] = new $module();
+        return $this;
     }
 
     public function __destruct()

@@ -92,7 +92,7 @@ function &DB($params = '')
         show_error('You have not selected a database type to connect to.');
     }
 
-    !class_exists('CI_DB_driver') && require_once(BASEPATH.'database/DB_driver.php');
+    !class_exists('CI_DB_driver') && require_once(__DIR__.'/DB_driver.php');
     !class_exists('CI_DB_query_builder') && require_once(BASEPATH.'database/DB_query_builder.php');
     if (! class_exists('CI_DB', false)) {
             /**
@@ -109,7 +109,7 @@ function &DB($params = '')
     }
 
     // Load the DB driver
-    $driver_file = BASEPATH.'database/drivers/'.$params['dbdriver'].'/'.$params['dbdriver'].'_driver.php';
+    $driver_file = RESOURCEPATH.'Database/drivers/'.$params['dbdriver'].'/'.$params['dbdriver'].'_driver.php';
     file_exists($driver_file) || show_error('Invalid DB driver');
 
     require_once($driver_file);
@@ -120,7 +120,7 @@ function &DB($params = '')
 
     // Check for a subdriver
     if (! empty($DB->subdriver)) {
-        $driver_file = BASEPATH.'database/drivers/'.$DB->dbdriver.'/subdrivers/'.$DB->dbdriver.'_'.$DB->subdriver.'_driver.php';
+        $driver_file = RESOURCEPATH.'Database/drivers/'.$DB->dbdriver.'/subdrivers/'.$DB->dbdriver.'_'.$DB->subdriver.'_driver.php';
 
         if (file_exists($driver_file)) {
             require_once($driver_file);

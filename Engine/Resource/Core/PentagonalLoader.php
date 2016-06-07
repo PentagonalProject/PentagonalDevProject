@@ -10,7 +10,7 @@ class PentagonalLoader extends CI_Loader
     protected $_ci_ob_level;
 
     /**
-     * List of paths to load views from
+     * List of paths to load view from
      *
      * @var	array
      */
@@ -29,12 +29,6 @@ class PentagonalLoader extends CI_Loader
      * @var	array
      */
     protected $_ci_model_paths =    array(APPPATH);
-    /**
-     * List of paths to load modules from
-     *
-     * @var	array
-     */
-    protected $_ci_module_paths =    array(MODULEPATH);
 
     /**
      * List of paths to load helpers from
@@ -90,11 +84,11 @@ class PentagonalLoader extends CI_Loader
      *
      * @param $name
      */
-    public function setActiveTheme($name)
+    public function setActiveTemplate($name)
     {
         if (is_string($name)) {
-            $name = preg_replace('/(\\\|\/)+/', DIRECTORY_SEPARATOR, $name);
-            $name = rtrim($name, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+            $name = preg_replace('/(\\\|\/)+/', DS, $name);
+            $name = rtrim($name, DS) . DS;
             if (($name !== TEMPLATEPATH && $name !== ADMINTEMPLATEPATH)
                 && (strpos($name, TEMPLATEPATH) !== false || strpos($name, ADMINTEMPLATEPATH) !== false)
                 && is_dir($name)
@@ -107,7 +101,7 @@ class PentagonalLoader extends CI_Loader
     /**
      * @return null|mixed
      */
-    public function getActiveTheme()
+    public function getActiveTemplate()
     {
         return $this->active_theme;
     }
@@ -175,14 +169,14 @@ class PentagonalLoader extends CI_Loader
         //       MY_Model from being an abstract class and is
         //       sub-optimal otherwise anyway.
         if (! class_exists('CI_Model', false)) {
-            $app_path = APPPATH.'Core'.DIRECTORY_SEPARATOR;
+            $app_path = APPPATH.'Core'.DS;
             if (file_exists($app_path.'Model.php')) {
                 require_once($app_path.'Model.php');
                 if (! class_exists('CI_Model', false)) {
                     throw new RuntimeException($app_path."Model.php exists, but doesn't declare class CI_Model");
                 }
             } elseif (! class_exists('CI_Model', false)) {
-                require_once(BASEPATH.'core'.DIRECTORY_SEPARATOR.'Model.php');
+                require_once(BASEPATH.'core'.DS.'Model.php');
             }
 
             $class = config_item('subclass_prefix').'Model';
@@ -228,108 +222,6 @@ class PentagonalLoader extends CI_Loader
         return $this;
     }
 
-    public function module($module, $name = '', $db_conn = false)
-    {
-        if (empty($module)) {
-            return $this;
-        } elseif (is_array($module)) {
-            foreach ($module as $key => $value) {
-                is_int($key) ? $this->model($value, '', $db_conn) : $this->model($key, $value, $db_conn);
-            }
-
-            return $this;
-        }
-
-        $path = '';
-
-        // Is the model in a sub-folder? If so, parse out the filename and path.
-        if (($last_slash = strrpos($module, '/')) !== false) {
-            // The path is in front of the last slash
-            $path = substr($module, 0, ++$last_slash);
-
-            // And the model name behind it
-            $module = substr($module, $last_slash);
-        }
-
-        if (empty($name)) {
-            $name = $module;
-        }
-
-        $name = strtolower($name);
-        if (in_array($name, $this->_ci_module, true)) {
-            return $this;
-        }
-
-        $CI =& get_instance();
-        if ($CI->getModule($name)) {
-            throw new RuntimeException('The module name you are loading is the name of a resource that is already being used: '.$name);
-        }
-
-        if ($db_conn !== false && ! class_exists('CI_DB', false)) {
-            if ($db_conn === true) {
-                $db_conn = '';
-            }
-
-            $this->database($db_conn, false, true);
-        }
-
-        // Note: All of the code under this condition used to be just:
-        //
-        //       load_class('Model', 'core');
-        //
-        //       However, load_class() instantiates classes
-        //       to cache them for later use and that prevents
-        //       MY_Model from being an abstract class and is
-        //       sub-optimal otherwise anyway.
-        if (! class_exists('Module', false)) {
-            $app_path = RESOURCEPATH.'Core'.DIRECTORY_SEPARATOR;
-            if (file_exists($app_path.'Module.php')) {
-                require_once($app_path . 'Module.php');
-                if (!class_exists('CI_Module', false)) {
-                    throw new RuntimeException($app_path . "Module.php exists, but doesn't declare class CI_Module");
-                }
-            } else {
-                throw new RuntimeException($app_path . "Module.php does not exists");
-            }
-        }
-
-        $module = ucfirst($module);
-        if (! class_exists($module, false)) {
-            if (file_exists($path = MODULEPATH . $module . DIRECTORY_SEPARATOR . $path . $module . '.php')
-                || file_exists($path = MODULEPATH . lcfirst($module) . DIRECTORY_SEPARATOR . $path . $module . '.php')
-                || file_exists($path = MODULEPATH . lcfirst($module) . DIRECTORY_SEPARATOR . $path . lcfirst($module) . '.php')
-            ) {
-                require_once($path);
-                if (! class_exists($module, false)) {
-                    throw new RuntimeException($path . " exists, but doesn't declare class ".$module);
-                }
-            } else {
-                foreach ($this->_ci_module_paths as $mod_path) {
-                    if (file_exists($path = $mod_path . 'Module/' . DIRECTORY_SEPARATOR . $module . $path . $module . '.php')
-                        || file_exists($path = $mod_path . 'Module/' . DIRECTORY_SEPARATOR . lcfirst($module) . $path . $module . '.php')
-                        || file_exists($path = $mod_path . 'Module/' . DIRECTORY_SEPARATOR . lcfirst($module) . $path . lcfirst($module) . '.php')
-                    ) {
-                        require_once($path);
-                        if (!class_exists($module, false)) {
-                            throw new RuntimeException($path . " exists, but doesn't declare class " . $module);
-                        }
-                        break;
-                    }
-                }
-            }
-
-            if (! class_exists($module, false)) {
-                throw new RuntimeException('Unable to locate the model you have specified: '.$module);
-            }
-        } elseif (! is_subclass_of($module, 'CI_Module')) {
-            throw new RuntimeException("Class ".$module." already exists and doesn't extend Module");
-        }
-
-        $this->_ci_module[] = $name;
-        $CI->{'module@list'}[$name] = new $module();
-        return $this;
-    }
-
     // --------------------------------------------------------------------
 
     /**
@@ -355,7 +247,7 @@ class PentagonalLoader extends CI_Loader
             return false;
         }
 
-        require_once(RESOURCEPATH.'DB.php');
+        require_once(RESOURCEPATH. 'Database'.DS.'DB.php');
 
         if ($return === true) {
             return DB($params, $query_builder);
@@ -572,9 +464,7 @@ class PentagonalLoader extends CI_Loader
 
         array_unshift($this->_ci_library_paths, $path);
         array_unshift($this->_ci_model_paths, $path);
-        array_unshift($this->_ci_module_paths, $path);
         array_unshift($this->_ci_helper_paths, $path);
-        array_unshift($this->_ci_module_paths, $path);
 
         $this->_ci_view_paths = array($path.'Views/' => $view_cascade) + $this->_ci_view_paths;
 
@@ -619,7 +509,6 @@ class PentagonalLoader extends CI_Loader
         if ($path === '') {
             array_shift($this->_ci_library_paths);
             array_shift($this->_ci_model_paths);
-            array_shift($this->_ci_module_paths);
             array_shift($this->_ci_helper_paths);
             array_shift($this->_ci_view_paths);
             array_pop($config->_config_paths);
@@ -644,7 +533,6 @@ class PentagonalLoader extends CI_Loader
         $this->_ci_library_paths = array_unique(array_merge($this->_ci_library_paths, array(APPPATH, BASEPATH)));
         $this->_ci_helper_paths = array_unique(array_merge($this->_ci_helper_paths, array(APPPATH, BASEPATH)));
         $this->_ci_model_paths = array_unique(array_merge($this->_ci_model_paths, array(APPPATH)));
-        $this->_ci_module_paths = array_unique(array_merge($this->_ci_module_paths, array(MODULEPATH)));
         $this->_ci_view_paths = array_merge($this->_ci_view_paths, array(SOURCEPATH.'Views/' => true));
         $config->_config_paths = array_unique(array_merge($config->_config_paths, array(APPPATH)));
 
@@ -933,7 +821,7 @@ class PentagonalLoader extends CI_Loader
     /**
      * Internal CI Data Loader
      *
-     * Used to load views and files.
+     * Used to load view and files.
      *
      * Variables are prefixed with _ci_ to avoid symbol collision with
      * variables made available to view files.
@@ -964,14 +852,14 @@ class PentagonalLoader extends CI_Loader
              * add template directory
              */
             $the_view_path = $this->_ci_view_paths;
-            if (is_string($this->getActiveTheme()) && $this->getActiveTheme() != '') {
-                $path = $this->getActiveTheme();
+            if (is_string($this->getActiveTemplate()) && $this->getActiveTemplate() != '') {
+                $path = $this->getActiveTemplate();
                 if ($path && ($path = realpath($path))) {
                     if (($path !== TEMPLATEPATH && $path !== ADMINTEMPLATEPATH)
                         && (strpos($path, TEMPLATEPATH) !== false || strpos($path, ADMINTEMPLATEPATH) !== false)
                         && is_dir($path)
                     ) {
-                        $path .= DIRECTORY_SEPARATOR;
+                        $path .= DS;
                         $the_view_path = array_merge(
                             array(
                                 $path => true
@@ -999,7 +887,7 @@ class PentagonalLoader extends CI_Loader
             show_error('Unable to load the requested file: '.$_ci_file);
         }
 
-        // This allows anything loaded using $this->load (views, files, etc.)
+        // This allows anything loaded using $this->load (view, files, etc.)
         // to become accessible from within the Controller and Model functions.
         $_ci_CI =& get_instance();
         foreach (get_object_vars($_ci_CI) as $_ci_key => $_ci_var) {
@@ -1013,8 +901,8 @@ class PentagonalLoader extends CI_Loader
          *
          * You can either set variables using the dedicated $this->load->vars()
          * function or via the second parameter of this function. We'll merge
-         * the two types and cache them so that views that are embedded within
-         * other views can have access to these variables.
+         * the two types and cache them so that view that are embedded within
+         * other view can have access to these variables.
          */
         if (is_array($_ci_vars)) {
             foreach (array_keys($_ci_vars) as $key) {
@@ -1046,7 +934,7 @@ class PentagonalLoader extends CI_Loader
         if ( ! is_php('5.4') && ! ini_get('short_open_tag') && config_item('rewrite_short_tags') === true) {
             echo eval('?>'.preg_replace('/;*\s*\?>/', '; ?>', str_replace('<?=', '<?php echo ', file_get_contents($_ci_path))));
         } else {
-            include($_ci_path); // include() vs include_once() allows for multiple views with the same name
+            include($_ci_path); // include() vs include_once() allows for multiple view with the same name
         }
 
         log_message('info', 'File loaded: '.$_ci_path);
@@ -1061,8 +949,8 @@ class PentagonalLoader extends CI_Loader
         /*
          * Flush the buffer... or buff the flusher?
          *
-         * In order to permit views to be nested within
-         * other views, we need to flush the content back out whenever
+         * In order to permit view to be nested within
+         * other view, we need to flush the content back out whenever
          * we are beyond the first level of output buffering so that
          * it can be seen and included properly by the first included
          * template and any subsequent ones. Oy!

@@ -17,7 +17,6 @@ class DefaultController extends CI_Controller
                 return;
             }
         }
-
         // default 404
         show_404();
     }

@@ -4,7 +4,9 @@ msgstr ""
 "Project-Id-Version: Pentagonal CI PO\n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: \n"
+"Last-Translator: awan <nawa@yahoo.com>\n"
 "Language-Team: pentagonal <dev@pentagonal.org>\n"
+"Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -12,8 +14,6 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;_x;translate;translateSystem;lang\n"
 "X-Generator: Poedit 1.8.5\n"
-"Last-Translator: awan <nawa@yahoo.com>\n"
-"Language: id\n"
 
 msgid "Su"
 msgstr "Mi"
@@ -196,7 +196,7 @@ msgid "(UTC -11:00) Niue"
 msgstr "(UTC -11:00) Niue"
 
 msgid "(UTC -10:00) Hawaii-Aleutian Standard Time, Cook Islands, Tahiti"
-msgstr "(UTC -10:00)  Waktu Standar Hawaii-Aleutian, Kepulauan Cook, Tahiti"
+msgstr "(UTC -10:00)  Waktu Standar Hawai-Aleutian, Kepulauan Cook, Tahiti"
 
 msgid "(UTC -9:30) Marquesas Islands"
 msgstr "(UTC -9:30) Kepulauan Marquesas"
@@ -208,7 +208,7 @@ msgid "(UTC -8:00) Pacific Standard Time, Clipperton Island"
 msgstr "(UTC -8:00) Standar Waktu Pasifik, Kepulauan Clipperto"
 
 msgid "(UTC -7:00) Mountain Standard Time"
-msgstr "(UTC -7:00) Waktu Standar Mountain"
+msgstr "(UTC -7:00) Waktu Standar Pegunungan"
 
 msgid "(UTC -6:00) Central Standard Time"
 msgstr "(UTC -6:00) Waktu Standar Tengah"
@@ -243,58 +243,61 @@ msgstr "(UTC +1:00) Waktu European Bagian Tengah, Waktu Afrika Bagian Barat"
 msgid ""
 "(UTC +2:00) Central Africa Time, Eastern European Time, Kaliningrad Time"
 msgstr ""
+"(UTC +2:00) Central Africa Time, Eastern European Time, Kaliningrad Time"
 
 msgid "(UTC +3:00) Moscow Time, East Africa Time, Arabia Standard Time"
-msgstr ""
+msgstr "(UTC +3:00) Waktu Moscow, Waktu Africa Timur, Waktu Standar Arab"
 
 msgid "(UTC +3:30) Iran Standard Time"
-msgstr ""
+msgstr "(UTC +3:30) Waktu Standar Iran"
 
 msgid "(UTC +4:00) Azerbaijan Standard Time, Samara Time"
-msgstr ""
+msgstr "(UTC +4:00) Waktu Standar Azerbaijan, Waktu Samara"
 
 msgid "(UTC +4:30) Afghanistan"
-msgstr ""
+msgstr "(UTC +4:30) Afghanistan"
 
 msgid "(UTC +5:00) Pakistan Standard Time, Yekaterinburg Time"
-msgstr ""
+msgstr "(UTC +5:00) Waktu Standar Pakistan, Waktu Yekaterinburg"
 
 msgid "(UTC +5:30) Indian Standard Time, Sri Lanka Time"
-msgstr ""
+msgstr "(UTC +5:30) Waktu Standar India, Waktu Sri Lanka"
 
 msgid "(UTC +5:45) Nepal Time"
-msgstr ""
+msgstr "(UTC +5:45) Waktu Nepal"
 
 msgid "(UTC +6:00) Bangladesh Standard Time, Bhutan Time, Omsk Time"
-msgstr ""
+msgstr "(UTC +6:00) Waktu Standar Bangladesh, Waktu Bhutan, Waktu Omsk"
 
 msgid "(UTC +6:30) Cocos Islands, Myanmar"
-msgstr ""
+msgstr "(UTC +6:30) Kepulauan Cocos, Myanmar"
 
 msgid "(UTC +7:00) Krasnoyarsk Time, Cambodia, Laos, Thailand, Vietnam"
-msgstr ""
+msgstr "(UTC +7:00) Waktu Krasnoyarsk, Kamboja, Laos, Thailand, Vietnam"
 
 msgid ""
 "(UTC +8:00) Australian Western Standard Time, Beijing Time, Irkutsk Time"
 msgstr ""
+"(UTC +8:00) Waktu Standar Australia Bagian Barat, Waktu Beijing, Waktu "
+"Irkutsk"
 
 msgid "(UTC +8:45) Australian Central Western Standard Time"
-msgstr ""
+msgstr "(UTC +8:45) Waktu Standar Australia Tengah Bagian Barat"
 
 msgid "(UTC +9:00) Japan Standard Time, Korea Standard Time, Yakutsk Time"
-msgstr ""
+msgstr "(UTC +9:00) Waktu Standar Jepang, Waktu Standar Korea, Waktu Yakutsk"
 
 msgid "(UTC +9:30) Australian Central Standard Time"
-msgstr ""
+msgstr "(UTC +9:30) Waktu Standar Australia Tengah"
 
 msgid "(UTC +10:00) Australian Eastern Standard Time, Vladivostok Time"
-msgstr ""
+msgstr "(UTC +10:00) Waktu Standar Australia Bagian Timur, Waktu Vladivostok"
 
 msgid "(UTC +10:30) Lord Howe Island"
-msgstr ""
+msgstr "(UTC +10:30) Kepulauan Lord Howe"
 
 msgid "(UTC +11:00) Srednekolymsk Time, Solomon Islands, Vanuatu"
-msgstr ""
+msgstr "(UTC +11:00) Waktu Srednekolymsk, Kepulauan Solomon, Vanuatu"
 
 msgid "(UTC +11:30) Norfolk Island"
 msgstr ""
@@ -638,30 +641,32 @@ msgid "An angle of rotation is required to rotate the image."
 msgstr ""
 
 msgid "The path to the image is not correct."
-msgstr ""
+msgstr "Path gambar tidak benar."
 
 msgid "The image copy routine failed."
-msgstr ""
+msgstr "Rutinitas menyalin gambar gagal."
 
 msgid "Unable to find a font to use."
-msgstr ""
+msgstr "Tidak dapat menemukan huruf untuk dipergunakan."
 
 msgid ""
 "Unable to save the image. Please make sure the image and file directory are "
 "writable."
 msgstr ""
+"Tidak dapat menyimpan gambar. Pastikan direktori gambar dan berkas dapat di "
+"timpa."
 
 msgid "No migrations were found."
-msgstr ""
+msgstr "Tidak ada migrasi yang dapat ditemukan."
 
 msgid "No migration could be found with the version number: %s."
-msgstr ""
+msgstr "Tidak ada migrasi yang dapat ditemukan dengan nomor versi: %s."
 
 msgid "There is a gap in the migration sequence near version number: %s."
-msgstr ""
+msgstr "Ada kesenjangan dalam urutan migrasi di nomor versi: %s."
 
 msgid "There are multiple migrations with the same version number: %s."
-msgstr ""
+msgstr "Ada beberapa migrasi dengan nomor versi yang sama: %s."
 
 msgid "The migration class \"%s\" could not be found."
 msgstr "Class migrasi \"%s\" tidak dapat ditemukan."
@@ -862,27 +867,45 @@ msgstr ""
 msgid ""
 "The image you are attempting to upload doesn't fit into the allowed "
 "dimensions."
-msgstr ""
+msgstr "Gambar yang anda unggah tidak sesuai dengan dimensi diperbolehkan."
 
 msgid ""
 "A problem was encountered while attempting to move the uploaded file to the "
 "final destination."
 msgstr ""
+"Terdapat kesalahan saat mencoba untuk memindahkan berkas yang diunggah ke "
+"tujuan akhir."
 
 msgid "The upload path does not appear to be valid."
-msgstr ""
+msgstr "Direktori unggah sepertinta tidak sah."
 
 msgid "You have not specified any allowed file types."
-msgstr ""
+msgstr "Anda tidak menentukan tipe berkas yang di perbolehkan."
 
 msgid "The file name you submitted already exists on the server."
-msgstr ""
+msgstr "Nama berkas yang anda kirimkan sudah tersedia di server."
 
 msgid "The upload destination folder does not appear to be writable."
-msgstr ""
+msgstr "Destinasi folder unggah sepertinya tidak dapat ditulis."
 
 msgid "The path you submitted must be a local server path, not a URL."
 msgstr ""
+"Path yang dikirim harus merupakan sebuah path server lokal, bukan sebuah URL."
 
 msgid "Not a valid path: "
-msgstr ""
+msgstr "Bukan sebuah path yang sah:"
+
+msgid "404 Not Found"
+msgstr "404 Tidak Ditemukan"
+
+msgid "404 Page Not Found"
+msgstr "404 Halaman Tidak Ditemukan"
+
+msgid "The page you requested was not found."
+msgstr "Halaman yang anda minta tidak dapat ditemukan."
+
+msgid "Error Encountered."
+msgstr "Terdapat Kesalahan."
+
+msgid "There was an error."
+msgstr "Ada kesalahan."

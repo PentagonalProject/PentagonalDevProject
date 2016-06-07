@@ -1,8 +1,7 @@
 <?php
 class Post extends CI_Module
 {
-    public function __construct()
+    public function afterController()
     {
-        parent::__construct();
     }
 }

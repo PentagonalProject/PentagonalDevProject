@@ -114,7 +114,7 @@ class CI_Exceptions
         if (empty($templates_path)) {
             $templates_path = VIEWPATH.'errors'.DIRECTORY_SEPARATOR;
         }
-
+        $the_message = $message;
         if (is_cli()) {
             $message = "\t".(is_array($message) ? implode("\n\t", $message) : $message);
             $template = 'cli'.DIRECTORY_SEPARATOR.$template;
@@ -137,12 +137,14 @@ class CI_Exceptions
         ob_start();
         if (!is_cli() && isset($file[$template]) && function_exists('get_instance')) {
             $ci = get_instance();
-            if (isset($ci->load) && $ci->load instanceof \PentagonalLoader && $ci->load->getActiveTheme()) {
-                if (file_exists($ci->load->getActiveTheme() . DIRECTORY_SEPARATOR . $file[$template])) {
+            if (isset($ci->load) && $ci->load instanceof \PentagonalLoader && $ci->load->getActiveTemplate()) {
+                if (file_exists($ci->load->getActiveTemplate() . DIRECTORY_SEPARATOR . $file[$template])) {
                     $ci->load->vars(
                         array(
-                            'message' => $message,
+                            'heading' => $heading,
+                            'message' => $the_message,
                             'exception' => $this,
+                            'status_code' => $status_code
                         )
                     );
                     $ci->load->view($file[$template]);
@@ -190,8 +192,8 @@ class CI_Exceptions
         }
         if (!is_cli() && function_exists('get_instance')) {
             $ci = get_instance();
-            if (isset($ci->load) && $ci->load instanceof \PentagonalLoader && $ci->load->getActiveTheme()) {
-                if (file_exists($ci->load->getActiveTheme() . DIRECTORY_SEPARATOR . 'exception.php')) {
+            if (isset($ci->load) && $ci->load instanceof \PentagonalLoader && $ci->load->getActiveTemplate()) {
+                if (file_exists($ci->load->getActiveTemplate() . DIRECTORY_SEPARATOR . 'exception.php')) {
                     $ci->load->vars(
                         array(
                             'message' => $message,
@@ -255,8 +257,8 @@ class CI_Exceptions
         ob_start();
         if (!is_cli() && function_exists('get_instance')) {
             $ci = get_instance();
-            if (isset($ci->load) && $ci->load instanceof \PentagonalLoader && $ci->load->getActiveTheme()) {
-                if (file_exists($ci->load->getActiveTheme() . DIRECTORY_SEPARATOR . 'errorphp.php')) {
+            if (isset($ci->load) && $ci->load instanceof \PentagonalLoader && $ci->load->getActiveTemplate()) {
+                if (file_exists($ci->load->getActiveTemplate() . DIRECTORY_SEPARATOR . 'errorphp.php')) {
                     $ci->load->vars(
                         array(
                             'message' => $message,

@@ -183,7 +183,7 @@ class AdminTemplateModel extends CI_Model
         if (strpos($json, '}') === false && strpos($json, '[') === false) {
             return null;
         }
-        // remove templates comments
+        // remove template comments
         if (strpos($json, '/') !== false) {
             $json = preg_replace_callback('/"(.*?)"/s', function ($c) {
                 $c[1] = str_replace('//', '\/\/', $c[1]);

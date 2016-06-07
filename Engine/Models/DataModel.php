@@ -21,6 +21,7 @@ class DataModel extends CI_Model
             )
         )->result_array();
         foreach ($record as $array) {
+            $array['options_value'] = StringHelper::maybeUnserialize($array['options_value']);
             $this->cached_record[$array['options_name']] = $array;
         }
     }
@@ -46,6 +47,10 @@ class DataModel extends CI_Model
                     'options_name' => $name
                 )
             )->row(0, 'array');
+            if (isset($this->cached_record[$name]['options_value'])) {
+                $this->cached_record[$name]['options_value'] =
+                    StringHelper::maybeUnserialize($this->cached_record[$name]['options_value']);
+            }
         }
 
         if (empty($this->cached_record[$name])
@@ -101,7 +106,7 @@ class DataModel extends CI_Model
             return null;
         }
 
-        if (!is_null($value) && !is_string($value) && is_bool($value)) {
+        if (! is_null($value) && ! is_string($value) && ! is_bool($value)) {
             $value = StringHelper::maybeSerialize($value);
         }
 

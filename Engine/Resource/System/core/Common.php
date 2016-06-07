@@ -395,7 +395,7 @@ if ( ! function_exists('show_error'))
 	 *
 	 * This function lets us invoke the exception class and
 	 * display errors using the standard error template located
-	 * in resource/views/errors/error_general.php
+	 * in resource/view/errors/error_general.php
 	 * This function will send the error page directly to the
 	 * browser and exit.
 	 *

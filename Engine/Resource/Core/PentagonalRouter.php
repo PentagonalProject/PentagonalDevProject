@@ -3,6 +3,50 @@
 class PentagonalRouter extends CI_Router
 {
     /**
+     * Class constructor
+     *
+     * Runs the route mapping function.
+     *
+     * @param	array	$routing
+     * @return	void
+     */
+    public function __construct($routing = null)
+    {
+        $this->extendedRouting = $routing;
+
+        $this->config =& load_class('Config', 'core');
+        $this->uri =& load_class('URI', 'core');
+
+        $this->enable_query_strings = ( ! is_cli() && $this->config->item('enable_query_strings') === TRUE);
+
+        // If a directory override is configured, it has to be set before any dynamic routing logic
+        is_array($routing) && isset($routing['directory']) && $this->set_directory($routing['directory']);
+    }
+
+    protected function setRoutingAddition()
+    {
+
+        // Set any routing overrides that may exist in the main index file
+        if (!empty($this->extendedRouting) && is_array($this->extendedRouting)) {
+            empty($this->extendedRouting['controller'])
+                || $this->set_class($this->extendedRouting['controller']);
+            empty($this->extendedRouting['function'])
+                || $this->set_method($this->extendedRouting['function']);
+        }
+
+        unset($this->extendedRouting);
+        log_message('info', 'Router Class Initialized');
+    }
+
+    public function setRouting()
+    {
+        static $hasCall;
+        if (!$hasCall) {
+            $this->_set_routing();
+        }
+    }
+
+    /**
      * Set route mapping
      *
      * Determines what should be served based on the URI request,
@@ -82,12 +126,19 @@ class PentagonalRouter extends CI_Router
             return;
         }
 
+        /**
+         * Run Hooks
+         */
+        Hook::apply('system_before_root_parsed', $this);
+
         // Is there anything to parse?
         if ($this->uri->uri_string !== '') {
             $this->_parse_routes();
         } else {
             $this->_set_default_controller();
         }
+
+        $this->setRoutingAddition();
     }
 
     /**

@@ -102,231 +102,180 @@ namespace {
         ) {
             if (defined($val)) {
                 header('HTTP/1.1 503 Service Unavailable.', true, 503);
-                echo 'There was defined system constant. System constant could not defined before init';
+                echo 'There was defined system constant. System constant could not defined before init : (' .$val .')';
                 exit(3); // EXIT_CONFIG
             }
         }
     }
+
+    ! defined('DS') && define('DS', DIRECTORY_SEPARATOR);
+    if (DS !== DS) {
+        header('HTTP/1.1 503 Service Unavailable.', true, 503);
+        echo 'There was defined system constant. Constant `DS` must be equal with DS';
+        exit(3); // EXIT_CONFIG
+    }
+
+    $configs = isset($config) ? $config : null;
 
     /*
     |--------------------------------------------------------------------------
     | Directory
     |--------------------------------------------------------------------------
     */
-    $resource = 'Resource';
-    $views = 'Views';
+    $system     = 'System';
+    $resource   = 'Resource';
+    $view       = 'Views';
     $controller = 'Controller';
-    $configpath = 'Config';
-    $modelpath = 'Models';
-    $temppath = 'Temp';
-    $module = 'Modules';
-    $templates = 'templates';
-    $system = 'System';
-    if (isset($config) && !empty($config['path']) && is_array($config['path'])) {
-        if (!empty($config['path']['system'])) {
-            if (!is_string($config['path']['system'])) {
-                header('HTTP/1.1 503 Service Unavailable.', true, 503);
-                echo 'Invalid setting for `system` path';
-                exit(3); // EXIT_CONFIG
-            }
-            if (trim($config['path']['system']) != '') {
-                $system = preg_replace('/(\\\|\/)+/', DIRECTORY_SEPARATOR, $config['path']['system']);
-            }
-        }
-        if (!empty($config['path']['resource'])) {
-            if (!is_string($config['path']['resource'])) {
-                header('HTTP/1.1 503 Service Unavailable.', true, 503);
-                echo 'Invalid setting for `resource` path';
-                exit(3); // EXIT_CONFIG
-            }
-            if (trim($config['path']['resource']) != '') {
-                $resource = preg_replace('/(\\\|\/)+/', DIRECTORY_SEPARATOR, $config['path']['resource']);
-            }
-        }
-        if (!empty($config['path']['views'])) {
-            if (!is_string($config['path']['views'])) {
-                header('HTTP/1.1 503 Service Unavailable.', true, 503);
-                echo 'Invalid setting for `views` path';
-                exit(3); // EXIT_CONFIG
-            }
-            if (trim($config['path']['views']) != '') {
-                $views = preg_replace('/(\\\|\/)+/', DIRECTORY_SEPARATOR, $config['path']['views']);
-            }
-        }
-
-        if (!empty($config['path']['controller'])) {
-            if (!is_string($config['path']['controller'])) {
-                header('HTTP/1.1 503 Service Unavailable.', true, 503);
-                echo 'Invalid setting for `controller` path';
-                exit(3); // EXIT_CONFIG
-            }
-            if (trim($config['path']['controller']) != '') {
-                $controller = preg_replace('/(\\\|\/)+/', DIRECTORY_SEPARATOR, $config['path']['controller']);
-            }
-        }
-        if (!empty($config['path']['model'])) {
-            if (!is_string($config['path']['model'])) {
-                header('HTTP/1.1 503 Service Unavailable.', true, 503);
-                echo 'Invalid setting for `controller` path';
-                exit(3); // EXIT_CONFIG
-            }
-            if (trim($config['path']['model']) != '') {
-                $modelpath = preg_replace('/(\\\|\/)+/', DIRECTORY_SEPARATOR, $config['path']['model']);
-            }
-        }
-        if (!empty($config['path']['config'])) {
-            if (!is_string($config['path']['config'])) {
-                header('HTTP/1.1 503 Service Unavailable.', true, 503);
-                echo 'Invalid setting for `config` path';
-                exit(3); // EXIT_CONFIG
-            }
-            if (trim($config['path']['controller']) != '') {
-                $configpath = preg_replace('/(\\\|\/)+/', DIRECTORY_SEPARATOR, $config['path']['config']);
-            }
-        }
-        if (!empty($config['path']['temp'])) {
-            if (!is_string($config['path']['temp'])) {
-                header('HTTP/1.1 503 Service Unavailable.', true, 503);
-                echo 'Invalid setting for `temp` path';
-                exit(3); // EXIT_CONFIG
-            }
-            if (trim($config['path']['temp']) != '') {
-                $configpath = preg_replace('/(\\\|\/)+/', DIRECTORY_SEPARATOR, $config['path']['temp']);
-            }
-        }
-        if (!empty($config['path']['module'])) {
-            if (!is_string($config['path']['module'])) {
-                header('HTTP/1.1 503 Service Unavailable.', true, 503);
-                echo 'Invalid setting for `module` path';
-                exit(3); // EXIT_CONFIG
-            }
-            if (trim($config['path']['module']) != '') {
-                $module = preg_replace('/(\\\|\/)+/', DIRECTORY_SEPARATOR, $config['path']['module']);
-            }
-        }
-        if (!empty($config['path']['template'])) {
-            if (!is_string($config['path']['template'])) {
-                header('HTTP/1.1 503 Service Unavailable.', true, 503);
-                echo 'Invalid setting for `templates` path';
-                exit(3); // EXIT_CONFIG
-            }
-            if (trim($config['path']['template']) != '') {
-                $templates = preg_replace('/(\\\|\/)+/', DIRECTORY_SEPARATOR, $config['path']['template']);
+    $config     = 'Config';
+    $model      = 'Models';
+    $temp       = 'Temp';
+    $module     = 'Modules';
+    $template   = 'template';
+    $asset      = 'assets';
+    $upload     = 'uploads';
+    if (!empty($configs['path']) && is_array($configs['path'])) {
+        foreach (array(
+            'system',
+            'resource',
+            'view',
+            'controller',
+            'config',
+            'model',
+            'temp',
+            'module',
+            'template',
+            'asset',
+            'upload',
+        ) as $v) {
+            if (!empty($configs['path'][$v])) {
+                if (!is_string($configs['path']['system'])) {
+                    header('HTTP/1.1 503 Service Unavailable.', true, 503);
+                    printf('Invalid setting for `%s` path', $v);
+                    exit(3);
+                }
+                if (trim($configs['path'][$v]) != '') {
+                    $$v = preg_replace('/(\\\|\/)+/', DS, $configs['path'][$v]);
+                }
             }
         }
     }
 
     define('SOURCE', realpath(__DIR__)); //current source dir
-    define('SOURCEPATH', SOURCE . DIRECTORY_SEPARATOR); //current source dir
-    define('CONTROLLERPATH', SOURCEPATH . $controller . DIRECTORY_SEPARATOR);
-    define('MODELPATH', SOURCEPATH . $modelpath . DIRECTORY_SEPARATOR);
-    define('VIEWPATH', SOURCEPATH . DIRECTORY_SEPARATOR . $views . DIRECTORY_SEPARATOR);
-    define('CONFIGPATH', SOURCEPATH . $configpath . DIRECTORY_SEPARATOR);
-    define('MODULEPATH', SOURCEPATH . $module . DIRECTORY_SEPARATOR);
-    define('LANGUAGEPATH', SOURCEPATH . 'Languages' . DIRECTORY_SEPARATOR);
-    // admin templates
-    define('ADMINTEMPLATEPATH', SOURCEPATH . 'AdminTemplates' . DIRECTORY_SEPARATOR);
-    // alias an application path
-    define('RESOURCEPATH', SOURCE . DIRECTORY_SEPARATOR . $resource .DIRECTORY_SEPARATOR);
-
+    define('SOURCEPATH', SOURCE . DS); //current source dir
+    define('CONTROLLERPATH', SOURCEPATH . $controller . DS);
+    define('MODELPATH', SOURCEPATH . $model . DS);
+    define('VIEWPATH', SOURCEPATH . $view . DS);
+    define('CONFIGPATH', SOURCEPATH . $config . DS);
+    define('MODULEPATH', SOURCEPATH . $module . DS);
+    define('LANGUAGEPATH', SOURCEPATH . 'Languages' . DS);
+    define('ADMINTEMPLATEPATH', SOURCEPATH . 'AdminTemplates' . DS); // admin template
+    define('RESOURCEPATH', SOURCE . DS . $resource .DS); // alias an application path
     define('APPPATH', RESOURCEPATH);
-
-    // root
-    define('FCPATH', dirname(realpath(ROOT)) . DIRECTORY_SEPARATOR);// Path to the front controller (this file) directory
-    define('BASEPATH', RESOURCEPATH . $system . DIRECTORY_SEPARATOR);// Path to the system directory
+    define('FCPATH', dirname(realpath(ROOT)) . DS);// Path to the front controller (this file) directory
+    define('BASEPATH', RESOURCEPATH . $system . DS);// Path to the system directory
     define('SYSDIR', basename(BASEPATH)); // Name of the "system" directory
-    if (substr($templates,0, 1) == '/') {
-        $template_ = realpath($templates);
+    define('ASSETPATH', FCPATH . $asset . DS); // Name of the "system" directory
+    define('UPLOADPATH', FCPATH . $upload . DS); // Name of the "system" directory
+
+    /**
+     * Validate Template Path
+     */
+    if (substr($template,0, 1) == '/') {
+        $template_ = realpath($template);
         if ($template_) {
-            $templates = $template_;
+            $template = $template_;
         } else {
-            $templates = FCPATH . $templates . DIRECTORY_SEPARATOR;
+            $template = FCPATH . $template . DS;
         }
-        define('TEMPLATEPATH', $templates);
+        define('TEMPLATEPATH', $template);
     } else {
-        define('TEMPLATEPATH', FCPATH . $templates . DIRECTORY_SEPARATOR);
+        define('TEMPLATEPATH', FCPATH . $template . DS);
     }
 
-    if ($temppath != 'Temp') {
-        $temppath = SOURCEPATH . $temppath;
+    /**
+     * Validate Temp path
+     */
+    if ($temp != 'Temp') {
+        $temp = SOURCEPATH . $temp;
     } else {
-        if (!realpath($temppath) || ! is_dir(FCPATH . $temppath)) {
-            $temppath = SOURCEPATH . 'Temp';
-            if (!is_dir($temppath)) {
-                @mkdir($temppath, '755', true);
+        if (!realpath($temp) || ! is_dir(FCPATH . $temp)) {
+            $temp = SOURCEPATH . 'Temp';
+            if (!is_dir($temp)) {
+                @mkdir($temp, '755', true);
             }
-        } elseif (is_dir(FCPATH . $temppath)) {
-            $temppath = FCPATH .$temppath;
+        } elseif (is_dir(FCPATH . $temp)) {
+            $temp = FCPATH . $temp;
         } else {
-            $temppath = SOURCEPATH . 'Temp';
+            $temp = SOURCEPATH . 'Temp';
         }
     }
 
-    define('TEMPPATH', $temppath . DIRECTORY_SEPARATOR); // Name of the "temp" directory
+    define('TEMPPATH', $temp . DS); // Name of the "temp" directory
 
-    if (!is_dir(BASEPATH)) {
+    /**
+     * Check Upload Path
+     */
+    if (strpos(UPLOADPATH, realpath(SOURCEPATH)) === 0) {
         header('HTTP/1.1 503 Service Unavailable.', true, 503);
-        echo 'Directory System Does Not exist. Please check your configuration or your folder on source';
+        echo 'Invalid setting for `upload` path. Upload path must be not in engine application directory';
         exit(3); // EXIT_CONFIG
     }
-
-    if (!is_dir(APPPATH)) {
+    if (strpos(UPLOADPATH, realpath(TEMPLATEPATH)) === 0) {
         header('HTTP/1.1 503 Service Unavailable.', true, 503);
-        echo 'Directory Application Does Not exist. Please check your configuration or your folder on source';
+        echo 'Invalid setting for `upload` path. Upload path must be not in template directory';
         exit(3); // EXIT_CONFIG
     }
-
-    if (!is_dir(CONTROLLERPATH)) {
+    if (strpos(UPLOADPATH, realpath(ASSETPATH)) === 0) {
         header('HTTP/1.1 503 Service Unavailable.', true, 503);
-        echo 'Directory controller Does Not exist. Please check your configuration or your folder on source';
+        echo 'Invalid setting for `upload` path. Upload path must be not in asset directory';
         exit(3); // EXIT_CONFIG
     }
-
-    if (!is_dir(VIEWPATH)) {
+    if (strpos(UPLOADPATH, realpath(FCPATH)) !== 0) {
         header('HTTP/1.1 503 Service Unavailable.', true, 503);
-        echo 'Directory views Does Not exist. Please check your configuration or your folder on source';
+        echo 'Invalid setting for `upload` path. Upload path must be in root directory';
         exit(3); // EXIT_CONFIG
     }
-
-    if (!is_dir(MODELPATH)) {
-        header('HTTP/1.1 503 Service Unavailable.', true, 503);
-        echo 'Directory model Does Not exist. Please check your configuration or your folder on source';
-        exit(3); // EXIT_CONFIG
+    /**
+     * Re CHecking Upload Path
+     */
+    if (!is_dir(UPLOADPATH)) {
+        if (file_exists(UPLOADPATH)) {
+            header('HTTP/1.1 503 Service Unavailable.', true, 503);
+            echo 'Looks like your upload path exist and as not a directory.';
+            exit(3); // EXIT_CONFIG
+        } elseif (!@mkdir(UPLOADPATH, 755, true)) {
+            header('HTTP/1.1 503 Service Unavailable.', true, 503);
+            echo 'Could not create upload directory';
+            exit(3); // EXIT_CONFIG
+        }
+        if (!file_exists(UPLOADPATH .'index.html') && is_writable(UPLOADPATH)) {
+            // add index
+            @file_put_contents(UPLOADPATH . 'index.html', '');
+        }
     }
 
-    if (!is_dir(MODULEPATH)) {
-        header('HTTP/1.1 503 Service Unavailable.', true, 503);
-        echo 'Directory module Does Not exist. Please check your configuration or your folder on source';
-        exit(3); // EXIT_CONFIG
+    /**
+     * Check Directory Existences
+     */
+    foreach (array(
+        SOURCEPATH => 'Source',
+        BASEPATH => 'System',
+        APPPATH  => 'Application',
+        CONTROLLERPATH => 'Controller',
+        VIEWPATH => 'Views',
+        MODELPATH => 'Model',
+        MODULEPATH => 'Module',
+        LANGUAGEPATH => 'Language',
+        ADMINTEMPLATEPATH => 'Admin Templates',
+        TEMPLATEPATH => 'Templates',
+        TEMPPATH => 'Temporary',
+        ASSETPATH => 'assets',
+    ) as $k => $v) {
+        if (!is_dir($k)) {
+            header('HTTP/1.1 503 Service Unavailable.', true, 503);
+            echo 'Directory ' . $v . ' Does Not exist. Please check your configuration or your folder on source';
+        }
     }
-    if (!is_dir(LANGUAGEPATH)) {
-        header('HTTP/1.1 503 Service Unavailable.', true, 503);
-        echo 'Directory language Does Not exist. Please check your configuration or your folder on source';
-        exit(3); // EXIT_CONFIG
-    }
-
-    if (!is_dir(ADMINTEMPLATEPATH)) {
-        header('HTTP/1.1 503 Service Unavailable.', true, 503);
-        echo 'Directory Admin Templates Does Not exist. Please check your configuration or your folder on source';
-        exit(3); // EXIT_CONFIG
-    }
-
-    if (!is_dir(TEMPLATEPATH)) {
-        header('HTTP/1.1 503 Service Unavailable.', true, 503);
-        echo 'Directory templates Does Not exist. Please check your configuration or your folder on source';
-        exit(3); // EXIT_CONFIG
-    }
-
-    unset($system,
-        $val,
-        $views,
-        $resource,
-        $arr,
-        $config,
-        $configpath,
-        $controller,
-        $modelpath
-    );
 
     /*
     |--------------------------------------------------------------------------
@@ -374,4 +323,19 @@ namespace {
     define('EXIT_DATABASE', 8); // database error
     define('EXIT__AUTO_MIN', 9); // lowest automatically-assigned error code
     define('EXIT__AUTO_MAX', 125); // highest automatically-assigned error code
+
+    unset($k,
+        $v,
+        $system ,
+        $resource,
+        $view,
+        $controller,
+        $config,
+        $model,
+        $temp,
+        $module,
+        $template,
+        $asset,
+        $upload
+    );
 }

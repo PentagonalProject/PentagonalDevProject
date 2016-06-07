@@ -6,9 +6,9 @@ class CI_Module
      *
      * @return	void
      */
-    public function __construct()
+    final public function __construct()
     {
-        log_message('info', 'Module Class Initialized');
+        log_message('info', 'Module Class '.get_class($this).' Initialized');
     }
 
     /**
@@ -18,6 +18,14 @@ class CI_Module
     final public function getModule($name = null)
     {
         return get_instance()->getModule($name);
+    }
+
+    /**
+     * Call before Route Initiate
+     * as initial Module called
+     */
+    public function initial()
+    {
     }
 
     /**

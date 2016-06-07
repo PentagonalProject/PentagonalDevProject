@@ -245,7 +245,7 @@ function is_cli()
  *
  * This function lets us invoke the exception class and
  * display errors using the standard error template located
- * in resource/views/errors/error_general.php
+ * in resource/view/errors/error_general.php
  * This function will send the error page directly to the
  * browser and exit.
  *
@@ -674,7 +674,7 @@ function is_admin_area()
  */
 function get_header()
 {
-    $file = get_instance()->load->getActiveTheme();
+    $file = get_instance()->load->getActiveTemplate();
     if (!$file) {
         return;
     }
@@ -689,7 +689,7 @@ function get_header()
  */
 function get_footer()
 {
-    $file = get_instance()->load->getActiveTheme();
+    $file = get_instance()->load->getActiveTemplate();
     if (!$file) {
         return;
     }

@@ -17,57 +17,68 @@ class CI_Controller
      *
      * @return  void
      */
-    final public function __construct()
+    final public function __construct($load_init = true)
     {
-        self::$instance =& $this;
+        if (!self::$instance) {
+            self::$instance =& $this;
+        }
         foreach (is_loaded() as $var => $class) {
             $this->$var =& load_class($class);
         }
-
-        $this->load =& load_class('Loader', 'core');
-        $this->{'module@list'} = array();
+        $this->load            =& load_class('Loader', 'core');
         $this->load->initialize();
         // load dependency
         $this->initLoadDependency();
-        // call before mapping
-        $this->beforeMapping();
-        log_message('info', 'Controller Class Initialized');
+        if ($load_init) {
+            // call before mapping
+            $this->beforeMapping();
+            log_message('info', 'Controller Class Initialized');
+        }
     }
 
     final private function initLoadDependency()
     {
+        $CI =& get_instance();
         /**
          * Always Load 2 helper for language and url
          */
-        $this->load->helper(
+        $CI->load->helper(
             array(
                 'language',
                 'url',
             )
         );
-        // load database
-        $this->load->database();
+
+        if (!isset($CI->{'module@list'})) {
+            $CI->{'module@list'} = array();
+        }
+
+        $CI->load->database();
         /**
          * Load model
          */
-        $this->load->model('DatabaseTableModel', 'model.table');
-        $this->load->model('DataModel', 'model.option');
-        $this->load->model('AdminTemplateModel', 'model.template.admin');
-        $this->load->model('TemplateModel', 'model.template.user');
-        if ($this->load->get('router')->class == 'AdminController') {
-            $template = $this
+        $CI->load->model('DatabaseTableModel', 'model.table');
+        $CI->load->model('DataModel', 'model.option');
+        $CI->load->model('AdminTemplateModel', 'model.template.admin');
+        $CI->load->model('TemplateModel', 'model.template.user');
+        if ($CI->load->get('router') && $CI->load->get('router')->class == 'AdminController') {
+            $template = $CI
                 ->load
                 ->get('model.template.admin')
                 ->init()
                 ->getActiveTemplateDirectory();
             if ($template) {
-                $this->load->setActiveTheme($template);
+                $CI->load->setActiveTemplate($template);
             }
         } else {
-            $this->load->setActiveTheme(
-                $this->load->get('model.template.user')->getActiveTemplateDirectory()
+            $CI->load->setActiveTemplate(
+                $CI->load->get('model.template.user')->getActiveTemplateDirectory()
             );
         }
+    }
+
+    public function beforeMapping()
+    {
     }
 
     // --------------------------------------------------------------------
@@ -80,14 +91,10 @@ class CI_Controller
      */
     final public static function &get_instance()
     {
+        if (!self::$instance) {
+            self::$instance = new self(false);
+        }
         return self::$instance;
-    }
-
-    /**
-     * Instantiate Before Mapping
-     */
-    public function beforeMapping()
-    {
     }
 
     /**
@@ -119,7 +126,7 @@ class CI_Controller
         if (!is_string($name)) {
             return null;
         }
-
+        $name = strtolower($name);
         return isset($this->{'module@list'}[$name]) ? $this->{'module@list'}[$name] : null;
     }
 }

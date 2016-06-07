@@ -21,14 +21,14 @@ class Controller404 extends CI_Controller
                 ->init()
                 ->getActiveTemplateDirectory();
             if ($template)) {
-                $ci->load->setActiveTheme($template);
+                $ci->load->setActiveTemplate($template);
                 $adminExist = true;
             }
         }
 
         if (!$adminExist) {
             $ci->load->model('AdminTemplateModel', 'model.template.user');
-            $ci->load->setActiveTheme(
+            $ci->load->setActiveTemplate(
                 $ci->load->get('model.template.user')->getActiveTemplateDirectory()
             );
         }

@@ -880,3 +880,18 @@ msgstr ""
 
 msgid "Not a valid path: "
 msgstr ""
+
+msgid "404 Not Found"
+msgstr ""
+
+msgid "404 Page Not Found"
+msgstr ""
+
+msgid "The page you requested was not found."
+msgstr ""
+
+msgid "Error Encountered."
+msgstr ""
+
+msgid "There was an error."
+msgstr ""
