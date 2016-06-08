@@ -521,3 +521,17 @@ function template_uri($url_path = '')
     }
     return base_url($path . $url_path);
 }
+/**
+ * Current URL WIth Query
+ *
+ * Returns the full URL (including segments) of the page where this
+ * function is placed
+ *
+ * @return	string
+ */
+function current_really_url()
+{
+    $CI =& get_instance();
+    $query = isset($_SERVER['QUERY_STRING']) ? '?'.$_SERVER['QUERY_STRING'] : '';
+    return $CI->config->site_url($CI->uri->uri_string().$query);
+}

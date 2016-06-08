@@ -1,7 +1,7 @@
 <?php
 /**
  * Class CI_Controller
- * override able controller
+ * @override CI_Controller
  */
 class CI_Controller
 {
@@ -15,13 +15,15 @@ class CI_Controller
     /**
      * Class constructor override constructor
      *
-     * @return  void
+     * @param bool $load_init
+     * @return CI_Controller
      */
     final public function __construct($load_init = true)
     {
         if (!self::$instance) {
             self::$instance =& $this;
         }
+
         foreach (is_loaded() as $var => $class) {
             $this->$var =& load_class($class);
         }
@@ -30,6 +32,7 @@ class CI_Controller
         // load dependency
         $this->initLoadDependency();
         if ($load_init) {
+            self::$instance =& $this;
             // call before mapping
             $this->beforeMapping();
             log_message('info', 'Controller Class Initialized');
@@ -61,6 +64,7 @@ class CI_Controller
         $CI->load->model('DataModel', 'model.option');
         $CI->load->model('AdminTemplateModel', 'model.template.admin');
         $CI->load->model('TemplateModel', 'model.template.user');
+        $CI->load->model('NoticeRecord', 'model.notice');
         if ($CI->load->get('router') && $CI->load->get('router')->class == 'AdminController') {
             $template = $CI
                 ->load
@@ -77,6 +81,9 @@ class CI_Controller
         }
     }
 
+    /**
+     * Before Mapping or callindex
+     */
     public function beforeMapping()
     {
     }
@@ -110,6 +117,13 @@ class CI_Controller
         }
 
         return null;
+    }
+
+    final public function __unset($name)
+    {
+        if ($name == 'module@list') {
+            return;
+        }
     }
 
     /**

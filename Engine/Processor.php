@@ -653,10 +653,6 @@ class Processor
         self::$config['app'] = $this->config_default['app'];
         self::$environment = self::$config['app']['environment'];
         self::$config['db'] = $this->config_default['db'];
-//        self::$config['memcache'] = $this->config_default['memcache'];
-//        self::$config['doctype'] = $this->config_default['doctype'];
-//        self::$config['foreign_char'] = $this->config_default['foreign_char'];
-//        self::$config['mime_type'] = $this->config_default['mime_type'];
         self::$config['smiley'] = $this->config_default['smiley'];
     }
 
@@ -794,9 +790,71 @@ class Processor
          */
         set_error_handler('_error_handler');
         set_exception_handler('_exception_handler');
-        register_shutdown_function('_shutdown_handler');
+        register_shutdown_function(array($this, '_shutdown_handler'));
 
         return $this;
+    }
+
+    protected $plugin_crashed = false;
+
+    public function _shutdown_handler()
+    {
+        $last = error_get_last();
+        if (!$this->plugin_crashed) {
+            if ($last['type'] & (E_ERROR | E_PARSE | E_CORE_ERROR | E_USER_ERROR)) {
+                ob_get_length() && ob_clean();
+                if (ENVIRONMENT == 'development') {
+                    show_error(
+                        array(
+                            'Message: ' . $last['message'],
+                            'File: ' . $last['file'] . ' in line '. $last['line'],
+                        )
+                    );
+                }
+            }
+            return call_user_func('_shutdown_handler', func_get_args());
+        }
+        if ($last['type'] & (E_ERROR | E_PARSE | E_CORE_ERROR | E_USER_ERROR)) {
+            ob_get_length() && ob_clean();
+            $CI =& get_instance();
+            $option = $CI->load->get('model.option');
+            if (!$option instanceof DataModel) {
+                show_error(
+                    'Site has corrupt. Data Model Could Not Loaded'
+                );
+            }
+            $CI->load->model('NoticeRecord', 'model.notice');
+            $record = $CI->load->get('model.notice');
+            $options = $option->get(CI_ModuleLoader::MODULE_OPTION);
+            $search_key = array_search($this->plugin_crashed, $options);
+            if ($search_key !== false) {
+                unset($options[$search_key]);
+            }
+            $result = $option->set(CI_ModuleLoader::MODULE_OPTION, $options);
+            if ($record instanceof \NoticeRecord) {
+                $record->set(
+                    'error',
+                    sprintf(
+                        'There was error on module `%s` during activated with error : %s',
+                        $this->plugin_crashed,
+                        'Message: ' . $last['message']
+                        . 'File: ' . $last['file'] . ' in line '. $last['line']
+                    )
+                );
+            }
+            if ($result) {
+                redirect(current_really_url());
+            } else {
+                show_error(
+                    array(
+                        'Mesage: ' . $last['message'],
+                        'File: ' . $last['file'] . ' in line '. $last['line'],
+                    )
+                );
+            }
+        }
+
+        return call_user_func('_shutdown_handler', func_get_args());
     }
 
     private function checkConfig()
@@ -1193,46 +1251,26 @@ class Processor
         load_class('Security', 'core');
         load_class('Input', 'core');
         load_class('Lang', 'core');
+
         /**
          * Create Instance
          */
         $this->createInstance();
         $CI = get_instance();
-        $option = $CI->load->get('model.option');
-        $active_module = $option->get('system.active.modules', null);
-        if (!is_array($active_module)) {
-            $active_module = array();
-            $option->set('system.active.modules', $active_module);
-        }
-
-        if (!empty($active_module)) {
-            $tmp_module = $active_module;
-            foreach ($active_module as $key => $value) {
-                if (! is_string($value)) {
-                    unset($active_module[$key]);
-                    continue;
-                }
-                $module = $this->loadModule($value);
-                if (!is_object($module)) {
-                    unset($active_module[$key]);
-                    continue;
-                }
-            }
-            $active_module = array_values($active_module);
-            if ($tmp_module !== $active_module) {
-                $option->set('system.active.modules', $active_module);
-            }
-        }
-
+        $moduleloader = load_class('ModuleLoader', 'Core');
+        $moduleloader->activateAvailableModule();
         $module = $CI->getModule();
         if (is_array($module)) {
-            foreach ($module as $value) {
+            foreach ($module as $key => $value) {
                 if (is_object($value)) {
+                    $this->plugin_crashed = $key;
                     $value->initial();
                 }
             }
         }
 
+        // ste to no
+        $this->plugin_crashed = false;
         /**
          * call to set routing
          */
@@ -1352,7 +1390,6 @@ class Processor
         $benchmark_class->mark('controller_execution_time_( '.$class.' / '.$method.' )_start');
 
         $codeIgniter = new $class();
-
          /*
          * ------------------------------------------------------
          *  Call the requested method
