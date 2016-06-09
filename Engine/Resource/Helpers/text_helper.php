@@ -112,6 +112,8 @@ if (! function_exists('character_limiter')) {
                 return (mb_strlen($out) === mb_strlen($str)) ? $out : $out.$end_char;
             }
         }
+
+        return $str;
     }
 }
 
@@ -303,9 +305,9 @@ if (! function_exists('highlight_code')) {
         // Remove our artificially added PHP, and the syntax highlighting that came with it
         $str = preg_replace(
             array(
-                '/<span style="color: #([A-Z0-9]+)">&lt;\?php(&nbsp;| )/i',
-                '/(<span style="color: #[A-Z0-9]+">.*?)\?&gt;<\/span>\n<\/span>\n<\/code>/is',
-                '/<span style="color: #[A-Z0-9]+"\><\/span>/i'
+                '/<span\s*style\=\"color\:\s*\#([A-Z0-9]+)\">&lt;\?php(&nbsp;| )/i',
+                '/(<span\s*style\=\"color\:\s*\#[A-Z0-9]+\">.*?)\?&gt;<\/span>\n<\/span>\n<\/code>/is',
+                '/<span\s*style\=\"color\:\s*\#[A-Z0-9]+\"\><\/span>/i'
             ),
             array(
                 '<span style="color: #$1">',
@@ -470,9 +472,9 @@ if (! function_exists('ellipsize')) {
      * This function will strip tags from a string, split it at its max_length and ellipsize
      *
      * @param	string	string to ellipsize
-     * @param	int	max length of string
+     * @param	int	    $max_length of string
      * @param	mixed	int (1|0) or float, .5, .2, etc for position to split
-     * @param	string	ellipsis ; Default '...'
+     * @param	string	$ellipsis ellipsis ; Default '...'
      * @return	string	ellipsized string
      */
     function ellipsize($str, $max_length, $position = 1, $ellipsis = '&hellip;')

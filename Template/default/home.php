@@ -1,5 +1,20 @@
 <?php
-$this->vars('title', 'Welcome to CodeIgniter');
+/**
+ * Example Implementation
+ */
+/** @noinspection PhpUndefinedMethodInspection */
+Hook::add('the_title', function () {
+    return 'Welcome to Code igniter';
+});
+/** @noinspection PhpUndefinedMethodInspection */
+Hook::add('body_class', function ($class) {
+    $class[] = 'home-page';
+    return $class;
+});
+/** @noinspection PhpUndefinedMethodInspection */
+Hook::add('language_attributes', function ($attr) {
+    return $attr. ' class="no-js"';
+});
 get_header();
 ?>
 <div id="container">

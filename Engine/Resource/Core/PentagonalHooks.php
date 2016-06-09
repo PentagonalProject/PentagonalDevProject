@@ -7,6 +7,7 @@ class PentagonalHooks extends CI_Hooks
      *
      * @return	void
      */
+    /** @noinspection PhpMissingParentConstructorInspection */
     public function __construct()
     {
         $CFG =& load_class('Config', 'core');

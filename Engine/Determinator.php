@@ -1,12 +1,34 @@
 <?php
 namespace {
+
+    /**
+     * Code Igniter Version
+     */
+    !defined('CI_VERSION') && define('CI_VERSION', '3.0.6');
+
+    /**
+     * Unique system admin prefix
+     */
+    define('ADMIN_URL_SEPARATOR_PREFIX', 'm:');
+    /**
+     * List of system Models name
+     */
+    define('MODEL_NAME_OPTION', 'model.option');
+    define('MODEL_NAME_TABLE', 'model.table');
+    define('MODEL_NAME_TEMPLATE_ADMIN', 'model.template.admin');
+    define('MODEL_NAME_TEMPLATE_USER', 'model.template.user');
+    define('MODEL_NAME_NOTICE', 'model.notice');
+    define('MODEL_NAME_USER', 'model.user');
+    define('MODEL_NAME_ADMIN', 'model.admin');
+    define('MODEL_NAME_AUTH', 'model.auth');
+
     /**
      * if does not determine root
      */
     if (!defined('ROOT')) {
         return;
     }
-    define('CI_VERSION', '3.0.6');
+
     /**
      * if not our script
      */
@@ -75,6 +97,7 @@ namespace {
     define('CONSTANT_COUNT', count(get_defined_constants()));
 
     if (is_file(CONFIG)) {
+        /** @noinspection PhpIncludeInspection */
         $config = require CONFIG;
     }
 
@@ -133,6 +156,7 @@ namespace {
     $template   = 'template';
     $asset      = 'assets';
     $upload     = 'uploads';
+    $admin      = 'admin';
     if (!empty($configs['path']) && is_array($configs['path'])) {
         foreach (array(
             'system',
@@ -146,6 +170,7 @@ namespace {
             'template',
             'asset',
             'upload',
+            'admin',
         ) as $v) {
             if (!empty($configs['path'][$v])) {
                 if (!is_string($configs['path']['system'])) {
@@ -176,6 +201,8 @@ namespace {
     define('SYSDIR', basename(BASEPATH)); // Name of the "system" directory
     define('ASSETPATH', FCPATH . $asset . DS); // Name of the "system" directory
     define('UPLOADPATH', FCPATH . $upload . DS); // Name of the "system" directory
+    $admin = str_replace(DIRECTORY_SEPARATOR ,'/', strtolower($admin));
+    define('ADMINPATH',trim($admin, '/')); // Name of the "system" directory
 
     /**
      * Validate Template Path

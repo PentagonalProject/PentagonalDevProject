@@ -5,7 +5,9 @@ class PentagonalConfig extends CI_Config
      * Constructor
      *
      * Override Config Core to Auto Detection URL if Config URL does not set
+     * @noinspection PhpMissingParentConstructorInspection
      */
+    /** @noinspection PhpMissingParentConstructorInspection */
     public function __construct()
     {
         // CI use refference to allow arguments take override nested

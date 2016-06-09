@@ -12,6 +12,8 @@ class CI_Controller
      */
     private static $instance;
 
+    private static $call = 0;
+
     /**
      * Class constructor override constructor
      *
@@ -20,19 +22,33 @@ class CI_Controller
      */
     final public function __construct($load_init = true)
     {
+        /**
+         * prevent module to print property
+         * module controller could call get_instance();
+         */
+        if (self::$call > 1) {
+            return;
+        }
+
+        self::$call++;
+
         if (!self::$instance) {
             self::$instance =& $this;
         }
 
         foreach (is_loaded() as $var => $class) {
-            $this->$var =& load_class($class);
+            self::get_instance()->$var =& load_class($class);
         }
-        $this->load            =& load_class('Loader', 'core');
+
+        $this->load =& load_class('Loader', 'core');
         $this->load->initialize();
         // load dependency
         $this->initLoadDependency();
         if ($load_init) {
-            self::$instance =& $this;
+            // remap
+            foreach (self::$instance as $key => $value) {
+                $this->$key = $value;
+            }
             // call before mapping
             $this->beforeMapping();
             log_message('info', 'Controller Class Initialized');
@@ -60,15 +76,15 @@ class CI_Controller
         /**
          * Load model
          */
-        $CI->load->model('DatabaseTableModel', 'model.table');
-        $CI->load->model('DataModel', 'model.option');
-        $CI->load->model('AdminTemplateModel', 'model.template.admin');
-        $CI->load->model('TemplateModel', 'model.template.user');
-        $CI->load->model('NoticeRecord', 'model.notice');
-        if ($CI->load->get('router') && $CI->load->get('router')->class == 'AdminController') {
+        $CI->load->model('DatabaseTableModel', MODEL_NAME_TABLE);
+        $CI->load->model('DataModel', MODEL_NAME_OPTION);
+        $CI->load->model('AdminTemplateModel', MODEL_NAME_TEMPLATE_ADMIN);
+        $CI->load->model('TemplateModel', MODEL_NAME_TEMPLATE_USER);
+        $CI->load->model('NoticeRecord', MODEL_NAME_NOTICE);
+        if (is_admin_area()) {
             $template = $CI
                 ->load
-                ->get('model.template.admin')
+                ->get(MODEL_NAME_TEMPLATE_ADMIN)
                 ->init()
                 ->getActiveTemplateDirectory();
             if ($template) {
@@ -76,13 +92,13 @@ class CI_Controller
             }
         } else {
             $CI->load->setActiveTemplate(
-                $CI->load->get('model.template.user')->getActiveTemplateDirectory()
+                $CI->load->get(MODEL_NAME_TEMPLATE_USER)->getActiveTemplateDirectory()
             );
         }
     }
 
     /**
-     * Before Mapping or callindex
+     * Before Mapping or call index
      */
     public function beforeMapping()
     {
@@ -132,7 +148,7 @@ class CI_Controller
      * @param string|null $name
      * @return mixed
      */
-    final public function getModule($name = null)
+    final public function &getModule($name = null)
     {
         if ($name === null) {
             return $this->{'module@list'};
@@ -141,6 +157,7 @@ class CI_Controller
             return null;
         }
         $name = strtolower($name);
-        return isset($this->{'module@list'}[$name]) ? $this->{'module@list'}[$name] : null;
+        $module = isset($this->{'module@list'}[$name]) ? $this->{'module@list'}[$name] : null;
+        return $module;
     }
 }

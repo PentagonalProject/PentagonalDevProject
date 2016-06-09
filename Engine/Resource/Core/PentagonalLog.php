@@ -6,6 +6,7 @@ class PentagonalLog extends CI_Log
      *
      * @return	void
      */
+    /** @noinspection PhpMissingParentConstructorInspection */
     public function __construct()
     {
         $config =& get_config();

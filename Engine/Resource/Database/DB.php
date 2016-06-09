@@ -103,6 +103,8 @@ function &DB($params = '')
              * @see     CI_DB_query_builder
              * @see     CI_DB_driver
              */
+
+        /** @noinspection PhpUndefinedClassInspection */
         class CI_DB extends CI_DB_query_builder
         {
         }

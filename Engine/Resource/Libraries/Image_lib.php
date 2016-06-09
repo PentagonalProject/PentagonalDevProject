@@ -1496,12 +1496,12 @@ class CI_Image_lib
      *      );
      *
      * @param   array
-     * @return  array
+     * @return  array|null
      */
     public function size_calculator($vals)
     {
         if (! is_array($vals)) {
-            return;
+            return null;
         }
 
         $allowed = array('new_width', 'new_height', 'width', 'height');

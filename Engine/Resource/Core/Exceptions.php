@@ -82,10 +82,18 @@ class CI_Exceptions
         if ($log_error) {
             log_message('error', $heading.': '.$page);
         }
+        /** @noinspection PhpUndefinedMethodInspection */
+        $heading = Hook::apply('title_404', __($heading));
+        /** @noinspection PhpUndefinedMethodInspection */
+        Hook::add('the_title', function () use ($heading) {
+            return $heading;
+        });
         $retval = $this->show_error($heading, $message, 'error_404', 404);
         if (!is_cli() && function_exists('get_instance')) {
             $ci = get_instance();
+            /** @noinspection PhpUndefinedFieldInspection */
             $ci->output->set_output($retval);
+            /** @noinspection PhpUndefinedFieldInspection */
             $ci->output->_display();
         } else {
             echo $retval;
@@ -131,6 +139,15 @@ class CI_Exceptions
             'html'.DIRECTORY_SEPARATOR.'error_404' => '404.php',
         );
 
+        /** @noinspection PhpUndefinedMethodInspection */
+        Hook::add('body_class', function($arr) use ($status_code) {
+            $arr[] = ($status_code == 404 ? 'notfound-' :'error-') . $status_code;
+            return $arr;
+        });
+        /** @noinspection PhpUndefinedMethodInspection */
+        Hook::add('the_title', function () use ($heading) {
+            return $heading;
+        });
         if (ob_get_level() > $this->ob_level + 1) {
             ob_end_flush();
         }
@@ -175,6 +192,7 @@ class CI_Exceptions
         if (empty($templates_path)) {
             $templates_path = VIEWPATH.'errors'.DIRECTORY_SEPARATOR;
         }
+        /** @noinspection PhpUndefinedMethodInspection */
         $message = $exception->getMessage();
         if (empty($message)) {
             $message = '(null)';
@@ -274,6 +292,7 @@ class CI_Exceptions
 
         if (empty($exist)) {
             unset($exist, $ci);
+            /** @noinspection PhpIncludeInspection */
             include($templates_path . $template . '.php');
         }
         $buffer = ob_get_contents();

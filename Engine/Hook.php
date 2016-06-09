@@ -7,6 +7,7 @@ use Pentagonal\Hookable\Hookable;
 class Hook
 {
     private static $hook;
+
     private static $instance;
 
     /**

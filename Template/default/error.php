@@ -1,8 +1,4 @@
 <?php
-$this->vars(
-    'title',
-    'Error Encountered'
-);
 get_header();
 ?>
     <div id="container">

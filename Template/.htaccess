@@ -1,0 +1,9 @@
+# Deny
+Deny from all
+
+# Does not allow access executable files
+# Allow only if not an executable
+# that allow to be access
+<Files ~ "\.(?i:(?!(php(.+)?s?|inc|cgi(.+)?|p?s?html?|logs?|exec?|msi|sh(ell)?|bin|cmd)))">
+    Allow From All
+</Files>

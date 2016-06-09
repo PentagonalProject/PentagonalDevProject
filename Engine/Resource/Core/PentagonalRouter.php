@@ -2,6 +2,22 @@
 
 class PentagonalRouter extends CI_Router
 {
+    protected $admin_path_route;
+
+    /**
+     * is on admin
+     *
+     * @var bool
+     */
+    protected $is_admin = false;
+
+    /**
+     * Add direct route controller 404 override
+     *
+     * @var string
+     */
+    public $override_404 = 'Controller404';
+
     /**
      * Class constructor
      *
@@ -10,6 +26,7 @@ class PentagonalRouter extends CI_Router
      * @param	array	$routing
      * @return	void
      */
+    /** @noinspection PhpMissingParentConstructorInspection */
     public function __construct($routing = null)
     {
         $this->extendedRouting = $routing;
@@ -56,36 +73,14 @@ class PentagonalRouter extends CI_Router
      */
     protected function _set_routing()
     {
-        // Load the routes.php file. It would be great if we could
-        // skip this for enable_query_strings = TRUE, but then
-        // default_controller would be empty ...
-        if (file_exists(CONFIGPATH.'routes.php')) {
-            /** @noinspection PhpIncludeInspection */
-            $route_tmp = include(CONFIGPATH.'routes.php');
-        }
-
-        if (file_exists(CONFIGPATH. ENVIRONMENT . '/routes.php')) {
-            /** @noinspection PhpIncludeInspection */
-            $route_tmp = include(CONFIGPATH. ENVIRONMENT . '/routes.php');
-        }
-
-        /**
-         * Fix re route variable
-         */
-        if (isset($route_tmp)) {
-            if (is_array($route_tmp)) {
-                $route = $route_tmp;
-            }
-        }
-
-        // Validate & get reserved routes
-        if (isset($route) && is_array($route)) {
-            isset($route['default_controller']) && $this->default_controller = $route['default_controller'];
-            isset($route['translate_uri_dashes']) && $this->translate_uri_dashes = $route['translate_uri_dashes'];
-            unset($route['default_controller'], $route['translate_uri_dashes']);
-            $route['404_override'] = 'Controller404';
-            $this->routes = $route;
-        }
+        $this->admin_path_route = '(?i)'.preg_quote(ADMINPATH, '/').'(\/+(.*))?';
+        $this->default_controller = 'DefaultController';
+        $this->translate_uri_dashes = false;
+        $this->override_404 = 'Controller404';
+        $this->routes = array(
+             $this->admin_path_route => 'AdminController',
+            '(.*)?' => 'DefaultController',
+        );
 
         // Are query strings enabled in the config file? Normally CI doesn't utilize query strings
         // since URI segments are more search-engine friendly, but they can optionally be used.
@@ -242,6 +237,8 @@ class PentagonalRouter extends CI_Router
 
             // Does the RegEx match?
             if (preg_match('#^'.$key.'$#', $uri, $matches)) {
+                //set is admin
+                $this->is_admin = ($key === $this->admin_path_route);
                 // Are we using callbacks to process back-references?
                 if (! is_string($val) && is_callable($val)) {
                     // Remove the original string from the matches array.
@@ -249,9 +246,8 @@ class PentagonalRouter extends CI_Router
 
                     // Execute the callback using the values in matches as its parameters.
                     $val = call_user_func_array($val, $matches);
-                }
-                // Are we using the default routing method for back-references?
-                elseif (strpos($val, '$') !== false && strpos($key, '(') !== false) {
+                } elseif (strpos($val, '$') !== false && strpos($key, '(') !== false) {
+                    // Are we using the default routing method for back-references?
                     $val = preg_replace('#^'.$key.'$#', $val, $uri);
                 }
 
@@ -267,5 +263,13 @@ class PentagonalRouter extends CI_Router
          * $this->_set_request(array_values($this->uri->segments));
          */
         return null;
+    }
+
+    /**
+     * @return boolif is on admin route
+     */
+    public function isAdminRoute()
+    {
+        return $this->is_admin;
     }
 }

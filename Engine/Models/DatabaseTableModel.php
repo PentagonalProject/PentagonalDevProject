@@ -1,4 +1,9 @@
 <?php
+/**
+ * Class DatabaseTableModel
+ */
+
+/** @noinspection PhpUndefinedClassInspection */
 class DatabaseTableModel extends CI_Model
 {
     protected $table_default = array(
@@ -58,6 +63,7 @@ class DatabaseTableModel extends CI_Model
 
     public function __construct()
     {
+        /** @noinspection PhpUndefinedClassInspection */
         parent::__construct();
         $this->table = $this->table_default;
     }
@@ -66,6 +72,15 @@ class DatabaseTableModel extends CI_Model
     {
         if (is_string($name)) {
             return isset($this->table[$name]) ? $this->table[$name] : null;
+        }
+        return null;
+    }
+
+    public function getTableName($name)
+    {
+        if (is_string($name)) {
+            $retval = $this->get($name);
+            return !empty($retval['name']) ? $retval['name'] : null;
         }
         return null;
     }

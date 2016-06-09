@@ -1,32 +1,65 @@
 <?php
 use Pentagonal\StaticHelper\PathHelper;
 
+/**
+ * Class AdminTemplateModel
+ */
+
+/** @noinspection PhpUndefinedClassInspection */
 class AdminTemplateModel extends CI_Model
 {
+    /**
+     * @var string
+     */
     protected $active_template;
 
+    /**
+     * List must be exist template
+     * @var array
+     */
     protected $headers = array(
-        'home.php',
-        'single.php',
         'header.php',
         'footer.php',
     );
 
+    /**
+     * @var string
+     */
     protected $detail_file = 'template.json';
 
-    const OPTIONNAME = 'system.admintemplate.active';
+    /**
+     * @const string
+     */
+    const OPTION_NAME = 'system.admin_template.active';
 
+    /**
+     * @var array
+     */
     protected $valid_template = array();
 
+    /**
+     * @var array
+     */
     protected $corrupt_template = array();
 
+    /**
+     * AdminTemplateModel constructor.
+     */
     public function __construct()
     {
+        /** @noinspection PhpUndefinedClassInspection */
         parent::__construct();
-        $this->load->model('DataModel', 'model.option');
+        /** @noinspection PhpUndefinedFieldInspection */
+        $this->load->model('DataModel', MODEL_NAME_OPTION);
+        /** @noinspection PhpUndefinedFieldInspection */
         $this->load->helper('language');
     }
 
+    /**
+     * @param string $name
+     *
+     * @return bool
+     */
     public function isValidTemplate($name)
     {
         if (!is_string($name) || trim($name) == '' || !is_dir(ADMINTEMPLATEPATH . $name)) {
@@ -54,6 +87,11 @@ class AdminTemplateModel extends CI_Model
         return true;
     }
 
+    /**
+     * Get active template directory
+     *
+     * @return null|string
+     */
     public function getActiveTemplateDirectory()
     {
         if ($this->getActiveTemplate()) {
@@ -64,6 +102,8 @@ class AdminTemplateModel extends CI_Model
     }
 
     /**
+     * Initialize
+     *
      * @return void
      */
     public function readAndSet()
@@ -102,7 +142,8 @@ class AdminTemplateModel extends CI_Model
         if (!empty($this->valid_template)) {
             if (!$this->active_template || ! isset($this->valid_template[$this->active_template])) {
                 $this->active_template = key($this->valid_template);
-                $this->load->get('model.option')->set(self::OPTIONNAME, $this->active_template, true);
+                /** @noinspection PhpUndefinedFieldInspection */
+                $this->load->get(MODEL_NAME_OPTION)->set(self::OPTION_NAME, $this->active_template, true);
             } else {
                 $this->active_template = null;
             }
@@ -113,6 +154,12 @@ class AdminTemplateModel extends CI_Model
         return;
     }
 
+    /**
+     * Get Info from template
+     * @param string $template
+     *
+     * @return null|array
+     */
     public function getInfo($template)
     {
         if (!$this->isValidTemplate($template)) {
@@ -123,26 +170,54 @@ class AdminTemplateModel extends CI_Model
         return isset($list[$template]) ? $list[$template] : null;
     }
 
+    /**
+     * get Ready templates
+     *
+     * @return array
+     */
     public function getTemplateReady()
     {
         return $this->valid_template;
     }
 
+    /**
+     * Get valid templates
+     *
+     * @return array
+     */
+    public function getValidTemplate()
+    {
+        return $this->valid_template;
+    }
+    /**
+     * @return array
+     */
     public function getCorruptTemplate()
     {
         return $this->corrupt_template;
     }
 
+    /**
+     * @return string
+     */
     public function getActiveTemplate()
     {
         return $this->active_template;
     }
 
+    /**
+     * @return array
+     */
     public function getTemplateList()
     {
         return array_merge($this->getTemplateReady(), $this->getCorruptTemplate());
     }
 
+    /**
+     * @param string $template_dir
+     *
+     * @return array
+     */
     private function parseDetail($template_dir)
     {
         $file = "{$template_dir}/{$this->detail_file}";
@@ -204,6 +279,11 @@ class AdminTemplateModel extends CI_Model
         return $json;
     }
 
+    /**
+     * initial
+     *
+     * @return $this
+     */
     public function init()
     {
         static $hasCall;
@@ -211,18 +291,25 @@ class AdminTemplateModel extends CI_Model
             return $this;
         }
         $hasCall = true;
-        $this->active_template = $this->load->get('model.option')->get(self::OPTIONNAME, null);
+        /** @noinspection PhpUndefinedFieldInspection */
+        $data = $this->load->get(MODEL_NAME_OPTION)->getFull(self::OPTION_NAME, null);
+        if (empty($data) || ! is_array($data) || isset($data['options_autoload']) && $data['options_autoload'] != 'yes') {
+            $this->load->get(MODEL_NAME_OPTION)->set(self::OPTION_NAME, $data['options_value'], true);
+        }
+        $this->active_template = isset($data['options_value']) ? $data['options_value'] : null;
         if (!$this->isValidTemplate($this->active_template)) {
+            // detect template
+            $this->readAndSet();
             $template = $this->getActiveTemplate();
-            Hook::add('admin_notice_info', function ($args) use ($template) {
+            /** @noinspection PhpUndefinedMethodInspection */
+            Hook::add('admin_notice_warning', function ($args) use ($template) {
                 if ($template) {
-                    $args['admin_template'] = __('Active admin template change to: ') .$template;
+                    $args[] = __('Active admin template change to: ') .$template;
                 } else {
-                    $args['admin_template'] = __('Could Not set admin active template. Nothing template being ready');
+                    $args[] = __('Could Not set admin active template. Nothing template being ready');
                 }
                 return $args;
             });
-            $this->readAndSet();
         }
 
         return $this;

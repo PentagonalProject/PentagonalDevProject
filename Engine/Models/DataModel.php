@@ -1,21 +1,60 @@
 <?php
 use Pentagonal\StaticHelper\StringHelper;
 
-class DataModel extends CI_Model
+/**
+ * Class DataModel
+ */
+
+/** @noinspection PhpUndefinedClassInspection */
+class DataModel extends \CI_Model
 {
+    /** @noinspection PhpUndefinedClassInspection */
+    /**
+     * @var CI_Controller
+     */
     protected $ci;
+
+    /**
+     * @var array
+     */
     protected $table;
+
+    /**
+     * @var string
+     */
+    protected $table_name;
+
+    /**
+     * @var array
+     */
     protected $cached_record = array();
+
+    /**
+     * @var array
+     */
     protected $temporary_data = array();
 
+    /**
+     * DataModel constructor.
+     */
     public function __construct()
     {
+        /** @noinspection PhpUndefinedClassInspection */
         parent::__construct();
         $this->ci =& get_instance();
-        $this->ci->load->model('DatabaseTableModel', 'model.table');
-        $this->table = $this->ci->{'model.table'}->getDefault('option');
+        $this->ci->load->model('DatabaseTableModel', MODEL_NAME_TABLE);
+        $this->table = $this->ci->{MODEL_NAME_TABLE}->getDefault('option');
+        if (empty($this->table['name'])) {
+            show_error(
+                array(
+                    __('There was an error.'),
+                    __('Model Table does not load correctly.')
+                )
+            );
+        }
+        $this->table_name = $this->table['name'];
         $record = $this->ci->db->get_where(
-            $this->table['name'],
+            $this->table_name,
             array(
                 'LOWER(options_autoload)' => 'yes'
             )
@@ -26,6 +65,11 @@ class DataModel extends CI_Model
         }
     }
 
+    /**
+     * @param string $name
+     *
+     * @return bool
+     */
     public function has($name)
     {
         $time = microtime();
@@ -33,6 +77,16 @@ class DataModel extends CI_Model
         return $retval !== $time;
     }
 
+    /**
+     * Get option value
+     *
+     * @param string $name
+     * @param null   $default
+     * @param bool   $force
+     * @param bool   $allow_temporary false to use original even temporrary data exists
+     *
+     * @return mixed|null
+     */
     public function get($name, $default = null, $force = false, $allow_temporary = true)
     {
         if (!is_string($name)) {
@@ -42,7 +96,7 @@ class DataModel extends CI_Model
         $name = trim($name);
         if (!isset($this->cached_record[$name]) || $force) {
             $this->cached_record[$name] = $this->ci->db->get_where(
-                $this->table['name'],
+                $this->table_name,
                 array(
                     'options_name' => $name
                 )
@@ -68,6 +122,15 @@ class DataModel extends CI_Model
         return $this->cached_record[$name]['options_value'];
     }
 
+    /**
+     * Get full data from options
+     *
+     * @param string $name
+     * @param null   $default
+     * @param bool   $force
+     *
+     * @return mixed|null
+     */
     public function getFull($name, $default = null, $force = false)
     {
         $name = trim($name);
@@ -82,8 +145,9 @@ class DataModel extends CI_Model
     /**
      * Update option
      *
-     * @param string $name
-     * @param mixed $value
+     * @param string      $name
+     * @param mixed       $value
+     * @param bool|string $autoload
      *
      * @return bool
      */
@@ -116,7 +180,7 @@ class DataModel extends CI_Model
         if ($status === null) {
             $autoload = $autoload != 'yes' ? 'no' : 'yes';
             $result = $this->ci->db->insert(
-                $this->table['name'],
+                $this->table_name,
                 array(
                     'options_name'     => $name,
                     'options_value'    => $value,
@@ -135,7 +199,7 @@ class DataModel extends CI_Model
                 return true;
             }
             $result = $this->ci->db->update(
-                $this->table['name'],
+                $this->table_name,
                 array(
                     'options_name'     => $name,
                     'options_value'    => $value,
@@ -159,6 +223,14 @@ class DataModel extends CI_Model
         return $result;
     }
 
+    /**
+     * Set Temporrary Data only without affecting database
+     *
+     * @param string $name
+     * @param mixed  $value
+     *
+     * @return bool|null
+     */
     public function temporary($name, $value)
     {
         if (!is_string($name)) {
@@ -170,6 +242,13 @@ class DataModel extends CI_Model
         return true;
     }
 
+    /**
+     * Getting temporary setted data
+     *
+     * @param string $name
+     *
+     * @return mixed|null
+     */
     public function getTemporary($name)
     {
         if (!is_string($name)) {
@@ -179,6 +258,13 @@ class DataModel extends CI_Model
         return isset($this->temporary_data[$name]) ? $this->temporary_data[$name] : null;
     }
 
+    /**
+     * Magic Method
+     *
+     * @param string $name
+     *
+     * @return mixed|null
+     */
     public function __get($name)
     {
         return $this->get($name);

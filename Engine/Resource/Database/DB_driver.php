@@ -389,10 +389,10 @@ abstract class CI_DB_driver
      * DB connect
      *
      * This is just a dummy method that all drivers will override.
-     *
+     * @param boolean $persistent
      * @return  mixed
      */
-    public function db_connect()
+    public function db_connect($persistent = false)
     {
         return true;
     }

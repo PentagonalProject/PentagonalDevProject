@@ -1,6 +1,7 @@
 <?php
 use Pentagonal\StaticHelper\PathHelper;
 
+/** @noinspection PhpUndefinedClassInspection */
 class TemplateModel extends CI_Model
 {
     protected $active_template;
@@ -14,7 +15,7 @@ class TemplateModel extends CI_Model
 
     protected $detail_file = 'template.json';
 
-    const OPTIONNAME = 'system.template.active';
+    const OPTION_NAME = 'system.template.active';
 
     protected $valid_template = array();
 
@@ -22,11 +23,12 @@ class TemplateModel extends CI_Model
 
     public function __construct()
     {
+        /** @noinspection PhpUndefinedClassInspection */
         parent::__construct();
         $CI =& get_instance();
-        $CI->load->model('DataModel', 'model.option');
+        $CI->load->model('DataModel', MODEL_NAME_OPTION);
         $CI->load->helper('language');
-        $this->active_template = $CI->load->get('model.option')->get(self::OPTIONNAME, null);
+        $this->active_template = $CI->load->get(MODEL_NAME_OPTION)->get(self::OPTION_NAME, null);
         if (!$this->isValidTemplate($this->active_template)) {
             $template = $this->getActiveTemplate();
             Hook::add('admin_notice_info', function ($args) use ($template) {
@@ -116,7 +118,7 @@ class TemplateModel extends CI_Model
         if (!empty($this->valid_template)) {
             if (!$this->active_template || ! isset($this->valid_template[$this->active_template])) {
                 $this->active_template = key($this->valid_template);
-                $this->load->get('model.option')->set(self::OPTIONNAME, $this->active_template, true);
+                $this->load->get(MODEL_NAME_OPTION)->set(self::OPTION_NAME, $this->active_template, true);
             } else {
                 $this->active_template = null;
             }

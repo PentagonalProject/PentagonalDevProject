@@ -1,4 +1,6 @@
 <?php
+
+/** @noinspection PhpUndefinedClassInspection */
 class DefaultController extends CI_Controller
 {
     protected $segmentsMethod = array(
@@ -7,6 +9,7 @@ class DefaultController extends CI_Controller
 
     public function index()
     {
+        $this->output->enable_profiler(true);
         $segment = $this->uri->segment(1);
         if (!$segment) {
             $this->load->view('home');

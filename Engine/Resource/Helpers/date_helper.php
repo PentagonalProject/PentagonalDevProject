@@ -688,7 +688,7 @@ function timezones($tz = '')
 		if (in_array($dataformat, array('gmt', 'pst', 'utc'))) {
 			$tz = substr($tz, 3);
 			$detect = substr(trim($tz), 0, 1);
-			if (!in_array($detect, array('-', '+')) {
+			if (!in_array($detect, array('-', '+'))) {
 				return null;
 			}
 			$tz = trim($tz, $detect);

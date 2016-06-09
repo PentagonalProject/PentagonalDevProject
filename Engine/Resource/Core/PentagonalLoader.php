@@ -575,7 +575,8 @@ class PentagonalLoader extends CI_Loader
 
         // Is this a stock library? There are a few special conditions if so ...
         if (file_exists(BASEPATH.'libraries/'.$subdir.$class.'.php')) {
-            return $this->_ci_load_stock_library($class, $subdir, $params, $object_name);
+            $this->_ci_load_stock_library($class, $subdir, $params, $object_name);
+            return;
         }
 
         // Let's search for the requested library file and load it.
@@ -599,7 +600,8 @@ class PentagonalLoader extends CI_Loader
                 if ($object_name !== null) {
                     $CI =& get_instance();
                     if (! isset($CI->$object_name)) {
-                        return $this->_ci_init_library($class, '', $params, $object_name);
+                        $this->_ci_init_library($class, '', $params, $object_name);
+                        return;
                     }
                 }
 
@@ -612,12 +614,14 @@ class PentagonalLoader extends CI_Loader
             }
 
             include_once($filepath);
-            return $this->_ci_init_library($class, '', $params, $object_name);
+            $this->_ci_init_library($class, '', $params, $object_name);
+            return;
         }
 
         // One last attempt. Maybe the library is in a subdirectory, but it wasn't specified?
         if ($subdir === '') {
-            return $this->_ci_load_library($class.'/'.$class, $params, $object_name);
+            $this->_ci_load_library($class.'/'.$class, $params, $object_name);
+            return;
         }
 
         // If we got this far we were unable to find the requested class.
@@ -654,7 +658,8 @@ class PentagonalLoader extends CI_Loader
             if ($object_name !== null) {
                 $CI =& get_instance();
                 if (! isset($CI->$object_name)) {
-                    return $this->_ci_init_library($library_name, $prefix, $params, $object_name);
+                    $this->_ci_init_library($library_name, $prefix, $params, $object_name);
+                    return;
                 }
             }
 
@@ -674,7 +679,8 @@ class PentagonalLoader extends CI_Loader
                 // Override
                 include_once($path);
                 if (class_exists($prefix.$library_name, false)) {
-                    return $this->_ci_init_library($library_name, $prefix, $params, $object_name);
+                    $this->_ci_init_library($library_name, $prefix, $params, $object_name);
+                    return;
                 } else {
                     log_message('debug', $path.' exists, but does not declare '.$prefix.$library_name);
                 }
@@ -699,7 +705,7 @@ class PentagonalLoader extends CI_Loader
             }
         }
 
-        return $this->_ci_init_library($library_name, $prefix, $params, $object_name);
+        $this->_ci_init_library($library_name, $prefix, $params, $object_name);
     }
 
     // --------------------------------------------------------------------
@@ -979,6 +985,7 @@ class PentagonalLoader extends CI_Loader
      */
     public function view($view, $vars = array(), $return = false)
     {
+        /** @noinspection PhpParamsInspection */
         return $this->_ci_load(
             array('_ci_view' => $view,
                   '_ci_vars' => $this->_ci_object_to_array($vars),
@@ -992,6 +999,7 @@ class PentagonalLoader extends CI_Loader
         if (isset($CI->$name)) {
             return $CI->$name;
         }
+        return null;
     }
     // --------------------------------------------------------------------
 

@@ -506,8 +506,8 @@ function template_uri($url_path = '')
     static $path;
     if (!isset($path)) {
         $CI =& get_instance();
-        $CI->load->model('TemplateModel', 'model.template.user');
-        $path = get_path_from_root($CI->load->get('model.template.user')->getActiveTemplateDirectory());
+        $CI->load->model('TemplateModel', MODEL_NAME_TEMPLATE_USER);
+        $path = get_path_from_root($CI->load->get(MODEL_NAME_TEMPLATE_USER)->getActiveTemplateDirectory());
     }
 
     if (!is_string($url_path)) {

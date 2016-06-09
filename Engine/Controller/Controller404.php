@@ -1,4 +1,6 @@
 <?php
+
+/** @noinspection PhpUndefinedClassInspection */
 class Controller404 extends CI_Controller
 {
     /**
@@ -13,23 +15,23 @@ class Controller404 extends CI_Controller
     {
         $adminExist = false;
         $ci = get_instance();
-        if ($ci->load->router->class == 'AdminController') {
-            $ci->load->model('AdminTemplateModel', 'model.template.admin');
+        if (is_admin_area()) {
+            $ci->load->model('AdminTemplateModel', MODEL_NAME_TEMPLATE_ADMIN);
             $template = $ci
                 ->load
-                ->get('model.template.admin')
+                ->get(MODEL_NAME_TEMPLATE_ADMIN)
                 ->init()
                 ->getActiveTemplateDirectory();
-            if ($template)) {
+            if ($template) {
                 $ci->load->setActiveTemplate($template);
                 $adminExist = true;
             }
         }
 
         if (!$adminExist) {
-            $ci->load->model('AdminTemplateModel', 'model.template.user');
+            $ci->load->model('AdminTemplateModel', MODEL_NAME_TEMPLATE_USER);
             $ci->load->setActiveTemplate(
-                $ci->load->get('model.template.user')->getActiveTemplateDirectory()
+                $ci->load->get(MODEL_NAME_TEMPLATE_USER)->getActiveTemplateDirectory()
             );
         }
 

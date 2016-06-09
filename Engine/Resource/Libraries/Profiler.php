@@ -174,7 +174,6 @@ class CI_Profiler
                 }
             }
         }
-
         if (count($dbs) === 0) {
             return $useoutput ? "\n\n"
             .'<fieldset id="ci_profiler_queries" style="border:1px solid #0000FF;padding:6px 10px 10px 10px;margin:20px 0 20px 0;background-color:#eee;">'
@@ -191,8 +190,10 @@ class CI_Profiler
 
         // Key words we want bolded
         $highlight = array('SELECT', 'DISTINCT', 'FROM', 'WHERE', 'AND', 'LEFT&nbsp;JOIN', 'ORDER&nbsp;BY', 'GROUP&nbsp;BY', 'LIMIT', 'INSERT', 'INTO', 'VALUES', 'UPDATE', 'OR&nbsp;', 'HAVING', 'OFFSET', 'NOT&nbsp;IN', 'IN', 'LIKE', 'NOT&nbsp;LIKE', 'COUNT', 'MAX', 'MIN', 'ON', 'AS', 'AVG', 'SUM', '(', ')');
-
-        $output  = "\n\n";
+        $output = array();
+        if ($useoutput) {
+            $output = "\n\n";
+        }
         $count = 0;
 
         foreach ($dbs as $name => $db) {
@@ -501,12 +502,12 @@ class CI_Profiler
     /**
      * Compile session userdata
      *
-     * @return 	string
+     * @return 	string|null
      */
     protected function _compile_session_data($useoutput = true)
     {
         if (! isset($this->CI->session)) {
-            return;
+            return null;
         }
         $output = array();
         if ($useoutput) {

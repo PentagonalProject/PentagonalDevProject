@@ -30,10 +30,11 @@ class Processor
             'url_suffix' => '',
             'language'	=> 'id',
             'charset' => 'UTF-8',
-            'enable_hooks' => true,
+            'enable_hooks' => false,
             'subclass_prefix' => 'Pentagonal',
             'composer_autoload' => true,
-            'permitted_uri_chars' => '',
+            // commone allowed chars
+            'permitted_uri_chars' => 'a-z0-9~\-_:\|\?\>\<\,\.\%\!',
             'allow_get_array' => true,
             'enable_query_strings' => false,
             'controller_trigger' => 'c',
@@ -696,7 +697,8 @@ class Processor
     {
         foreach ($replace as $key => $value) {
             // dont allow change subclass_prefix
-            if ($key == 'subclass_prefix' || $key = 'sess_match_ip' || $key = 'enable_hooks'
+            if ($key == 'subclass_prefix' || $key = 'sess_match_ip'
+                || $key = 'enable_hooks'|| $key = 'permitted_uri_chars'
                 || ($key == 'composer_autoload' && !is_string($value) && ! file_exists($value))
             ) {
                 continue;
@@ -817,31 +819,28 @@ class Processor
         if ($last['type'] & (E_ERROR | E_PARSE | E_CORE_ERROR | E_USER_ERROR)) {
             ob_get_length() && ob_clean();
             $CI =& get_instance();
-            $option = $CI->load->get('model.option');
+            $option = $CI->load->get(MODEL_NAME_OPTION);
             if (!$option instanceof DataModel) {
                 show_error(
                     'Site has corrupt. Data Model Could Not Loaded'
                 );
             }
-            $CI->load->model('NoticeRecord', 'model.notice');
-            $record = $CI->load->get('model.notice');
             $options = $option->get(CI_ModuleLoader::MODULE_OPTION);
             $search_key = array_search($this->plugin_crashed, $options);
             if ($search_key !== false) {
                 unset($options[$search_key]);
             }
             $result = $option->set(CI_ModuleLoader::MODULE_OPTION, $options);
-            if ($record instanceof \NoticeRecord) {
-                $record->set(
-                    'error',
-                    sprintf(
-                        'There was error on module `%s` during activated with error : %s',
-                        $this->plugin_crashed,
-                        'Message: ' . $last['message']
-                        . 'File: ' . $last['file'] . ' in line '. $last['line']
-                    )
+            // add Hook for error
+            Hook::add('admin_notice_error', function($cr) {
+                $cr[] = sprintf(
+                    'There was error on module `%s` during activated with error : %s',
+                    $this->plugin_crashed,
+                    'Message: ' . $last['message']
+                    . 'File: ' . $last['file'] . ' in line '. $last['line']
                 );
-            }
+                return $cr;
+            });
             if ($result) {
                 redirect(current_really_url());
             } else {
@@ -1038,6 +1037,7 @@ class Processor
          * ------------------------------------------------------
          */
         if (is_string($composer_autoload) && file_exists($composer_autoload)) {
+            /** @noinspection PhpIncludeInspection */
             require_once($composer_autoload);
         } elseif (file_exists(SOURCEPATH.'vendor/autoload.php')) {
             /** @noinspection PhpIncludeInspection */
@@ -1260,11 +1260,14 @@ class Processor
         $moduleloader = load_class('ModuleLoader', 'Core');
         $moduleloader->activateAvailableModule();
         $module = $CI->getModule();
+
         if (is_array($module)) {
             foreach ($module as $key => $value) {
                 if (is_object($value)) {
+                    $benchmark_class->mark('module:'.$key.'|initial_start');
                     $this->plugin_crashed = $key;
                     $value->initial();
+                    $benchmark_class->mark('module:'.$key.'|initial_end');
                 }
             }
         }
@@ -1331,9 +1334,9 @@ class Processor
         }
 
         if ($e404) {
-            if (! empty($router_class->routes['404_override'])) {
+            if (! empty($router_class->override_404)) {
                 $error_method = null;
-                if (sscanf($router_class->routes['404_override'], '%[^/]/%s', $error_class, $error_method) !== 2) {
+                if (sscanf($router_class->override_404, '%[^/]/%s', $error_class, $error_method) !== 2) {
                     $error_method = 'index';
                 }
                 $error_class = ucfirst($error_class);
@@ -1439,18 +1442,21 @@ class Processor
         }
         /** @noinspection PhpIncludeInspection */
         require_once RESOURCEPATH . 'Core' . DIRECTORY_SEPARATOR . 'Controller.php';
-        /**
-         * Reference to the CI_Controller method.
-         *
-         * Returns current CI instance object
-         *
-         * @return CI_Controller
-         */
-        function &get_instance()
-        {
-            return CI_Controller::get_instance();
+        if (!function_exists('get_instance')) {
+            /** @noinspection PhpUndefinedClassInspection */
+            /**
+             * Reference to the CI_Controller method.
+             *
+             * Returns current CI instance object
+             *
+             * @return CI_Controller
+             */
+            function &get_instance()
+            {
+                /** @noinspection PhpUndefinedClassInspection */
+                return CI_Controller::get_instance();
+            }
         }
-
     }
 
     /**
@@ -1511,6 +1517,7 @@ class Processor
         if (! class_exists('Module', false)) {
             $app_path = RESOURCEPATH.'Core'.DS;
             if (file_exists($app_path.'Module.php')) {
+                /** @noinspection PhpIncludeInspection */
                 require_once($app_path . 'Module.php');
                 if (!class_exists('CI_Module', false)) {
                     throw new RuntimeException($app_path . "Module.php exists, but doesn't declare class CI_Module");
@@ -1526,6 +1533,7 @@ class Processor
                 || file_exists($path = MODULEPATH . lcfirst($module) . DS . $path . $module . '.php')
                 || file_exists($path = MODULEPATH . lcfirst($module) . DS . $path . lcfirst($module) . '.php')
             ) {
+                /** @noinspection PhpIncludeInspection */
                 require_once($path);
                 if (! class_exists($module, false)) {
                     return $path . " exists, but doesn't declare class " . $module;
@@ -1536,6 +1544,7 @@ class Processor
                         || file_exists($path = $mod_path . 'Module/' . DS . lcfirst($module) . $path . $module . '.php')
                         || file_exists($path = $mod_path . 'Module/' . DS . lcfirst($module) . $path . lcfirst($module) . '.php')
                     ) {
+                        /** @noinspection PhpIncludeInspection */
                         require_once($path);
                         if (!class_exists($module, false)) {
                             return $path . " exists, but doesn't declare class " . $module;
