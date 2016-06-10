@@ -266,19 +266,6 @@ function get_body_class()
     return getBodyClass();
 }
 
-function getSiteInfo($type = null)
-{
-    $CI =& get_instance();
-    switch ($type) {
-        case 'language':
-            /** @noinspection PhpUndefinedFieldInspection */
-            /** @noinspection PhpUndefinedMethodInspection */
-            return Hook::apply('site_language', $CI->lang->getCurrentLanguage());
-    }
-
-    return null;
-}
-
 /**
  * @param string $name
  * @param null   $default
@@ -346,4 +333,75 @@ function get_the_title()
 {
     /** @noinspection PhpUndefinedMethodInspection */
     return (string) Hook::apply('the_title', '');
+}
+
+function getSiteInfo($type = null)
+{
+    $lang = load_class('Lang', 'Core');
+    switch ($type) {
+        case 'language':
+            /** @noinspection PhpUndefinedFieldInspection */
+            /** @noinspection PhpUndefinedMethodInspection */
+            return Hook::apply('site_language', $lang->getCurrentLanguage());
+    }
+
+    return null;
+}
+
+function getDynamicAssetCssEmpty()
+{
+    static $dynamic;
+    if (!$dynamic) {
+        $dynamic = trim(str_replace(DS, '/', DYNAMICPATH), '/');
+        $sha1    = sha1('null' . ENGINE_SALT );
+        $dynamic = base_url("{$dynamic}/css/null-hash[{$sha1}].css");
+    }
+
+    return $dynamic;
+}
+
+function getDynamicAssetJsEmpty()
+{
+    static $dynamic;
+
+    if (!$dynamic) {
+        $dynamic = trim(str_replace(DS, '/', DYNAMICPATH), '/');
+        $sha1    = sha1('null' . ENGINE_SALT);
+        $dynamic = base_url("{$dynamic}/js/null-hash[{$sha1}].js");
+    }
+
+    return $dynamic;
+}
+
+function generateDynamicAssetCss(array $asset)
+{
+    return generateDynamicAsset($asset, 'css');
+}
+
+function generateDynamicAssetJs(array $asset)
+{
+    return generateDynamicAsset($asset, 'js');
+}
+
+function generateDynamicAsset(array $asset, $type)
+{
+    if (!is_string($type)) {
+        return null;
+    }
+    $type = trim(strtolower(trim($type)), '.');
+    if ($type == '' || !in_array($type, array('js', 'css'))) {
+        return null;
+    }
+    if (!empty($asset)) {
+        $dynamic = DynamicAsset::generate($asset, $type);
+        if (! empty($dynamic)) {
+            return $dynamic->toUrl();
+        }
+    }
+
+    if ($type == 'js') {
+        return getDynamicAssetJsEmpty();
+    }
+
+    return getDynamicAssetCssEmpty();
 }

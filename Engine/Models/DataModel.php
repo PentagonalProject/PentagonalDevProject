@@ -43,6 +43,7 @@ class DataModel extends \CI_Model
         parent::__construct();
         $this->ci =& get_instance();
         $this->ci->load->model('DatabaseTableModel', MODEL_NAME_TABLE);
+        $this->ci->load->database();
         $this->table = $this->ci->{MODEL_NAME_TABLE}->getDefault('option');
         if (empty($this->table['name'])) {
             show_error(

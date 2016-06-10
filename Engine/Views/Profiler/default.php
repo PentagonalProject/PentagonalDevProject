@@ -6,7 +6,7 @@
         z-index:99999;
         bottom:0;
         right: 0;
-        height: 30px;
+        height: 40px;
         line-height: 32px;
         /*color: #eee;*/
         color: #181818;

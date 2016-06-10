@@ -16,5 +16,6 @@ require_once __DIR__ . DIRECTORY_SEPARATOR . 'Functions.php';
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'FunctionAlternate.php';
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'Processor.php';
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'Hook.php';
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'DynamicAsset.php';
 
 Processor::run();

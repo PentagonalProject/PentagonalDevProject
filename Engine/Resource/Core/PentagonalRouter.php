@@ -3,6 +3,7 @@
 class PentagonalRouter extends CI_Router
 {
     protected $admin_path_route;
+    protected $dynamic_path_route;
 
     /**
      * is on admin
@@ -10,6 +11,8 @@ class PentagonalRouter extends CI_Router
      * @var bool
      */
     protected $is_admin = false;
+
+    protected $is_dynamic = false;
 
     /**
      * Add direct route controller 404 override
@@ -57,8 +60,9 @@ class PentagonalRouter extends CI_Router
 
     public function setRouting()
     {
-        static $hasCall;
-        if (!$hasCall) {
+        static $hasCall = 0;
+        if ($hasCall < 2) {
+            $hasCall++;
             $this->_set_routing();
         }
     }
@@ -74,11 +78,13 @@ class PentagonalRouter extends CI_Router
     protected function _set_routing()
     {
         $this->admin_path_route = '(?i)'.preg_quote(ADMINPATH, '/').'(\/+(.*))?';
+        $this->dynamic_path_route = preg_quote(DYNAMICPATH, '/').'\/(js|css)\/([a-z0-9A-Z\_\-\.\,\(\)\~\@]+)\-hash\[[0-9a-f]{40}\]\.\\1';
         $this->default_controller = 'DefaultController';
         $this->translate_uri_dashes = false;
         $this->override_404 = 'Controller404';
         $this->routes = array(
              $this->admin_path_route => 'AdminController',
+             $this->dynamic_path_route => 'AssetController',
             '(.*)?' => 'DefaultController',
         );
 
@@ -239,6 +245,7 @@ class PentagonalRouter extends CI_Router
             if (preg_match('#^'.$key.'$#', $uri, $matches)) {
                 //set is admin
                 $this->is_admin = ($key === $this->admin_path_route);
+                ! $this->is_admin && $this->is_dynamic = ($key === $this->dynamic_path_route);
                 // Are we using callbacks to process back-references?
                 if (! is_string($val) && is_callable($val)) {
                     // Remove the original string from the matches array.
@@ -266,10 +273,17 @@ class PentagonalRouter extends CI_Router
     }
 
     /**
-     * @return boolif is on admin route
+     * @return bool if is on admin route
      */
     public function isAdminRoute()
     {
         return $this->is_admin;
+    }
+    /**
+     * @return bool if is on admin route
+     */
+    public function isAssetRoute()
+    {
+        return $this->is_dynamic;
     }
 }

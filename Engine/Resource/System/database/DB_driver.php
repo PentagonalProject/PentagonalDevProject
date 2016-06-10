@@ -1616,7 +1616,7 @@ abstract class CI_DB_driver {
 	 * @param	string	the path to the cache directory
 	 * @return	void
 	 */
-	public function cache_set_path($path = '')
+	public function ($path = '')
 	{
 		$this->cachedir = $path;
 	}

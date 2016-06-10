@@ -60,6 +60,7 @@ final class CI_ModuleLoader
     {
         if (!self::$instance) {
             $this->ci =& get_instance();
+            $this->ci->load =& load_class('Loader', 'Core');
             self::$instance =& $this;
             if (! class_exists('CI_Module', false)) {
                 $app_path = RESOURCEPATH.'Core'.DS;
@@ -112,7 +113,7 @@ final class CI_ModuleLoader
      */
     private function getPrivateModuleListAll()
     {
-        foreach(PathHelper::readDirList(MODULEPATH, 1) as $value) {
+        foreach((array) PathHelper::readDirList(MODULEPATH, 1) as $value) {
             $each = $this->testModuleFromFile($value);
             if (!is_array($each)) {
                 self::$list_invalid_module[] = $value;

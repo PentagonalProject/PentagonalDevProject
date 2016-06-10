@@ -87,7 +87,7 @@ namespace {
         define('CONFIG', dirname(ROOT) . DIRECTORY_SEPARATOR . 'config.php');
     }
 
-    if (defined('SYSCONST')) {
+    if (defined('CONSTANT_COUNT')) {
         header('HTTP/1.1 503 Service Unavailable.', true, 503);
         echo 'Root files only allowed set constant ROOT or CONFIG';
         exit(1); // EXIT_ERROR
@@ -157,6 +157,7 @@ namespace {
     $asset      = 'assets';
     $upload     = 'uploads';
     $admin      = 'admin';
+    $dynamic_asset      = 'dynamic_asset';
     if (!empty($configs['path']) && is_array($configs['path'])) {
         foreach (array(
             'system',
@@ -171,9 +172,10 @@ namespace {
             'asset',
             'upload',
             'admin',
+            'dynamic_asset'
         ) as $v) {
             if (!empty($configs['path'][$v])) {
-                if (!is_string($configs['path']['system'])) {
+                if (!is_string($configs['path'][$v])) {
                     header('HTTP/1.1 503 Service Unavailable.', true, 503);
                     printf('Invalid setting for `%s` path', $v);
                     exit(3);
@@ -199,10 +201,13 @@ namespace {
     define('FCPATH', dirname(realpath(ROOT)) . DS);// Path to the front controller (this file) directory
     define('BASEPATH', RESOURCEPATH . $system . DS);// Path to the system directory
     define('SYSDIR', basename(BASEPATH)); // Name of the "system" directory
-    define('ASSETPATH', FCPATH . $asset . DS); // Name of the "system" directory
-    define('UPLOADPATH', FCPATH . $upload . DS); // Name of the "system" directory
+    define('ASSETPATH', FCPATH . $asset . DS); // Name of the "asset" directory
+    define('UPLOADPATH', FCPATH . $upload . DS); // Name of the "upload" directory
     $admin = str_replace(DIRECTORY_SEPARATOR ,'/', strtolower($admin));
-    define('ADMINPATH',trim($admin, '/')); // Name of the "system" directory
+    define('ADMINPATH',trim($admin, '/')); // Name of the "admin" directory
+    $dynamic_asset = str_replace(DIRECTORY_SEPARATOR, '/', strtolower($dynamic_asset));
+    define('DYNAMICPATH',trim($dynamic_asset, '/')); // Name of the "dynamic asset route" directory
+    define('ENGINE_SALT', sha1(FCPATH . SOURCEPATH . CONSTANT_COUNT));
 
     /**
      * Validate Template Path
@@ -352,6 +357,8 @@ namespace {
     define('EXIT__AUTO_MAX', 125); // highest automatically-assigned error code
 
     unset($k,
+        $configs,
+        $config,
         $v,
         $system ,
         $resource,

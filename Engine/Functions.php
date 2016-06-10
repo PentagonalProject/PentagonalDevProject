@@ -271,11 +271,11 @@ function show_error($message, $status_code = 500, $heading = 'An Error Was Encou
 
     $_error =& load_class('Exceptions', 'core');
     $retval = $_error->show_error($heading, $message, 'error_general', $status_code);
-
     if (!is_cli() && function_exists('get_instance')) {
-        $ci = get_instance();
-        $ci->output->set_output($retval);
-        $ci->output->_display();
+        $output = load_class('Output', 'Core');
+        $output->set_output($retval);
+        $output->_display();
+        exit($exit_status);
     } else {
         echo $retval;
     }

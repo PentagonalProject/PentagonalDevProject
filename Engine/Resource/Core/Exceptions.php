@@ -151,6 +151,7 @@ class CI_Exceptions
         if (ob_get_level() > $this->ob_level + 1) {
             ob_end_flush();
         }
+
         ob_start();
         if (!is_cli() && isset($file[$template]) && function_exists('get_instance')) {
             $ci = get_instance();
@@ -175,9 +176,7 @@ class CI_Exceptions
             /** @noinspection PhpIncludeInspection */
             include( $templates_path . $template . '.php' );
         }
-
-        $buffer = ob_get_contents();
-        ob_end_clean();
+        $buffer = ob_get_clean();
         return $buffer;
     }
 

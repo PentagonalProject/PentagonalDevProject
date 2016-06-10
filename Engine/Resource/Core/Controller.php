@@ -12,7 +12,7 @@ class CI_Controller
      */
     private static $instance;
 
-    private static $call = 0;
+    private static $__private_call = 0;
 
     /**
      * Class constructor override constructor
@@ -22,33 +22,30 @@ class CI_Controller
      */
     final public function __construct($load_init = true)
     {
-        /**
-         * prevent module to print property
-         * module controller could call get_instance();
-         */
-        if (self::$call > 1) {
-            return;
-        }
-
-        self::$call++;
-
+        $exist = true;
         if (!self::$instance) {
             self::$instance =& $this;
+            $exist = false;
         }
-
         foreach (is_loaded() as $var => $class) {
-            self::get_instance()->$var =& load_class($class);
+            $this->$var =& load_class($class);
         }
 
         $this->load =& load_class('Loader', 'core');
+        // call initialize ? with this empty
         $this->load->initialize();
+
         // load dependency
         $this->initLoadDependency();
+
+        // remap
+        foreach (self::$instance as $key => $value) {
+            $this->$key = $value;
+        }
+        if ($exist) {
+            self::$instance = &$this;
+        }
         if ($load_init) {
-            // remap
-            foreach (self::$instance as $key => $value) {
-                $this->$key = $value;
-            }
             // call before mapping
             $this->beforeMapping();
             log_message('info', 'Controller Class Initialized');
@@ -57,30 +54,39 @@ class CI_Controller
 
     final private function initLoadDependency()
     {
-        $CI =& get_instance();
         /**
-         * Always Load 2 helper for language and url
+         * Prevent Multiple more than twice call dependency
          */
-        $CI->load->helper(
-            array(
-                'language',
-                'url',
-            )
-        );
+        if (self::$__private_call > 1) {
+            return;
+        }
+
+        $CI =& get_instance();
 
         if (!isset($CI->{'module@list'})) {
             $CI->{'module@list'} = array();
         }
-
-        $CI->load->database();
-        /**
-         * Load model
-         */
-        $CI->load->model('DatabaseTableModel', MODEL_NAME_TABLE);
-        $CI->load->model('DataModel', MODEL_NAME_OPTION);
-        $CI->load->model('AdminTemplateModel', MODEL_NAME_TEMPLATE_ADMIN);
-        $CI->load->model('TemplateModel', MODEL_NAME_TEMPLATE_USER);
-        $CI->load->model('NoticeRecord', MODEL_NAME_NOTICE);
+        // load at once
+        if (self::$__private_call === 0) {
+            /**
+             * Always Load 2 helper for language and url
+             */
+            $CI->load->helper(
+                array(
+                    'language',
+                    'url',
+                )
+            );
+            $CI->load->database();
+            /**
+             * Load model
+             */
+            $CI->load->model('DatabaseTableModel', MODEL_NAME_TABLE);
+            $CI->load->model('DataModel', MODEL_NAME_OPTION);
+            $CI->load->model('AdminTemplateModel', MODEL_NAME_TEMPLATE_ADMIN);
+            $CI->load->model('TemplateModel', MODEL_NAME_TEMPLATE_USER);
+            $CI->load->model('NoticeRecord', MODEL_NAME_NOTICE);
+        }
         if (is_admin_area()) {
             $template = $CI
                 ->load
@@ -95,6 +101,7 @@ class CI_Controller
                 $CI->load->get(MODEL_NAME_TEMPLATE_USER)->getActiveTemplateDirectory()
             );
         }
+        self::$__private_call++;
     }
 
     /**
@@ -114,9 +121,7 @@ class CI_Controller
      */
     final public static function &get_instance()
     {
-        if (!self::$instance) {
-            self::$instance = new self(false);
-        }
+        !self::$instance && new self();
         return self::$instance;
     }
 
@@ -156,6 +161,7 @@ class CI_Controller
         if (!is_string($name)) {
             return null;
         }
+
         $name = strtolower($name);
         $module = isset($this->{'module@list'}[$name]) ? $this->{'module@list'}[$name] : null;
         return $module;

@@ -89,7 +89,7 @@ class TemplateModel extends CI_Model
             return;
         }
         $hasCall = true;
-        foreach (PathHelper::readDirList(TEMPLATEPATH, 1) as $value) {
+        foreach ((array) PathHelper::readDirList(TEMPLATEPATH, 1) as $value) {
             if (!is_string($value)) {
                 continue;
             }
