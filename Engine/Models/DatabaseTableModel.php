@@ -63,7 +63,6 @@ class DatabaseTableModel extends CI_Model
 
     public function __construct()
     {
-        /** @noinspection PhpUndefinedClassInspection */
         parent::__construct();
         $this->table = $this->table_default;
     }

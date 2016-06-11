@@ -1,8 +1,20 @@
 <?php
 ?>
+
 <style type="text/css">
-
-
+    #codeigniter-button-profiler,
+    #codeigniter-container-profiler,
+    #codeigniter-container-profiler *,
+    #codeigniter-button-profiler:after,
+    #codeigniter-button-profiler:before,
+    #codeigniter-container-profiler:after,
+    #codeigniter-container-profiler:before,
+    #codeigniter-container-profiler *:after,
+    #codeigniter-container-profiler *:before {
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+    }
     #codeigniter-button-profiler {
         position: fixed;
         z-index:99999;
@@ -54,6 +66,8 @@
         bottom: -200px;
     }
     #codeigniter-container-profiler {
+        font-size:14px;
+        font-family: "Helvetica Neue", "Helvetica", Arial, sans-serif;
         position: fixed;
         right: 5%;
         bottom: 5%;
@@ -66,7 +80,30 @@
         transition: all ease 600ms;
         visibility: visible;
         opacity:1;
+        color: #333;
         z-index: 99999;
+        line-height: 1.42857143;
+    }
+    #codeigniter-container-profiler table {
+        border-spacing: 0;
+        display: table;
+        background-color: transparent;
+        border-color: grey;
+        border-collapse: collapse;
+    }
+    #codeigniter-container-profiler tr {
+        display: table-row;
+        vertical-align: inherit;
+        border-color: inherit;
+    }
+    #codeigniter-container-profiler td,
+    #codeigniter-container-profiler th {
+        padding: 0;
+    }
+    #codeigniter-container-profiler td,
+    #codeigniter-container-profiler th {
+        display: table-cell;
+        vertical-align: inherit;
     }
     #codeigniter-container-profiler.off {
         z-index: -1;
@@ -295,7 +332,7 @@ foreach ($section as $k => $v) {
                         }
                         $v = print_r($v, true);
                     }
-                    echo "<td style='padding: 5px 10px;background: #e4e6e7;border-bottom: 3px solid #39424d;'>{$v}</td>";
+                    echo "<tr><td style='padding: 5px 10px;background: #e4e6e7;border-bottom: 3px solid #39424d;'>{$v}</td></tr>";
                 }
             ?>
         </table>

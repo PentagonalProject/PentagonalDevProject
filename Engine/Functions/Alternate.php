@@ -2,7 +2,16 @@
 /**
  * Function collection
  */
-
+/**
+ * Core function Boolvalonly valid on php >= 5.5
+ */
+if (!function_exists('boolval')) {
+    function boolval($var)
+    {
+        settype($var, 'boolean');
+        return $var;
+    }
+}
 /**
  * @return array
  */
@@ -226,6 +235,8 @@ function sanitize_html_class($class, $fallback = '')
 /**
  * Getting body class
  *
+ * @param bool $echo
+ *
  * @return string
  */
 function bodyClass($echo = true)
@@ -246,6 +257,11 @@ function body_class($echo = true)
     return bodyClass($echo);
 }
 
+/**
+ * Geting body class string
+ *
+ * @return string
+ */
 function getBodyClass()
 {
     $arr = array();
@@ -261,6 +277,10 @@ function getBodyClass()
     return implode(' ', $arrs);
 }
 
+/**
+ * Body Class
+ * @return string
+ */
 function get_body_class()
 {
     return getBodyClass();
@@ -335,19 +355,134 @@ function get_the_title()
     return (string) Hook::apply('the_title', '');
 }
 
-function getSiteInfo($type = null)
+/**
+ * The title
+ *
+ * @return string
+ */
+function the_title()
 {
-    $lang = load_class('Lang', 'Core');
+    $title = get_the_title();
+    if (is_array($title) || is_object($title)) {
+        $title = print_r($title, true);
+    }
+    echo $title;
+
+    return $title;
+}
+
+/**
+ * Get administrator title
+ *
+ * @return string
+ */
+function get_admin_title()
+{
+    /** @noinspection PhpUndefinedMethodInspection */
+    return (string) Hook::apply('admin_title', __('Admin area'));
+}
+/**
+ * The title
+ *
+ * @return string
+ */
+function admin_title()
+{
+    $title = get_admin_title();
+    if (is_array($title) || is_object($title)) {
+        $title = print_r($title, true);
+    }
+    echo $title;
+
+    return $title;
+}
+/**
+ * Get Site Info
+ *
+ * @param string $type
+ *
+ * @return mixed
+ */
+function getSiteInfo($type)
+{
+    if (!is_string($type)) {
+        return null;
+    }
+    $ci =& get_instance();
     switch ($type) {
         case 'language':
-            /** @noinspection PhpUndefinedFieldInspection */
             /** @noinspection PhpUndefinedMethodInspection */
-            return Hook::apply('site_language', $lang->getCurrentLanguage());
+            return Hook::apply(
+                'site_language',
+                $ci->load->get('lang')->getCurrentLanguage()
+            );
+            break;
+        case 'site_name':
+            /** @noinspection PhpUndefinedMethodInspection */
+            return Hook::apply(
+                'site_name',
+                $ci->load->get(MODEL_NAME_OPTION)->get('site_name', '')
+            );
+            break;
+        case 'admin_url':
+            /** @noinspection PhpUndefinedMethodInspection */
+            return Hook::apply(
+                'admin_url',
+                admin_url()
+            );
+            break;
+        case 'charset':
+            /** @noinspection PhpUndefinedMethodInspection */
+            return Hook::apply(
+                'charset',
+                config_item('charset')
+            );
+            break;
     }
 
     return null;
 }
 
+/**
+ * @param string $type
+ *
+ * @return mixed
+ */
+function get_site_info($type)
+{
+    return getSiteInfo($type);
+}
+
+/**
+ * @param string $type
+ *
+ * @return mixed|null
+ */
+function site_info($type)
+{
+    return siteInfo($type);
+}
+
+/**
+ * @param $type
+ *
+ * @return mixed|null
+ */
+function siteInfo($type)
+{
+    $retval = getSiteInfo($type);
+    if (is_array($retval) || is_object($retval)) {
+        $retval = print_r($retval, true);
+    }
+    echo $retval;
+
+    return $retval;
+}
+/**
+ * Get default dynamic Empty for css
+ *
+ * @return string
+ */
 function getDynamicAssetCssEmpty()
 {
     static $dynamic;
@@ -360,6 +495,11 @@ function getDynamicAssetCssEmpty()
     return $dynamic;
 }
 
+/**
+ * Get default dynamic Empty for JS
+ *
+ * @return string
+ */
 function getDynamicAssetJsEmpty()
 {
     static $dynamic;
@@ -373,16 +513,38 @@ function getDynamicAssetJsEmpty()
     return $dynamic;
 }
 
+/**
+ * Generate Dynamic CSS
+ *
+ * @param array $asset
+ *
+ * @return null|string
+ */
 function generateDynamicAssetCss(array $asset)
 {
     return generateDynamicAsset($asset, 'css');
 }
 
+/**
+ * Generate Dynamic JS
+ *
+ * @param array $asset
+ *
+ * @return null|string
+ */
 function generateDynamicAssetJs(array $asset)
 {
     return generateDynamicAsset($asset, 'js');
 }
 
+/**
+ * Generate Dynamic asset
+ *
+ * @param array  $asset
+ * @param string $type
+ *
+ * @return null|string
+ */
 function generateDynamicAsset(array $asset, $type)
 {
     if (!is_string($type)) {

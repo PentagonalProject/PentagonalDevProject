@@ -6,7 +6,7 @@ use Pentagonal\StaticHelper\StringHelper;
  */
 
 /** @noinspection PhpUndefinedClassInspection */
-class DataModel extends \CI_Model
+class DataModel extends CI_Model
 {
     /** @noinspection PhpUndefinedClassInspection */
     /**
@@ -23,11 +23,6 @@ class DataModel extends \CI_Model
      * @var string
      */
     protected $table_name;
-
-    /**
-     * @var array
-     */
-    protected $cached_record = array();
 
     /**
      * @var array
@@ -54,6 +49,7 @@ class DataModel extends \CI_Model
             );
         }
         $this->table_name = $this->table['name'];
+        /** @noinspection PhpUndefinedFieldInspection */
         $record = $this->ci->db->get_where(
             $this->table_name,
             array(
@@ -62,7 +58,7 @@ class DataModel extends \CI_Model
         )->result_array();
         foreach ($record as $array) {
             $array['options_value'] = StringHelper::maybeUnserialize($array['options_value']);
-            $this->cached_record[$array['options_name']] = $array;
+            $this->setData($array['options_name'], $array);
         }
     }
 
@@ -95,24 +91,24 @@ class DataModel extends \CI_Model
         }
 
         $name = trim($name);
-        if (!isset($this->cached_record[$name]) || $force) {
-            $this->cached_record[$name] = $this->ci->db->get_where(
+        if (!isset($this->x_data___[$name]) || $force) {
+            $this->x_data___[$name] = $this->ci->db->get_where(
                 $this->table_name,
                 array(
                     'options_name' => $name
                 )
             )->row(0, 'array');
-            if (isset($this->cached_record[$name]['options_value'])) {
-                $this->cached_record[$name]['options_value'] =
-                    StringHelper::maybeUnserialize($this->cached_record[$name]['options_value']);
+            if (isset($this->x_data___[$name]['options_value'])) {
+                $this->x_data___[$name]['options_value'] =
+                    StringHelper::maybeUnserialize($this->x_data___[$name]['options_value']);
             }
         }
 
-        if (empty($this->cached_record[$name])
-            || ! array_key_exists('options_value', $this->cached_record[$name])
+        if (empty($this->x_data___[$name])
+            || ! array_key_exists('options_value', $this->x_data___[$name])
         ) {
             // set again
-            $this->cached_record[$name] = array();
+            $this->x_data___[$name] = array();
             if ($allow_temporary && isset($this->temporary_data[$name])) {
                 return $this->temporary_data[$name];
             }
@@ -120,7 +116,7 @@ class DataModel extends \CI_Model
             return $default;
         }
 
-        return $this->cached_record[$name]['options_value'];
+        return $this->x_data___[$name]['options_value'];
     }
 
     /**
@@ -140,7 +136,7 @@ class DataModel extends \CI_Model
             return $default;
         }
 
-        return $this->cached_record[$name];
+        return $this->x_data___[$name];
     }
 
     /**
@@ -199,7 +195,7 @@ class DataModel extends \CI_Model
             if ($autoload == $status['options_autoload'] && $value == $status['options_value']) {
                 return true;
             }
-            $result = $this->ci->db->update(
+            $result                 = $this->ci->db->update(
                 $this->table_name,
                 array(
                     'options_name'     => $name,
@@ -210,7 +206,7 @@ class DataModel extends \CI_Model
                     'id' => $status['id']
                 )
             );
-            $this->cached_record[$name] = array(
+            $this->x_data___[$name] = array(
                 'id' => $status['id'],
                 'options_name'     => $name,
                 'options_value'    => $value,

@@ -11,11 +11,15 @@ if (!defined('ROOT')) {
  * LOAD THE BOOTSTRAP FILE
  * --------------------------------------------------------------------
  */
-require_once __DIR__ . DIRECTORY_SEPARATOR . 'Determinator.php';
-require_once __DIR__ . DIRECTORY_SEPARATOR . 'Functions.php';
-require_once __DIR__ . DIRECTORY_SEPARATOR . 'FunctionAlternate.php';
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'Determinator.php'; // include fisrt
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'Functions' . DIRECTORY_SEPARATOR . 'Core.php';
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'Functions' . DIRECTORY_SEPARATOR . 'Url.php';
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'Functions' . DIRECTORY_SEPARATOR . 'Alternate.php';
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'Functions' . DIRECTORY_SEPARATOR . 'User.php';
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'Processor.php';
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'DataCollection.php';
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'Hook.php';
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'DynamicAsset.php';
 
-Processor::run();
+// run
+return Processor::run();

@@ -1,6 +1,8 @@
 <?php
 abstract class CI_Module
 {
+    protected $allow_access;
+
     /**
      * @var string
      */
@@ -81,6 +83,15 @@ abstract class CI_Module
         return $this->module_description;
     }
 
+    final public function allowedAccess()
+    {
+        if (!is_bool($this->allow_access)) {
+            $this->allow_access = boolval($this->allow_access);
+        }
+
+        return $this->allow_access;
+    }
+
     /**
      * @param string|null $name
      * @return mixed
@@ -93,6 +104,8 @@ abstract class CI_Module
     /**
      * Call before Route Initiate
      * as initial Module called
+     * could to set allow access
+     *
      */
     public function initial()
     {

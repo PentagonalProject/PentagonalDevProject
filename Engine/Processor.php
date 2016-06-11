@@ -854,7 +854,7 @@ class Processor
                 );
             }
         }
-
+        // call system default
         _shutdown_handler();
 
         return null;

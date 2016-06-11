@@ -6,12 +6,12 @@
 <!DOCTYPE html>
 <html <?php language_attributes();?>>
 <head>
- <meta charset="utf-8">
+ <meta charset="<?php site_info('charset');?>">
  <title><?php echo get_the_title();?></title>
  <link rel="stylesheet" href="<?php
     echo generateDynamicAssetCss(
         array(
-            'bootstrap/css/bootstrap.css',
+            'bootstrap/css/bootstrap',
         )
     );
 ?>">

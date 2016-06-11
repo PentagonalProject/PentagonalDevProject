@@ -1,5 +1,5 @@
 <?php
-class CI_Model
+class CI_Model extends DataCollection
 {
     /**
      * Class constructor

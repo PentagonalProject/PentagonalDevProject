@@ -6,8 +6,14 @@ use Pentagonal\Hookable\Hookable;
  */
 class Hook
 {
+    /**
+     * @var Hookable
+     */
     private static $hook;
 
+    /**
+     * @var Hook
+     */
     private static $instance;
 
     /**

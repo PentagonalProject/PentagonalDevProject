@@ -21,6 +21,8 @@ namespace {
     define('MODEL_NAME_USER', 'model.user');
     define('MODEL_NAME_ADMIN', 'model.admin');
     define('MODEL_NAME_AUTH', 'model.auth');
+    define('MODEL_NAME_ADMIN_MENU', 'model.menu.admin');
+    define('MODEL_NAME_USER_MENU', 'model.menu.user');
 
     /**
      * if does not determine root

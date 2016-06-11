@@ -34,7 +34,8 @@ class CI_Controller
         $this->load =& load_class('Loader', 'core');
         // call initialize ? with this empty
         $this->load->initialize();
-
+        // instance Hook
+        $this->hook = Hook::getInstance();
         // load dependency
         $this->initLoadDependency();
 
@@ -86,6 +87,8 @@ class CI_Controller
             $CI->load->model('AdminTemplateModel', MODEL_NAME_TEMPLATE_ADMIN);
             $CI->load->model('TemplateModel', MODEL_NAME_TEMPLATE_USER);
             $CI->load->model('NoticeRecord', MODEL_NAME_NOTICE);
+            $CI->load->model('AdminMenu', MODEL_NAME_ADMIN_MENU);
+            $CI->load->model('UserMenu', MODEL_NAME_USER_MENU);
         }
         if (is_admin_area()) {
             $template = $CI
