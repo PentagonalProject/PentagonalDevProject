@@ -697,8 +697,8 @@ class Processor
     {
         foreach ($replace as $key => $value) {
             // dont allow change subclass_prefix
-            if ($key == 'subclass_prefix' || $key = 'sess_match_ip'
-                || $key = 'enable_hooks'|| $key = 'permitted_uri_chars'
+            if ($key == 'subclass_prefix' || $key == 'sess_match_ip'
+                || $key == 'enable_hooks'|| $key == 'permitted_uri_chars'
                 || ($key == 'composer_autoload' && !is_string($value) && ! file_exists($value))
             ) {
                 continue;
@@ -1080,6 +1080,7 @@ class Processor
 
         return $this;
     }
+
     private function setEnvironment()
     {
         $allowed_environment = array(
