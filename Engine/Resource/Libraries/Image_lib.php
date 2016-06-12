@@ -649,7 +649,7 @@ class CI_Image_lib
     /**
      * Image Process Using GD/GD2
      *
-     * This function will resize or crop
+     * This function will resize or cropProcess
      *
      * @param   string
      * @return  bool
@@ -669,7 +669,7 @@ class CI_Image_lib
         }
 
         // Let's set up our values based on the action
-        if ($action === 'crop') {
+        if ($action === 'cropProcess') {
             // Reassign the source width/height if cropping
             $this->orig_width  = $this->width;
             $this->orig_height = $this->height;
@@ -740,7 +740,7 @@ class CI_Image_lib
     /**
      * Image Process Using ImageMagick
      *
-     * This function will resize, crop or rotate
+     * This function will resize, cropProcess or rotate
      *
      * @param   string
      * @return  bool
@@ -760,8 +760,8 @@ class CI_Image_lib
         // Execute the command
         $cmd = $this->library_path.' -quality '.$this->quality;
 
-        if ($action === 'crop') {
-            $cmd .= ' -crop '.$this->width.'x'.$this->height.'+'.$this->x_axis.'+'.$this->y_axis.' "'.$this->full_src_path.'" "'.$this->full_dst_path .'" 2>&1';
+        if ($action === 'cropProcess') {
+            $cmd .= ' -cropProcess '.$this->width.'x'.$this->height.'+'.$this->x_axis.'+'.$this->y_axis.' "'.$this->full_src_path.'" "'.$this->full_dst_path .'" 2>&1';
         } elseif ($action === 'rotate') {
             $angle = ($this->rotation_angle === 'hor' or $this->rotation_angle === 'vrt')
                 ? '-flop' : '-rotate '.$this->rotation_angle;
@@ -799,7 +799,7 @@ class CI_Image_lib
     /**
      * Image Process Using NetPBM
      *
-     * This function will resize, crop or rotate
+     * This function will resize, cropProcess or rotate
      *
      * @param   string
      * @return  bool
@@ -827,7 +827,7 @@ class CI_Image_lib
                 break;
         }
 
-        if ($action === 'crop') {
+        if ($action === 'cropProcess') {
             $cmd_inner = 'pnmcut -left '.$this->x_axis.' -top '.$this->y_axis.' -width '.$this->width.' -height '.$this->height;
         } elseif ($action === 'rotate') {
             switch ($this->rotation_angle) {

@@ -3,6 +3,9 @@
 /** @noinspection PhpUndefinedClassInspection */
 class AdminController extends CI_Controller
 {
+    /**
+     * @var string
+     */
     protected $segment_1;
 
     protected $segment_2;
@@ -22,8 +25,8 @@ class AdminController extends CI_Controller
     {
         /** @noinspection PhpUndefinedFieldInspection */
         $benchmark_class = $this->benchmark;
-//        /** @noinspection PhpUndefinedFieldInspection */
-//        $this->output->enable_profiler(true);
+        /** @noinspection PhpUndefinedFieldInspection */
+        $this->output->enable_profiler(true);
         /** @noinspection PhpUndefinedFieldInspection */
         $this->segment_1 = $this->uri->segment(1);
         /** @noinspection PhpUndefinedFieldInspection */
@@ -55,6 +58,7 @@ class AdminController extends CI_Controller
                         $content = ob_get_clean();
                         // load header
                         $this->load->view('header');
+                        /** @noinspection PhpUndefinedFieldInspection */
                         $this->output->append_output($content);
                         $this->load->view('footer');
                         return;
@@ -105,6 +109,7 @@ class AdminController extends CI_Controller
                             $benchmark_class->mark('admin:'.$this->class.'|controller_end');
                             $content = ob_get_clean();
                             $this->load->view('header');
+                            /** @noinspection PhpUndefinedFieldInspection */
                             $this->output->append_output($content);
                             $this->load->view('footer');
                             return;
@@ -129,7 +134,7 @@ class AdminController extends CI_Controller
                             if (!file_exists($file = $directory . DS . $st.'controller.php')) {
                                 if (!file_exists($file = $directory . DS . strtolower($st).'controller.php')) {
                                     show_404(
-                                        __('Module %s Controller Not Found'),
+                                        __('Module %s Controller Not Found.'),
                                         $this->segment_2
                                     );
 
@@ -142,17 +147,17 @@ class AdminController extends CI_Controller
                             $className = $module['detail']['classname'] . 'Controller';
                             $class = preg_quote($st . 'Controller', '/');
                             if (preg_match(
-                                    '/class\s*('.$class.')\s*extends\s*((?:\\\+)?CI_Controller)/i',
+                                    '/class\s\s*('.$class.')\s\s*extends\s\s*((?:\\\+)?CI_Controller)/i',
                                     $container,
                                     $match
                                 )
                                 && ! empty($match[1])
                             ) {
-                                if (strpos($match[2], '\\') === false && !preg_match('/use\s*CI_Controller/i', $container)) {
+                                if (strpos($match[2], '\\') === false && !preg_match('/use\s\s*CI_Controller/i', $container)) {
                                     unset($container);
                                     show_404(
                                         sprintf(
-                                            __('Module %s Controller Not Found'),
+                                            __('Module %s Controller Not Found.'),
                                             $this->segment_2
                                         )
                                     );
@@ -174,7 +179,7 @@ class AdminController extends CI_Controller
                                 if (!is_login()) {
                                     redirect(admin_url(self::URL_SEPARATOR_PREFIX . self::LOGIN_PATH));
                                 }
-                                // immunated
+                                // isolate
                                 array_map(function($file) {
                                     require_once $file;
                                 }, array($file));
@@ -196,6 +201,7 @@ class AdminController extends CI_Controller
                                     $benchmark_class->mark('admin_module:'.$this->class.'|controller_end');
                                     $content = ob_get_clean();
                                     $this->load->view('header');
+                                    /** @noinspection PhpUndefinedFieldInspection */
                                     $this->output->append_output($content);
                                     $this->load->view('footer');
 

@@ -1,5 +1,11 @@
 <?php
 namespace {
+    /**
+     * if does not determine root
+     */
+    if (!defined('ROOT')) {
+        return;
+    }
 
     /**
      * Code Igniter Version
@@ -23,13 +29,6 @@ namespace {
     define('MODEL_NAME_AUTH', 'model.auth');
     define('MODEL_NAME_ADMIN_MENU', 'model.menu.admin');
     define('MODEL_NAME_USER_MENU', 'model.menu.user');
-
-    /**
-     * if does not determine root
-     */
-    if (!defined('ROOT')) {
-        return;
-    }
 
     /**
      * if not our script
@@ -113,23 +112,29 @@ namespace {
     }
 
     if (isset($config) || CONSTANT_COUNT <> (count(get_defined_constants()) - 1)) {
-        foreach (array(
-                     'SOURCE', 'BASEPATH', 'FCPATH', 'APPPATH',
-                     'SYSDIR', 'VIEWPATH', 'FILE_READ_MODE',
-                     'FILE_WRITE_MODE', 'DIR_READ_MODE', 'DIR_WRITE_MODE',
-                     'FOPEN_READ', 'FOPEN_READ_WRITE', 'FOPEN_WRITE_CREATE_DESTRUCTIVE',
-                     'FOPEN_READ_WRITE_CREATE_DESTRUCTIVE', 'FOPEN_WRITE_CREATE',
-                     'FOPEN_READ_WRITE_CREATE', 'FOPEN_WRITE_CREATE_STRICT', 'FOPEN_READ_WRITE_CREATE_STRICT',
-                     'EXIT_SUCCESS', 'EXIT_ERROR', 'EXIT_CONFIG', 'EXIT_UNKNOWN_FILE',
-                     'EXIT_UNKNOWN_CLASS', 'EXIT_UNKNOWN_METHOD', 'EXIT_USER_INPUT',
-                     'EXIT_DATABASE', 'EXIT__AUTO_MIN', 'EXIT__AUTO_MAX'
-             ) as $val
-        ) {
-            if (defined($val)) {
-                header('HTTP/1.1 503 Service Unavailable.', true, 503);
-                echo 'There was defined system constant. System constant could not defined before init : (' .$val .')';
-                exit(3); // EXIT_CONFIG
-            }
+        $intersect = array_intersect(
+            array_keys(get_defined_constants()),
+            array(
+                'SOURCE', 'SOURCEPATH', 'CONTROLLERPATH',
+                'MODELPATH', 'VIEWPATH', 'CONFIGPATH',
+                'MODULEPATH', 'LANGUAGEPATH', 'ADMINTEMPLATEPATH',
+                'RESOURCEPATH', 'APPPATH', 'FCPATH', 'BASEPATH',
+                'SYSDIR', 'ASSETPATH', 'UPLOADPATH', 'ADMINPATH',
+                'DYNAMICPATH', 'ENGINE_SALT', 'TEMPLATEPATH', 'TEMPPATH',
+
+                'FILE_READ_MODE', 'FILE_WRITE_MODE', 'DIR_READ_MODE', 'DIR_WRITE_MODE',
+                'FOPEN_READ', 'FOPEN_READ_WRITE', 'FOPEN_WRITE_CREATE_DESTRUCTIVE',
+                'FOPEN_READ_WRITE_CREATE_DESTRUCTIVE', 'FOPEN_WRITE_CREATE',
+                'FOPEN_READ_WRITE_CREATE', 'FOPEN_WRITE_CREATE_STRICT', 'FOPEN_READ_WRITE_CREATE_STRICT',
+                'EXIT_SUCCESS', 'EXIT_ERROR', 'EXIT_CONFIG', 'EXIT_UNKNOWN_FILE',
+                'EXIT_UNKNOWN_CLASS', 'EXIT_UNKNOWN_METHOD', 'EXIT_USER_INPUT',
+                'EXIT_DATABASE', 'EXIT__AUTO_MIN', 'EXIT__AUTO_MAX'
+            )
+        );
+        if (!empty($intersect)) {
+            header('HTTP/1.1 503 Service Unavailable.', true, 503);
+            echo 'There was defined system constant. System constant could not defined before init : (' .explode(', ', $intersect) .')';
+            exit(3); // EXIT_CONFIG
         }
     }
 

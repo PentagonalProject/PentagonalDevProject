@@ -121,13 +121,6 @@ class AssetController extends CI_Controller
         }
 
         $status = 200;
-        /**
-         * Check if got function apache_request_headers
-         * @var array headers
-         */
-        $heads = function_exists('apache_request_headers')
-            ? apache_request_headers()
-            : headers_list();
 
         /**
          * Get max modified of time
@@ -146,18 +139,19 @@ class AssetController extends CI_Controller
             $date = gmdate('D, d M Y H:i:s', time()).' GMT';
             $etag = md5($date.$length);
         }
-
-        $header_list = [
-            'Expires' => gmdate('D, d M Y H:i:s', (time()+3600)).' GMT',
-            'Cache-Control' => 'max-age=3600',
+        $expires = 2592000; // 1 month
+        $header_list = array(
+            'Expires' => gmdate('D, d M Y H:i:s', (time()+$expires)).' GMT',
+            'Cache-Control' => 'max-age='.$expires,
             'Last-Modified' => $date,
-        ];
+        );
         $has = false;
-        if (!empty($heads['If-None-Match']) && !empty($heads['If-Modified-Since'])) {
-            if ($etag == md5($heads['If-Modified-Since'].$length)) {
+        if ($this->input->server('HTTP_IF_NONE_MATCH') && $this->input->server('HTTP_IF_MODIFIED_SINCE')
+        ) {
+            if ($etag == md5(trim($this->input->server('HTTP_IF_MODIFIED_SINCE')).$length)) {
                 $has = true;
                 $status = 304;
-                $header_list['ETag'] = $heads['If-None-Match']."\r\n";
+                $header_list['ETag'] = $this->input->server('HTTP_IF_NONE_MATCH');
                 $header_list['Connection'] = 'close';
             }
         }
@@ -166,7 +160,7 @@ class AssetController extends CI_Controller
          * If none match
          */
         if (!$has) {
-            $header_list['Cache-Control'] = 'max-age=3600';
+            $header_list['Cache-Control'] = 'max-age='.$expires;
             $header_list['ETag'] = $etag;
             $header_list['Content-Length'] = $length;
             $header_list['Accept-Ranges'] = 'bytes';

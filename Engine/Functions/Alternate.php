@@ -12,6 +12,31 @@ if (!function_exists('boolval')) {
         return $var;
     }
 }
+
+/**
+ * Get elapsed time
+ *
+ * @return mixed
+ */
+function get_elapsed_time()
+{
+    $BM =& load_class('Benchmark', 'core');
+    $elapsed = $BM->elapsed_time('total_execution_time_start', 'total_execution_time_end');
+    /** @noinspection PhpUndefinedMethodInspection */
+    return Hook::apply('elapsed_time', $elapsed);
+}
+
+/**
+ * Get elapsed time
+ *
+ * @return mixed
+ */
+function get_memory_usage()
+{
+    /** @noinspection PhpUndefinedMethodInspection */
+    return Hook::apply('memory_usage', (round(memory_get_usage() / 1024 / 1024, 2)));
+}
+
 /**
  * @return array
  */

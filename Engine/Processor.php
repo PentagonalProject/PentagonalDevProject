@@ -766,6 +766,8 @@ class Processor
             'iconv',
             'json',
             'pcre',
+            'gd',
+            'exif',
         );
 
         array_map(function($c) {

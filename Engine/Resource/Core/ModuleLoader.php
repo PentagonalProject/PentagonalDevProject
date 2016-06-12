@@ -169,8 +169,8 @@ final class CI_ModuleLoader
                     /**
                      * Validate within regex before include into core
                      */
-                    if (preg_match('/namespace\s*'.preg_quote($namespace, '/').'\s*\;/i', $container)
-                        && preg_match('/class\s*('.$module_name.')\s*extends\s*((?:\\\+)?CI_Module)/i', $container, $match)
+                    if (preg_match('/namespace\s\s*'.preg_quote($namespace, '/').'\s*\;/i', $container)
+                        && preg_match('/class\s\s*('.$module_name.')\s\s*extends\s\s*((?:\\\+)?CI_Module)/i', $container, $match)
                         && ! empty($match[1])
                     ) {
                         /**

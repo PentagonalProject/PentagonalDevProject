@@ -95,8 +95,7 @@ class AccessUrl extends CI_Model
                     $isAllowed[$uri] = false;
                     return false;
                 }
-                if (empty($value) || in_array(0, $value) || $level === 2 && count($value) > 1 || in_array($level, $value)
-                ) {
+                if (!empty($value[$uri]) && $value[$uri] == $this->user_level) {
                     return ($isAllowed[$uri] =  true);
                 } else {
                     return ($isAllowed[$uri] =  false);

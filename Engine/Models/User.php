@@ -23,7 +23,7 @@ class User extends CI_Model
             show_error(
                 array(
                     __('There was an error.'),
-                    __('Model Table does not load correctly.')
+                    sprintf(__('Model %s does not load correctly.'), 'Table')
                 )
             );
         }

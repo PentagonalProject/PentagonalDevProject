@@ -909,3 +909,6 @@ msgstr "Terdapat Kesalahan."
 
 msgid "There was an error."
 msgstr "Ada kesalahan."
+
+msgid "Module %s Controller Not Found."
+msgstr "Kontroller Modul %s Tidak DItemukan."

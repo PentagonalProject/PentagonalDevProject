@@ -895,3 +895,12 @@ msgstr ""
 
 msgid "There was an error."
 msgstr ""
+
+msgid "Model %s does not load correctly."
+msgstr ""
+
+msgid "Module %s Controller Not Found."
+msgstr ""
+
+msgid "The class %s must be not loaded before controller call."
+msgstr ""
