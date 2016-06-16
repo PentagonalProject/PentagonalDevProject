@@ -167,8 +167,26 @@ class DataModel extends CI_Model
             return null;
         }
 
-        if (! is_null($value) && ! is_string($value) && ! is_bool($value)) {
-            $value = StringHelper::maybeSerialize($value);
+        /**
+         * Prevent Save closure data
+         */
+        if ($value instanceof Closure) {
+            trigger_error('Could not save closure data', E_USER_NOTICE);
+            return null;
+        }
+        /**
+         * if is and object convert all object to std class
+         */
+        if (is_object($value)) {
+            $std = new \stdClass();
+            foreach (get_object_vars($value) as $key => $v) {
+                $std->{$key} = $v;
+            }
+            $value = $std;
+        } elseif (! is_string($value) && !is_null($value)) {
+            // all except string & null will be serialize even if as boolean
+            // to make sure getting data as the real value
+            $value = serialize($value);
         }
 
         $name = trim($name);
@@ -221,7 +239,7 @@ class DataModel extends CI_Model
     }
 
     /**
-     * Set Temporrary Data only without affecting database
+     * Set Temporary Data only without affecting database
      *
      * @param string $name
      * @param mixed  $value
