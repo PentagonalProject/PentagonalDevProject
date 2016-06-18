@@ -1491,9 +1491,9 @@ class Tlds
             || $this->strlen($retval['extension_name']) > 18
             // must not be a special characters
             || preg_match(
-                   '/[\~\!\@\#\$\%\^\&\*\(\)\_\+\`\-\=\\\\|\'\{\}\[\]\;\"\:\,\/\<\>\?\s]/',
-                   $retval['domain_name']
-               ) !== 0
+                '/[\~\!\@\#\$\%\^\&\*\(\)\_\+\`\-\=\\\\|\'\{\}\[\]\;\"\:\,\/\<\>\?\s]/',
+                $retval['domain_name']
+            ) !== 0
         ) {
             $this->cached[$domainname] = false;
             return false;
@@ -1519,9 +1519,9 @@ class Tlds
              * allow dash
              */
             || preg_match(
-                   '/[\~\!\@\#\$\%\^\&\*\(\)\_\+\`\=\\\\|\'\{\}\[\]\;\"\:\,\/\<\>\?\s]/',
-                   $retval['domain_name']
-               ) !== 0
+                '/[\~\!\@\#\$\%\^\&\*\(\)\_\+\`\=\\\\|\'\{\}\[\]\;\"\:\,\/\<\>\?\s]/',
+                $retval['domain_name']
+            ) !== 0
         ) {
             $this->cached[$domainname] = false;
             return false;
@@ -1540,9 +1540,9 @@ class Tlds
                 // must not be a special characters
                 // sub domain allowed underscore and dash ([_-])
                 || preg_match(
-                       '/[\~\!\@\#\$\%\^\&\*\(\)\+\`\=\\\\|\'\{\}\[\]\;\"\:\,\/\<\>\?\s]/',
-                       $retval['subdomain_name']
-                   ) !== 0
+                    '/[\~\!\@\#\$\%\^\&\*\(\)\+\`\=\\\\|\'\{\}\[\]\;\"\:\,\/\<\>\?\s]/',
+                    $retval['subdomain_name']
+                ) !== 0
             ) {
                 $domain_cached[$domainname] = false;
                 return false;
@@ -1568,11 +1568,10 @@ class Tlds
             return false;
         }
 
-        if (!preg_match( // if domain is ascii
-                '/[^a-z]/i',
-                $retval['extension_name']
-            )
-            && (
+        if (!preg_match(// if domain is ascii
+            '/[^a-z]/i',
+            $retval['extension_name']
+        ) && (
                 // if domain extension is not ws
                 (
                 ! in_array($retval['extension_name'], array('ws', 'jp', 'cn'))
@@ -1776,9 +1775,9 @@ class Tlds
                 }
                 return $this->toLowerCase($email);
                 break;
-            case 'live';
-            case 'hotmail';
-            case 'outlook';
+            case 'live':
+            case 'hotmail':
+            case 'outlook':
                 if (!preg_match('/[a-z0-9\.\_\-]{1,30}[a-z]{1/i', $mail_address)) {
                     return false;
                 }
