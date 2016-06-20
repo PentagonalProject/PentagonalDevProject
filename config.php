@@ -13,10 +13,10 @@ return array(
     ),
     'db' => array(
         'default' => array(
-            'hostname' => 'localhost',
-            'username' => 'root',
-            'password' => 'mysql',
-            'database' => 'codeigniter',
+            'hostname' => getenv('OPENSHIFT_MYSQL_DB_HOST'),
+            'username' => getenv('OPENSHIFT_MYSQL_DB_USERNAME'),
+            'password' => getenv('OPENSHIFT_MYSQL_DB_PASSWORD'),
+            'database' => getenv('OPENSHIFT_APP_NAME'),
             'dbdriver' => 'mysqli',
             'dbprefix' => '',
         )

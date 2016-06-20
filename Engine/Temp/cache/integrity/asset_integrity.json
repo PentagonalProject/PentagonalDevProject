@@ -1,1 +1,38 @@
-{}
+{
+    "12d24a4207850055eae8a9eabde63f9f46d6349a": {
+        "type": "css",
+        "data": [
+            "bootstrap\/css\/bootstrap.css"
+        ],
+        "integrity": "12d24a4207850055eae8a9eabde63f9f46d6349a",
+        "integrity_aliases": "aa2a3dd1acc434f65a7329153c599a6533f03c3f"
+    },
+    "aa2a3dd1acc434f65a7329153c599a6533f03c3f": {
+        "type": "css",
+        "data": [
+            "bootstrap\/css\/bootstrap.css"
+        ],
+        "integrity": "aa2a3dd1acc434f65a7329153c599a6533f03c3f",
+        "integrity_aliases": "12d24a4207850055eae8a9eabde63f9f46d6349a"
+    },
+    "bb4022414f33e1c35d6a9705a781012b7a742a6c": {
+        "type": "js",
+        "data": [
+            "js\/jquery.min.js",
+            "js\/jquery-migrate.min.js",
+            "bootstrap\/js\/bootstrap.js"
+        ],
+        "integrity": "bb4022414f33e1c35d6a9705a781012b7a742a6c",
+        "integrity_aliases": "63fe6db9d0efec05ec5a1a3c28db8a0a0eed8650"
+    },
+    "63fe6db9d0efec05ec5a1a3c28db8a0a0eed8650": {
+        "type": "js",
+        "data": [
+            "js\/jquery.min.js",
+            "js\/jquery-migrate.min.js",
+            "bootstrap\/js\/bootstrap.js"
+        ],
+        "integrity": "63fe6db9d0efec05ec5a1a3c28db8a0a0eed8650",
+        "integrity_aliases": "bb4022414f33e1c35d6a9705a781012b7a742a6c"
+    }
+}
