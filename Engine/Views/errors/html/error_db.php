@@ -1,64 +1,70 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+$heading = (isset($heading) ? $heading : 'Database Error Occurred');
+$message = (isset($message) ? $message : 'There was an error on database server interaction.');
+$title = 'Database Error Occurred';
+$lang = 'en';
+if (function_exists('get_instance')) {
+	$CI = get_instance();
+	if (isset($CI->load)) {
+		$title = $CI->load->get_var('title') !== null ? $CI->load->get_var('title') : $title;
+	}
+	if (isset($CI->lang)) {
+		$heading = $CI->lang->line($heading);
+		if (is_array($message)) {
+			foreach ($message as $k => $v) {
+				$message[$k] = $CI->lang->line($message);
+			}
+		} else {
+			$message = $CI->lang->line($message);
+		}
+		$title = $CI->lang->line($title);
+		$lang = $CI->lang->getCurrentLanguage();
+	}
+}
 ?><!DOCTYPE html>
-<html lang="en">
+<html lang="<?php echo $lang;?>">
 <head>
-<meta charset="utf-8">
-<title>Database Error</title>
-<style type="text/css">
-
-::selection { background-color: #E13300; color: white; }
-::-moz-selection { background-color: #E13300; color: white; }
-
-body {
-	background-color: #fff;
-	margin: 40px;
-	font: 13px/20px normal Helvetica, Arial, sans-serif;
-	color: #4F5155;
-}
-
-a {
-	color: #003399;
-	background-color: transparent;
-	font-weight: normal;
-}
-
-h1 {
-	color: #444;
-	background-color: transparent;
-	border-bottom: 1px solid #D0D0D0;
-	font-size: 19px;
-	font-weight: normal;
-	margin: 0 0 14px 0;
-	padding: 14px 15px 10px 15px;
-}
-
-code {
-	font-family: Consolas, Monaco, Courier New, Courier, monospace;
-	font-size: 12px;
-	background-color: #f9f9f9;
-	border: 1px solid #D0D0D0;
-	color: #002166;
-	display: block;
-	margin: 14px 0 14px 0;
-	padding: 12px 10px 12px 10px;
-}
-
-#container {
-	margin: 10px;
-	border: 1px solid #D0D0D0;
-	box-shadow: 0 0 8px #D0D0D0;
-}
-
-p {
-	margin: 12px 15px 12px 15px;
-}
-</style>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title><?php echo $title;?></title>
+	<style type="text/css">
+		*,*:after,
+		*:before {
+			-webkit-box-sizing: border-box;
+			-moz-box-sizing: border-box;
+			box-sizing: border-box;
+		}
+		body {
+			background-color: #f1f1f1;
+			font-size: 14px;
+			font-family: "Helvetica Neue", "Helvetica", Arial, sans-serif;
+			color: #555;
+			line-height: 1;
+			padding: 0;
+			margin: 0;
+		}
+		p {
+			margin: 0 0 .7em;
+			letter-spacing: 1px;
+		}
+		.wrap {
+			text-align: center;
+		}
+		h1 {
+			font-size: 13em;
+			margin: .6em 0;
+			text-shadow: 2px 0 0 #fff;
+		}
+		h2 {
+			font-size: 1.2em;
+		}
+	</style>
 </head>
 <body>
-	<div id="container">
-		<h1><?php echo $heading; ?></h1>
-		<?php echo $message; ?>
-	</div>
+<div class="wrap">
+	<h1>404</h1>
+	<h2><?php echo $heading;?></h2>
+	<p><?php echo is_array($message) ? implode('</p><p>', $message) : $message;?></p>
+</div>
 </body>
 </html>
