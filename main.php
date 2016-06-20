@@ -1,6 +1,8 @@
 <?php
 /**
  * Openshift Development Only
+ * Remove this if use openshift
+ * or change values on environment
  */
 if (!getenv('OPENSHIFT_MYSQL_DB_HOST')) {
    putenv('OPENSHIFT_MYSQL_DB_HOST=localhost');

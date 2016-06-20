@@ -1,5 +1,5 @@
 <?php
-class PentagonalUri extends CI_URI
+class PentagonalURI extends CI_URI
 {
     /**
      * Parse REQUEST_URI
@@ -14,6 +14,14 @@ class PentagonalUri extends CI_URI
     {
         if ( ! isset($_SERVER['REQUEST_URI'], $_SERVER['SCRIPT_NAME'])) {
             return '';
+        }
+        // add server request_uri into cached data server
+        $_SERVER['REQUEST_URI_ORIGINAL'] = $_SERVER['REQUEST_URI'];
+        /**
+         * Fix Some problem server that requesting URI
+         */
+        if (strpos($_SERVER['REQUEST_URI'], '%') && preg_match('~%[0-9A-F]{2}~i', $_SERVER['REQUEST_URI'])) {
+            $_SERVER['REQUEST_URI']  = rawurldecode(str_replace(['+','='], ['%2B','%3D'], $_SERVER['REQUEST_URI']));
         }
 
         // parse_url() returns false if no host is present, but the path or query string

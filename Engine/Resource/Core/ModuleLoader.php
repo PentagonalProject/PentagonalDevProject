@@ -235,10 +235,19 @@ final class CI_ModuleLoader
                 return;
             }
             self::$hascall       = true;
-            $active_module = $option->get(self::MODULE_OPTION, null);
+            $active_module = $option->getFull(self::MODULE_OPTION, null);
+            if (empty($active_module) || !isset($active_module['options_value'])) {
+                $active_module['options_value'] = array();
+                $option->set(self::MODULE_OPTION, array(), true);
+            } elseif (empty($active_module['options_autoload']) || $active_module['options_autoload'] != 'yes') {
+                $option->set(self::MODULE_OPTION, $active_module['options_value'], true);
+            }
+            // get array
+            $active_module = $active_module['options_value'];
+
             if (!is_array($active_module)) {
                 $active_module = array();
-                $option->set(self::MODULE_OPTION, $active_module);
+                $option->set(self::MODULE_OPTION, $active_module, true);
                 return;
             }
             if (!empty($active_module)) {
@@ -266,7 +275,7 @@ final class CI_ModuleLoader
                 }
                 $active_module = array_values($active_module);
                 if ($tmp_module !== $active_module) {
-                    $option->set(self::MODULE_OPTION, $active_module);
+                    $option->set(self::MODULE_OPTION, $active_module, true);
                 }
             }
         }

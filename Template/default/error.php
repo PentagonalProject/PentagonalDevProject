@@ -16,7 +16,7 @@ if (is_array($message)) {
             <code><?php echo $this->getActiveTemplate(); echo basename(__FILE__);?></code>
             <code><?php echo $message;?></code>
         </div>
-        <p class="footer">Page rendered in <strong>{elapsed_time}</strong> <?php _e('seconds');?>. <?php echo  (ENVIRONMENT === 'development') ?  'CodeIgniter Version <strong>' . CI_VERSION . '</strong>' : '' ?></p>
+        <p class="footer">Page rendered in <strong><?php echo get_elapsed_time();?></strong> <?php _e('seconds');?>. <?php echo  (ENVIRONMENT === 'development') ?  'CodeIgniter Version <strong>' . CI_VERSION . '</strong>' : '' ?></p>
     </div>
 <?php
 get_footer();
