@@ -1365,7 +1365,7 @@ class Tlds
     private $cached = array();
 
     /**
-     * Tlds constructor.
+     * Domain constructor.
      */
     public function __construct()
     {
@@ -1491,15 +1491,16 @@ class Tlds
             || $this->strlen($retval['extension_name']) > 18
             // must not be a special characters
             || preg_match(
-                '/[\~\!\@\#\$\%\^\&\*\(\)\_\+\`\-\=\\\\|\'\{\}\[\]\;\"\:\,\/\<\>\?\s]/',
-                $retval['domain_name']
-            ) !== 0
+                   '/[\~\!\@\#\$\%\^\&\*\(\)\_\+\`\-\=\\\\|\'\{\}\[\]\;\"\:\,\/\<\>\?\s]/',
+                   $retval['domain_name']
+               ) !== 0
         ) {
             $this->cached[$domainname] = false;
             return false;
         }
         array_pop($explode);
         $retval['domain_name'] = $this->toLowerCase(end($explode));
+        array_pop($explode);
         /**
          * minimum domain name must be 1 & max is 63
          */
@@ -1519,9 +1520,9 @@ class Tlds
              * allow dash
              */
             || preg_match(
-                '/[\~\!\@\#\$\%\^\&\*\(\)\_\+\`\=\\\\|\'\{\}\[\]\;\"\:\,\/\<\>\?\s]/',
-                $retval['domain_name']
-            ) !== 0
+                   '/[\~\!\@\#\$\%\^\&\*\(\)\_\+\`\=\\\\|\'\{\}\[\]\;\"\:\,\/\<\>\?\s]/',
+                   $retval['domain_name']
+               ) !== 0
         ) {
             $this->cached[$domainname] = false;
             return false;
@@ -1540,9 +1541,9 @@ class Tlds
                 // must not be a special characters
                 // sub domain allowed underscore and dash ([_-])
                 || preg_match(
-                    '/[\~\!\@\#\$\%\^\&\*\(\)\+\`\=\\\\|\'\{\}\[\]\;\"\:\,\/\<\>\?\s]/',
-                    $retval['subdomain_name']
-                ) !== 0
+                       '/[\~\!\@\#\$\%\^\&\*\(\)\+\`\=\\\\|\'\{\}\[\]\;\"\:\,\/\<\>\?\s]/',
+                       $retval['subdomain_name']
+                   ) !== 0
             ) {
                 $domain_cached[$domainname] = false;
                 return false;
@@ -1569,25 +1570,25 @@ class Tlds
         }
 
         if (!preg_match(// if domain is ascii
-            '/[^a-z]/i',
-            $retval['extension_name']
-        ) && (
+                '/[^a-z]/i',
+                $retval['extension_name']
+            ) && (
                 // if domain extension is not ws
-                (
-                ! in_array($retval['extension_name'], array('ws', 'jp', 'cn'))
+            (
+                ! in_array($retval['extension_name'], array("ws", "jp", "cn", "ca", "fr", "ar"))
                 && (
-                        // sub domain contains not valid character ascii
-                        preg_match(
-                            '/[^a-z0-9\_\-\.]/i',
-                            $retval['subdomain_name']
-                        )
-                        // sub domain contains not valid characer ascii
-                        || preg_match(
-                            '/[^a-z0-9\-]/i',
-                            $retval['domain_name']
-                        )
+                    // sub domain contains not valid character ascii
+                    preg_match(
+                        '/[^a-z0-9\_\-\.]/i',
+                        $retval['subdomain_name']
+                    )
+                    // sub domain contains not valid characer ascii
+                    || preg_match(
+                        '/[^a-z0-9\-]/i',
+                        $retval['domain_name']
                     )
                 )
+            )
             )
         ) {
             return false;
@@ -1611,17 +1612,19 @@ class Tlds
         if (($ext = $this->getExtensionFrom($ext)) === false) {
             return false;
         }
-        unset($domain_detail['extension_name']);
         // ws allow special characters
-        if (!in_array($ext, array('ws', 'jp', 'cn')) && !preg_match('/([^a-z])/', $ext)) {
-            return $this->splitAsciiDomainArrayOnly("{$domain_detail['subdomain_name']}.{$domain_detail['domain_name']}.{$ext}");
+        if (! in_array($ext, array("ws", "jp", "cn", "ca", "fr", "ar")) && ! preg_match('/([^a-z])/', $ext)) {
+            if ($domain_detail['subdomain_name'] == '') {
+                unset($domain_detail['subdomain_name']);
+            }
+            return $this->splitAsciiDomainArrayOnly(implode('.', $domain_detail));
         } else {
             return $domain_detail;
         }
     }
 
     /**
-     * check if is valid Domainname
+     * validate if is valid Domainname
      *
      * @param string $domainname
      *
@@ -1634,7 +1637,7 @@ class Tlds
     }
 
     /**
-     * check if is valid domain name with sub domain
+     * validate if is valid domain name with sub domain
      *
      * @param string $domainname
      *
@@ -1651,7 +1654,7 @@ class Tlds
      *
      * @param string $email
      * @param bool   $allow_subdomain allowed subdomain , this recommended to set into true
-     *                                sub domains is allowed for check domain
+     *                                sub domains is allowed for validate domain
      *
      * @return bool|string boolean false if not valid
      */
@@ -1662,7 +1665,7 @@ class Tlds
         }
 
         $data = explode('@', $email);
-        // check must be 2 counted
+        // validate must be 2 counted
         if (count($data) <> 2) {
             return false;
         }
@@ -1681,11 +1684,11 @@ class Tlds
         }
 
         $domain_array = $this->getDomainFromExistencesArray($domain);
-        if (empty($domain_array) || $allow_subdomain === false && trim($domain_array['subdomain_name']) === '') {
+        if (empty($domain_array) || $allow_subdomain === false && trim($domain_array['subdomain_name']) !== '') {
             return false;
         }
 
-        // check mail
+        // validate mail
         if (preg_match('/[\~\!\@\#\$\%\^\&\*\(\)\+\`\=\\\\|\'\{\}\[\]\;\"\:\,\/\<\>\?\s]/', $mail_address)) {
             return false;
         }
@@ -1694,12 +1697,6 @@ class Tlds
          * Check common name
          */
         if (in_array($domain_array['extension_name'], array('com', 'net', 'co', 'de', 'jp'))) {
-            // if has sub domain is invalid
-            if (trim($domain_array['subdomain_name']) !== ''
-                || strlen($mail_address) > 64 // microsoft maximum 32 characters long
-            ) {
-                return false;
-            }
             $common = $this->checkCommonEmail($domain_array['domain_name'], $email);
             if ($common !== true) {
                 return $common;
@@ -1732,14 +1729,15 @@ class Tlds
                 return $common;
             }
         }
-
-        if (! in_array($domain_array['extension_name'], array('ws', 'jp', 'cn'))
+        if (! in_array($domain_array['extension_name'], array("ws", "jp", "cn", "ca", "fr", "ar"))
             && ! preg_match('/[^a-z]/i', $domain_array['extension_name'])
-            && preg_match('/[^0-9a-z\_-\.]/i', $mail_address)
+            && preg_match('/[^0-9a-z\_\-\.]/i', $mail_address)
         ) {
             return false;
         }
-
+        if ($domain_array['subdomain_name'] == '') {
+            unset($domain_array['subdomain_name']);
+        }
         return $this->toLowerCase($mail_address) . '@' . implode('.', $domain_array);
     }
 
@@ -1759,7 +1757,9 @@ class Tlds
         switch ($domain) {
             case 'gmail':
                 if (strlen($mail_address) > 30
-                    || ! preg_match('/[a-z0-9\.]{1,30}[a-z]{1}/i', $mail_address)) {
+                    || preg_match('/[^a-z0-9\.]/i', $mail_address)
+                    || ! preg_match('/[a-z0-9\.]{1,30}[a-z]{1}/i', $mail_address)
+                ) {
                     return false;
                 }
                 return $this->toLowerCase($email);
@@ -1770,6 +1770,7 @@ class Tlds
                 if (strlen($mail_address) > 32
                     || substr_count($mail_address, '.') > 1
                     || substr_count($mail_address, '_') > 1
+                    || preg_match('/[^a-z0-9\.\_]/i', $mail_address)
                     || ! preg_match('/[a-z0-9\.]{1,30}[a-z]{1}/i', $mail_address)) {
                     return false;
                 }
@@ -1778,7 +1779,9 @@ class Tlds
             case 'live':
             case 'hotmail':
             case 'outlook':
-                if (!preg_match('/[a-z0-9\.\_\-]{1,30}[a-z]{1/i', $mail_address)) {
+                if (preg_match('/[a-z0-9\.\_\-]/i', $mail_address)
+                    || !preg_match('/[a-z0-9\.\_\-]{1,30}[a-z]{1/i', $mail_address)
+                ) {
                     return false;
                 }
                 return $this->toLowerCase($email);
@@ -1802,7 +1805,7 @@ class Tlds
         }
 
         $data = explode('@', $email);
-        // check must be 2 counted
+        // validate must be 2 counted
         if (count($data) <> 2) {
             return false;
         }
@@ -1818,7 +1821,7 @@ class Tlds
             return false;
         }
 
-        if (preg_match('/[^0-9a-z\_-\.]/', $mail_address)) {
+        if (preg_match('/[^a-z0-9\_\-\.]/', $mail_address)) {
             return false;
         }
 
@@ -1835,3 +1838,4 @@ class Tlds
         return $this->data_tlds;
     }
 }
+
