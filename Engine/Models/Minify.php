@@ -1,6 +1,5 @@
 <?php
-use \Pentagonal\StaticHelper\PathHelper;
-
+use Pentagonal\StaticHelper\PathHelper;
 
 /**
  * Class Minify
@@ -15,9 +14,17 @@ class Minify extends CI_Model
     // 10 hours
     const EXPIRE_TIME = 36000;
 
+    /**
+     * Determine as cache ready to uses
+     * @var null|boolean
+     */
     private static $cache_ready = null;
 
-    protected $cache_dir = null;
+    /**
+     * cache directory
+     * @var string
+     */
+    protected $cache_dir;
 
     /**
      * Minify constructor.
@@ -89,7 +96,7 @@ class Minify extends CI_Model
         foreach ((array) PathHelper::readDirList($this->cache_dir, 1) as $v) {
             $file = $this->cache_dir . $v;
             $ext = pathinfo($file, PATHINFO_EXTENSION);
-            if (!is_file($this->cache_dir . $v) || $ext != 'css' && $ext != 'js' ) {
+            if (!is_file($this->cache_dir . $v) || $ext != 'css' && $ext != 'js') {
                 continue;
             }
             // remove invalid time
@@ -99,7 +106,16 @@ class Minify extends CI_Model
         }
     }
 
-    private function cachePut($hash, $text, $type, $force = false)
+    /**
+     * Put data into cache
+     *
+     * @param  string  $hash      hash key
+     * @param  string  $text      data
+     * @param  string  $type      js|css
+     * @param  boolean $overwrite overwrite if exist
+     * @return boolean
+     */
+    private function cachePut($hash, $text, $type, $overwrite = false)
     {
         if (!self::$cache_ready) {
             return false;
@@ -115,13 +131,13 @@ class Minify extends CI_Model
         $file = $this->cache_dir . $file_name;
         $text = trim($text);
         // empty no need to check
-        if ($text == '' && !$force) {
+        if ($text == '' && !$overwrite) {
             return true;
         }
         if (!file_exists($file) || !is_writable($file)) {
             if (@$fp = fopen($file, FOPEN_WRITE_CREATE_DESTRUCTIVE)) {
                 $text = str_split($text, 2048);
-                for ($i=0; count($text) > $i ; $i++) {
+                for ($i=0; count($text) > $i; $i++) {
                     $fwrite = fputs($fp, $text[$i]);
                     if ($fwrite === false) {
                         break;
@@ -136,6 +152,13 @@ class Minify extends CI_Model
         return false;
     }
 
+    /**
+     * Getting cache data
+     *
+     * @param  string $hash hash key
+     * @param  string $type js|css
+     * @return string|boolean
+     */
     private function cacheGet($hash, $type)
     {
         if (!self::$cache_ready) {
@@ -165,6 +188,8 @@ class Minify extends CI_Model
     }
 
     /**
+     * Minify CSS from file
+     *
      * @param string $file
      * @param bool   $strict
      *
@@ -244,7 +269,13 @@ class Minify extends CI_Model
         return false;
     }
 
-
+    /**
+     * Minify CSS
+     *
+     * @param  string      $text         css text
+     * @param  null|string $url_replacer url replacerfor handle fix source
+     * @return string
+     */
     public function css($text, $url_replacer = null)
     {
         if (!is_string($text)) {
@@ -352,7 +383,7 @@ class Minify extends CI_Model
                             break;
                         }
                         $c[0] = substr($c[0], 3);
-                    } while(strpos('../', $c[0]) === 0);
+                    } while (strpos('../', $c[0]) === 0);
                     $c[0] = rtrim($full_path, '/').'/'.ltrim($detach, '/');
                     $c[0] = strpos($c[0], '\'') !== false ? json_encode("{$c[0]}") : "'{$c[0]}'";
                     $c[0] = "url({$c[0]})";
@@ -365,8 +396,10 @@ class Minify extends CI_Model
     }
 
     /**
-     * @param string $js
+     * Remove non confitional comment
      *
+     * @access protected
+     * @param string $js
      * @return mixed
      */
     protected function removeNonConditionalCommentsJS($js)
@@ -374,7 +407,13 @@ class Minify extends CI_Model
         return preg_replace('/(?:(?:\/\*(?:[^*\!]|(?:\*+[^*\/]))*\*+\/)|(?:(?<!\:|\\\|\'|\")\/\/.*))/', '$1', $js);
     }
 
-
+    /**
+     * Remove brackets on semi colon
+     *
+     * @access protected
+     * @param  string $js javascript source text
+     * @return string
+     */
     protected function removeBracketsSemiColon($js)
     {
         // remove new line after semicolon
@@ -387,9 +426,10 @@ class Minify extends CI_Model
     }
 
     /**
+     * Minify Javascript file
+     *
      * @param string $file
      * @param bool   $strict
-     *
      * @return bool|string
      */
     public function jsFile($file, $strict = true, $usefirst_comment = true, $comment_only = false)
@@ -473,6 +513,13 @@ class Minify extends CI_Model
         return false;
     }
 
+    /**
+     * Minify javascript without fully optimized
+     *
+     * @param  string  $js                javascript source
+     * @param  boolean $use_first_comment allow first comment
+     * @return string
+     */
     public function removeCommentOnlyJs($js, $use_first_comment = true)
     {
         $hash = self::HASH_METHOD;
@@ -507,6 +554,13 @@ class Minify extends CI_Model
         return $js;
     }
 
+    /**
+     * Minify Javascript
+     *
+     * @param  string  $js                javascript source
+     * @param  boolean $use_first_comment allow first comment
+     * @return string
+     */
     public function js($js, $use_first_comment = true)
     {
         if (!is_string($js) || !trim($js)) {
@@ -560,21 +614,22 @@ class Minify extends CI_Model
             }
             $last = $v;
         }
-        unset($jsr);
-        $js = preg_replace('/(?>(?!\'|\"|\/))([\)\}])\s*{/', "$1{", $js);
-        $js = preg_replace('/(?>(?!\'|\"|\/))([a-z0-9\)])\n\./i', "$1.", $js);
-        $js = preg_replace('/(?>(?!\'|\"|\/)),\n([a-z\$\_])/i', ",$1", $js);
-        $js = preg_replace('/(?>(?!\'|\"|\/)),( |\n)(\"\'a-z\$\_])/i', ",$1", $js);
-        $js = preg_replace('/(?>(?!\'|\"|\/)):\n([a-z\$\_])/', ":$1", $js);
-        $js = preg_replace('/(?>(?!\'|\"|\/)) :/i', ':', $js);
-        $js = preg_replace("/(function)\s*\(((?>[\(]).+)?\)\s*\{(?:\s*([a-z]+))/", "\$1(\$2){\$3", $js);
+
+        unset($jsr); // freed
+        $js = preg_replace('/(?>(?!\'|\"|\/))\s*(&&|\|\|)\s*/', '$1', $js);
+        $js = preg_replace('/(?>(?!\'|\"|\/))([\)\}])\s*{/', '$1{', $js);
+        $js = preg_replace('/(?>(?!\'|\"|\/))([a-z0-9\)])\n\./i', '$1.', $js);
+        $js = preg_replace('/(?>(?!\'|\"|\/))([,:])\n([a-z\$\_])/i', '$1$2', $js);
+        $js = preg_replace('/(?>(?!\'|\"|\/)),[ \n]([\"\'a-z\$\_])/i', ',$1', $js);
+        $js = preg_replace('/(?>(?!\'|\"|\/))(?:[ ])?:(?:\s*)?(\{)?/i', ':$1', $js);
+        $js = preg_replace("/(function)\s*\(((?>[\(]).+)?\)\s*\{(?:\s*([a-zA-Z]+))/", "\$1(\$2){\$3", $js);
         $js = preg_replace('/(?>(?!\'|\" | \/))(function) \(\)/', "\$1()", $js);
         $js = preg_replace('/var\s*((?:.+[^\s*]|[0-9a-zA-Z]+|[0-9a-zA-Z\$]+))\s*=\s*/', "var \$1=", $js);
         $js = preg_replace('/(?:[ ]+|\n[ ])([\=\&\:\$\.\}\{]|if \()/', " $1", $js);
         $js = preg_replace('/(\n+)[\t ]+|((\n|\n\r|([\t ]+)\n)+)/i', "\n", $js);
         $js = preg_replace('/(?>(?!\'|\"|\/)) ((?:\!|\=)?==?|\:|\&\&|\<|\>|\<\>|<\=|\?|\|\||\-) ?([\{\(\'\"\$a-z0-9]|false|null)/i', '$1$2', $js);
         $js = preg_replace('/(?>(?!\'|\"|\/))([a-z])(=|\:) ([\{\(\'\"\$a-z0-9]|false|null)/i', '$1$2$3', $js);
-        $js = preg_replace('/;\n(?!\s*\/\*)/', ';', $js);
+        $js = preg_replace('/(?>(?!\'|\"|\/));\n(?!\s*\/\*)/', ';', $js);
         $js = preg_replace('/(?>(?!\'|\"|\/))(;|)\s*}/', "}", $js);
         $js = str_replace(array("}\n}", "}\n}", "} }"), "}}", $js);
         $js = str_replace(array(")\n}", ")\n}", ") }"), ")}", $js);

@@ -252,7 +252,7 @@ class Processor
             'php3'	=>	'resource/x-httpd-php',
             'phtml'	=>	'resource/x-httpd-php',
             'phps'	=>	'resource/x-httpd-php-source',
-            'js'	=>	array('resource/x-javascript', 'text/plain'),
+            'js'	=>	array('application/javascript', 'text/plain'),
             'swf'	=>	'resource/x-shockwave-flash',
             'sit'	=>	'resource/x-stuffit',
             'tar'	=>	'resource/x-tar',
@@ -801,6 +801,11 @@ class Processor
 
     protected $plugin_crashed = false;
 
+    /**
+     * Handle Shutdown
+     *
+     * @return mixed
+     */
     public function _shutdown_handler()
     {
         $last = error_get_last();

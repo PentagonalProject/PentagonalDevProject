@@ -14,6 +14,11 @@ final class DynamicAsset
 
     const DIRECTORY_SEP = '~';
 
+    /**
+     * @const Expired time integrity cached
+     */
+    const INTEGRITY_TIME = 36000;
+
     private static $instance;
 
     private static $integrity_cached = null;
@@ -95,6 +100,11 @@ final class DynamicAsset
                 if (!file_exists($file)) {
                     @file_put_contents($file, json_encode(self::$integrity_cached));
                 } elseif (is_readable($file)) {
+                    $expired = (@time() - self::INTEGRITY_TIME);
+                    if (fileatime($file) < $expired) {
+                        @file_put_contents($file, json_encode(array()));
+                        return;
+                    }
                     $str = file_get_contents($file);
                     $json = json_decode($str, true);
                     if (!is_array($json)) {
@@ -230,8 +240,8 @@ final class DynamicAsset
         foreach ($data[$hash] as $k => $v) {
             $obj->$k = $v;
         }
-        $obj->integrity = $hash_2;
-        $obj->integrity = $hash_2;
+        $obj->integrity = $hash;
+        $obj->integrity_aliases = $hash_2;
         return $obj;
     }
 
@@ -247,7 +257,19 @@ final class DynamicAsset
 
     public function checkIntegrity($integrity)
     {
-        return $integrity === $this->getIntegrity() || $integrity === $this->getIntegrityAliases();
+        if (!is_string($integrity)) {
+            return false;
+        }
+        if ($integrity === $this->getIntegrity() || $integrity === $this->getIntegrityAliases()) {
+            return true;
+        } elseif ($this->getIntegrityAliases() && !empty(self::$integrity_cached[$integrity]['integrity_aliases'])) {
+            /**
+             * Check Integrity aliases
+             */
+            return self::$integrity_cached[$integrity]['integrity_aliases'] == $this->getIntegrityAliases();
+        }
+
+        return false;
     }
 
     public function toUrl()
