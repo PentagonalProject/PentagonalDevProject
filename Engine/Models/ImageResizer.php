@@ -1,13 +1,30 @@
 <?php
 /**
+ * Image Resizer
+ *
+ * @uses
+ *     $im = new ImageResizer();
+ *     // array if success
+ *     $result = $im->create('/path/to/file/source.png')
+ *         ->resize(100, 200, 'landscape');
+ *         ->saveTo('/path/of/target/target_save.png', 100, true);
+ *
  * @purpose Resize and saves image
  * @require PHP5, GD library.
+ * @suggest ext: Imagick
  *
- * @author awan <nawa@yahoo.com>
- *
+ * @author  awan <nawa@yahoo.com>
+ * @version 1.0
+ * @license MIT
  */
-final Class ImageResizer extends CI_Model
+
+final class ImageResizer extends CI_Model
 {
+    /**
+     * List image type extension
+     *
+     * @var array
+     */
     protected $image_type_list = array(
         1 => array(
             'IMAGETYPE_GIF',
@@ -78,6 +95,12 @@ final Class ImageResizer extends CI_Model
             'ico'
         ),
     );
+
+    /**
+     * list functions uses
+     *
+     * @var array
+     */
     protected $image_type_function = array(
         'IMAGETYPE_GIF' => 'imagecreatefromgif',
         'IMAGETYPE_JPEG' => 'imagecreatefromjpeg',
@@ -99,55 +122,79 @@ final Class ImageResizer extends CI_Model
     );
 
     /**
+     * Source file
+     *
      * @var string
      */
     protected $source_file;
 
     /**
+     * Determine image type
+     *
      * @var string
      */
     protected $image_type;
 
     /**
+     * Determine application has ready to use
+     *
      * @var boolean
      */
     protected $ready = false;
 
     /**
+     * Extension
+     *
      * @var string
      */
     protected $extension;
 
     /**
+     * Real Extension
+     *
      * @var string
      */
     protected $real_extension;
 
     /**
+     * Rsource Image created
+     *
      * @var object|resource
      */
     protected $resource;
 
     /**
+     * Original resource width
+     *
      * @var integer
      */
     protected $width;
 
     /**
+     * Original resource height
+     *
      * @var integer
      */
     protected $height;
+
     /**
+     * Resource image resized
+     *
      * @var resource|object resized
      */
     protected $image_resized;
 
     /**
+     * Imagick Php Extension status
+     *
+     * @access private
      * @var bool
      */
     private static $imagick_exist;
 
     /**
+     * Last image size set
+     *
      * @var array
      */
     protected $last_set_image = array(
@@ -168,6 +215,8 @@ final Class ImageResizer extends CI_Model
     }
 
     /**
+     * Check if use image magick
+     *
      * @return bool
      */
     public function useImagick()
@@ -177,6 +226,7 @@ final Class ImageResizer extends CI_Model
 
     /**
      * Initial create
+     *
      * @param string $fileName
      *
      * @return $this
@@ -193,6 +243,7 @@ final Class ImageResizer extends CI_Model
             $res->createResourceOfFile();
             return $res;
         }
+
         trigger_error(
             'File does not exists',
             E_USER_WARNING
@@ -205,6 +256,8 @@ final Class ImageResizer extends CI_Model
 
     /**
      * Determine real type and set some property
+     *
+     * @access private
      *
      * @return void
      */
@@ -226,6 +279,9 @@ final Class ImageResizer extends CI_Model
                 return;
             }
 
+            /*!
+             * Set Property
+             */
             $this->resource = new Imagick($this->source_file);
             $this->width  = $this->resource->getImageWidth();
             $this->height = $this->resource->getImageHeight();
@@ -243,6 +299,9 @@ final Class ImageResizer extends CI_Model
             );
         }
 
+        /*!
+         * Set Property
+         */
         $this->resource = $this->image_type_function[$this->image_type]($this->source_file);
         $this->width  = imagesx($this->resource);
         $this->height = imagesy($this->resource);
@@ -351,6 +410,8 @@ final Class ImageResizer extends CI_Model
     }
 
     /**
+     * Set as Landscape
+     *
      * @param integer $newWidth
      * @param integer $newHeight
      *
@@ -362,9 +423,11 @@ final Class ImageResizer extends CI_Model
     }
 
     /**
+     * Resize
+     *
      * @param integer $newWidth
      * @param integer $newHeight
-     * @param string $option
+     * @param string $option crop|exact|potrait|landscape|auto default crop
      *
      * @return $this|null
      */
@@ -375,7 +438,7 @@ final Class ImageResizer extends CI_Model
         }
 
         $option = !is_string($option) ? 'crop' : trim(strtolower($option));
-        // *** Get optimal width and height - based on $option
+        // Get optimal width and height - based on $option
         $optionArray = $this->getDimensions($newWidth, $newHeight, $option);
         $optimalWidth  = $optionArray['w'];
         $optimalHeight = $optionArray['h'];
@@ -390,7 +453,8 @@ final Class ImageResizer extends CI_Model
             $this->image_resized = clone $this->resource;
             $this->image_resized->resizeImage($optimalWidth, $optimalHeight, Imagick::FILTER_LANCZOS, 1);
             $retval = $this->image_resized->cropImage(
-                $newWidth, $newHeight,
+                $newWidth,
+                $newHeight,
                 (($optimalWidth - $newWidth) / 2),
                 (($optimalHeight - $newHeight) / 2)
             );
@@ -400,6 +464,7 @@ final Class ImageResizer extends CI_Model
 
         $resource = is_resource($this->image_resized) ? $this->image_resized : $this->resource;
         $this->image_resized = imagecreatetruecolor($optimalWidth, $optimalHeight);
+        // resampling
         imagecopyresampled(
             $this->image_resized,
             $resource,
@@ -432,8 +497,7 @@ final Class ImageResizer extends CI_Model
      */
     private function getDimensions($newWidth, $newHeight, $option)
     {
-        switch ($option)
-        {
+        switch ($option) {
             case 'exact':
                 $optimalWidth = $newWidth;
                 $optimalHeight= $newHeight;
@@ -462,6 +526,10 @@ final Class ImageResizer extends CI_Model
     }
 
     /**
+     * Get fixed size by height
+     *
+     * @access private
+     *
      * @param integer $newHeight
      *
      * @return mixed
@@ -474,6 +542,10 @@ final Class ImageResizer extends CI_Model
     }
 
     /**
+     * Get fixed size by width
+     *
+     * @access private
+     *
      * @param integer $newWidth
      *
      * @return mixed
@@ -486,6 +558,10 @@ final Class ImageResizer extends CI_Model
     }
 
     /**
+     * Get Auto size
+     *
+     * @access private
+     *
      * @param integer $newWidth
      * @param integer $newHeight
      *
@@ -493,20 +569,16 @@ final Class ImageResizer extends CI_Model
      */
     private function getSizeByAuto($newWidth, $newHeight)
     {
-        if ($this->height < $this->width)
-            // *** Image to be resized is wider (landscape)
-        {
+        // *** Image to be resized is wider (landscape)
+        if ($this->height < $this->width) {
             $optimalWidth = $newWidth;
             $optimalHeight= $this->getSizeByFixedWidth($newWidth);
-        }
-        elseif ($this->height > $this->width)
-            // *** Image to be resized is taller (portrait)
-        {
+        } elseif ($this->height > $this->width) {
+            // Image to be resized is taller (portrait)
             $optimalWidth = $this->getSizeByFixedHeight($newHeight);
             $optimalHeight= $newHeight;
-        } else
-            // *** Image to be resizerd is a square
-        {
+        } else {
+            // Image to be resized is a square
             if ($newHeight < $newWidth) {
                 $optimalWidth = $newWidth;
                 $optimalHeight= $this->getSizeByFixedWidth($newWidth);
@@ -514,7 +586,7 @@ final Class ImageResizer extends CI_Model
                 $optimalWidth = $this->getSizeByFixedHeight($newHeight);
                 $optimalHeight= $newHeight;
             } else {
-                // *** Sqaure being resized to a square
+                // Square being resized to a square
                 $optimalWidth = $newWidth;
                 $optimalHeight= $newHeight;
             }
@@ -524,6 +596,10 @@ final Class ImageResizer extends CI_Model
     }
 
     /**
+     * Get Optimal Crop
+     *
+     * @access private
+     *
      * @param integer $newWidth
      * @param integer $newHeight
      *
@@ -548,6 +624,10 @@ final Class ImageResizer extends CI_Model
     }
 
     /**
+     * Proccess crop
+     *
+     * @access private
+     *
      * @param integer $optimalWidth
      * @param integer $optimalHeight
      * @param integer $newWidth
@@ -562,33 +642,38 @@ final Class ImageResizer extends CI_Model
         }
 
         // *** Find center - this will be used for the cropProcess
-        $cropStartX = ( $optimalWidth / 2) - ( $newWidth /2 );
-        $cropStartY = ( $optimalHeight/ 2) - ( $newHeight/2 );
+        $cropStartX = ($optimalWidth / 2) - ($newWidth / 2);
+        $cropStartY = ($optimalHeight/ 2) - ($newHeight / 2);
 
         $crop = $this->image_resized;
-        // *** Now cropProcess from center to exact requested size
-        $this->image_resized = imagecreatetruecolor($newWidth , $newHeight);
+        // Now cropProcess from center to exact requested size
+        $this->image_resized = imagecreatetruecolor($newWidth, $newHeight);
+
+        // resampling
         imagecopyresampled(
             $this->image_resized,
-            $crop ,
+            $crop,
             0,
             0,
             $cropStartX,
             $cropStartY,
             $newWidth,
-            $newHeight ,
+            $newHeight,
             $newWidth,
             $newHeight
         );
+
         return true;
     }
 
     /**
-     * @param string $savePath
-     * @param integer $imageQuality
-     * @param bool   $force
+     * Save The image result resized
      *
-     * @return bool
+     * @param string  $savePath     Full path of file name eg [/path/of/dir/image/image.jpg]
+     * @param integer $imageQuality image quality [1 - 100]
+     * @param bool    $force        force rewrite existing image if there was savepath exists
+     *
+     * @return bool|array           aboolean false if on fail otherwise array
      */
     public function saveTo($savePath, $imageQuality = 100, $force = false)
     {
@@ -610,7 +695,7 @@ final Class ImageResizer extends CI_Model
             }
         }
 
-        // *** Get extension
+        // Get extension
         $extension = pathinfo($savePath, PATHINFO_EXTENSION);
         // file exist
         if (file_exists($savePath)) {
@@ -644,32 +729,42 @@ final Class ImageResizer extends CI_Model
         if ($this->useImagick()) {
             $this->image_resized->setImageFormat($extension);
             if (!$fp = @fopen($savePath, 'wb')) {
+                $this->image_resized->clear();
+                $this->image_resized = null;
                 trigger_error(
                     'Could not write into your target directory. Resource image resize cleared.',
                     E_USER_WARNING
                 );
-                $this->image_resized->clear();
-                $this->image_resized = null;
-                return false;
+                 return false;
             }
             $this->image_resized->imageWriteFile($fp);
             @fclose($fp);
+
+            $width  = $this->image_resized->getImageWidth();
+            $height = $this->image_resized->getImageHeight();
+            $path = is_file($savepath) ? realpath($savepath) : $savepath;
+
             $this->image_resized->clear();
             $this->image_resized = null;
-            return true;
+
+            return array(
+                'width' => $width,
+                'height' => $height,
+                'path' => $path,
+            );
         }
 
-        switch($extension) {
+        switch ($extension) {
             case 'jpg':
             case 'jpeg':
-                     imagejpeg($this->image_resized, $savePath, $imageQuality);
+                    imagejpeg($this->image_resized, $savePath, $imageQuality);
                 break;
             case 'wbmp':
             case 'bmp':
-                     imagewbmp($this->image_resized, $savePath, $imageQuality);
+                    imagewbmp($this->image_resized, $savePath, $imageQuality);
                 break;
             case 'gif':
-                     imagegif($this->image_resized, $savePath);
+                    imagegif($this->image_resized, $savePath);
                 break;
             case 'xbm':
                     imagexbm($this->image_resized, $savePath);
@@ -680,14 +775,24 @@ final Class ImageResizer extends CI_Model
                     imagepng($this->image_resized, $savePath, $invertScaleQuality);
                 break;
             default:
-                    return false;
+                // invalid type
+                return false;
                 break;
         }
 
+        $width  = imagesx($this->image_resized);
+        $height = imagesy($this->image_resized);
+        $path   = is_file($savepath) ? realpath($savepath) : $savepath;
+
+        // destroy resource to make memory freely
         imagedestroy($this->image_resized);
         $this->image_resized = null;
 
-        return true;
+        return array(
+            'width' => $width,
+            'height' => $height,
+            'path' => $path,
+        );
     }
 
     /**
