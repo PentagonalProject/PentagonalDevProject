@@ -266,7 +266,7 @@ final class DynamicAsset
             /**
              * Check Integrity aliases
              */
-            return self::$integrity_cached[$integrity]['integrity_aliases'] == $this->getIntegrityAliases();
+            return self::$integrity_cached[$integrity]['integrity_aliases'] === $this->getIntegrityAliases();
         }
 
         return false;
