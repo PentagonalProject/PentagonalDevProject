@@ -1,48 +1,4 @@
 {
-    "4495066036336cd428efd89e06098f9a9f79d269": {
-        "type": "css",
-        "data": [
-            "bootstrap\/css\/bootstrap.css",
-            "bootflat\/css\/bootflat.css"
-        ],
-        "integrity": "4495066036336cd428efd89e06098f9a9f79d269",
-        "integrity_aliases": "6aeb7c6fad96ee139845b37c2e9ed9b3d1ed5d23"
-    },
-    "6aeb7c6fad96ee139845b37c2e9ed9b3d1ed5d23": {
-        "type": "css",
-        "data": [
-            "bootstrap\/css\/bootstrap.css",
-            "bootflat\/css\/bootflat.css"
-        ],
-        "integrity": "6aeb7c6fad96ee139845b37c2e9ed9b3d1ed5d23",
-        "integrity_aliases": "4495066036336cd428efd89e06098f9a9f79d269"
-    },
-    "6f73e67375e478395af4a524b18cbe669fc7d723": {
-        "type": "js",
-        "data": [
-            "js\/jquery.min.js",
-            "js\/jquery-migrate.min.js",
-            "bootstrap\/js\/bootstrap.js",
-            "bootflat\/js\/icheck.min.js",
-            "bootflat\/js\/jquery.fs.selecter.min.js",
-            "bootflat\/js\/jquery.fs.stepper.min.js"
-        ],
-        "integrity": "6f73e67375e478395af4a524b18cbe669fc7d723",
-        "integrity_aliases": "e31dc6949516c1c29f622cbe8455867f25d3ee8c"
-    },
-    "e31dc6949516c1c29f622cbe8455867f25d3ee8c": {
-        "type": "js",
-        "data": [
-            "js\/jquery.min.js",
-            "js\/jquery-migrate.min.js",
-            "bootstrap\/js\/bootstrap.js",
-            "bootflat\/js\/icheck.min.js",
-            "bootflat\/js\/jquery.fs.selecter.min.js",
-            "bootflat\/js\/jquery.fs.stepper.min.js"
-        ],
-        "integrity": "e31dc6949516c1c29f622cbe8455867f25d3ee8c",
-        "integrity_aliases": "6f73e67375e478395af4a524b18cbe669fc7d723"
-    },
     "12d24a4207850055eae8a9eabde63f9f46d6349a": {
         "type": "css",
         "data": [
@@ -58,51 +14,5 @@
         ],
         "integrity": "aa2a3dd1acc434f65a7329153c599a6533f03c3f",
         "integrity_aliases": "12d24a4207850055eae8a9eabde63f9f46d6349a"
-    },
-    "bb4022414f33e1c35d6a9705a781012b7a742a6c": {
-        "type": "js",
-        "data": [
-            "js\/jquery.min.js",
-            "js\/jquery-migrate.min.js",
-            "bootstrap\/js\/bootstrap.js"
-        ],
-        "integrity": "bb4022414f33e1c35d6a9705a781012b7a742a6c",
-        "integrity_aliases": "63fe6db9d0efec05ec5a1a3c28db8a0a0eed8650"
-    },
-    "63fe6db9d0efec05ec5a1a3c28db8a0a0eed8650": {
-        "type": "js",
-        "data": [
-            "js\/jquery.min.js",
-            "js\/jquery-migrate.min.js",
-            "bootstrap\/js\/bootstrap.js"
-        ],
-        "integrity": "63fe6db9d0efec05ec5a1a3c28db8a0a0eed8650",
-        "integrity_aliases": "bb4022414f33e1c35d6a9705a781012b7a742a6c"
-    },
-    "86116eaba4d2a52cac376b886494dafd230cee68": {
-        "type": "js",
-        "data": [
-            "js\/jquery.min.js",
-            "js\/jquery-migrate.min.js",
-            "bootstrap\/js\/bootstrap.min.js",
-            "bootflat\/js\/icheck.min.js",
-            "bootflat\/js\/jquery.fs.selecter.min.js",
-            "bootflat\/js\/jquery.fs.stepper.min.js"
-        ],
-        "integrity": "86116eaba4d2a52cac376b886494dafd230cee68",
-        "integrity_aliases": "0e619e9e2c62729855074f4e09c8702d9da2584d"
-    },
-    "0e619e9e2c62729855074f4e09c8702d9da2584d": {
-        "type": "js",
-        "data": [
-            "js\/jquery.min.js",
-            "js\/jquery-migrate.min.js",
-            "bootstrap\/js\/bootstrap.min.js",
-            "bootflat\/js\/icheck.min.js",
-            "bootflat\/js\/jquery.fs.selecter.min.js",
-            "bootflat\/js\/jquery.fs.stepper.min.js"
-        ],
-        "integrity": "0e619e9e2c62729855074f4e09c8702d9da2584d",
-        "integrity_aliases": "86116eaba4d2a52cac376b886494dafd230cee68"
     }
 }
