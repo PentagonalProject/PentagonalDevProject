@@ -18,7 +18,7 @@ return array(
             'password' => getenv('OPENSHIFT_MYSQL_DB_PASSWORD'),
             'database' => getenv('OPENSHIFT_APP_NAME'),
             'dbdriver' => 'mysqli',
-            'dbprefix' => '',
+            'dbprefix' => ''
         )
     )
 );
