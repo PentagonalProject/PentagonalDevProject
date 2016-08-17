@@ -681,15 +681,15 @@ final class ImageResizer extends CI_Model
     }
 
     /**
-     * Save The image result resized
+     * Save The image result reSized
      *
      * @param string  $savePath     Full path of file name eg [/path/of/dir/image/image.jpg]
      * @param integer $imageQuality image quality [1 - 100]
-     * @param bool    $force        force rewrite existing image if there was savepath exists
+     * @param bool    $overwrite        force rewrite existing image if there was savepath exists
      *
      * @return bool|array           aboolean false if on fail otherwise array
      */
-    public function saveTo($savePath, $imageQuality = 100, $force = false)
+    public function saveTo($savePath, $imageQuality = 100, $overwrite = false)
     {
         if (!$this->isReady()) {
             return false;
@@ -697,8 +697,8 @@ final class ImageResizer extends CI_Model
 
         // check if has on cropProcess
         if (!isset($this->image_resized)) {
-            if ($this->last_set_image['width'] === false) {
-                $this->image_resized = $this->resource;
+            if ($this->last_set_image['width'] === false || ! $this->image_resized) {
+                $this->image_resized = clone $this->resource;
             } else {
                 // set from last result
                 $this->resize(
@@ -713,7 +713,7 @@ final class ImageResizer extends CI_Model
         $extension = pathinfo($savePath, PATHINFO_EXTENSION);
         // file exist
         if (file_exists($savePath)) {
-            if (!$force) {
+            if (!$overwrite) {
                 return false;
             }
             if (!is_writable($savePath)) {
@@ -724,6 +724,7 @@ final class ImageResizer extends CI_Model
                 return false;
             }
         }
+
         // check if image output type allowed
         if (!in_array($extension, $this->allowed_extensions_output)) {
             trigger_error(
@@ -733,15 +734,15 @@ final class ImageResizer extends CI_Model
             return false;
         }
 
-        $dirname = dirname($savePath);
-        if (!$dirname || ! ($dirname = realpath($dirname))) {
+        $dir_name = dirname($savePath);
+        if (!$dir_name || ! ($dir_name = realpath($dir_name))) {
             trigger_error(
                 'Directory Target Does not exist. Resource image resize cleared.',
                 E_USER_WARNING
             );
             return false;
         }
-        if (!is_writable($dirname)) {
+        if (!is_writable($dir_name)) {
             trigger_error(
                 'Directory Target is not writable. Please check directory permission.',
                 E_USER_WARNING
@@ -757,9 +758,9 @@ final class ImageResizer extends CI_Model
                     'Could not write into your target directory. Resource image resize cleared.',
                     E_USER_WARNING
                 );
-                 return false;
+                return false;
             }
-            $this->image_resized->imageWriteFile($fp);
+            $ret_val = $this->image_resized->writeImageFile($fp);
             @fclose($fp);
 
             $width  = $this->image_resized->getImageWidth();
@@ -769,36 +770,33 @@ final class ImageResizer extends CI_Model
             $this->image_resized->clear();
             $this->image_resized = null;
 
-            return array(
+            return ! $ret_val ? false : array(
                 'width' => $width,
                 'height' => $height,
                 'path' => $path,
             );
         }
 
+        $ret_val = false;
         switch ($extension) {
             case 'jpg':
             case 'jpeg':
-                    imagejpeg($this->image_resized, $savePath, $imageQuality);
+                $ret_val = imagejpeg($this->image_resized, $savePath, $imageQuality);
                 break;
             case 'wbmp':
             case 'bmp':
-                    imagewbmp($this->image_resized, $savePath, $imageQuality);
+                $ret_val = imagewbmp($this->image_resized, $savePath);
                 break;
             case 'gif':
-                    imagegif($this->image_resized, $savePath);
+                $ret_val = imagegif($this->image_resized, $savePath);
                 break;
             case 'xbm':
-                    imagexbm($this->image_resized, $savePath);
+                $ret_val = imagexbm($this->image_resized, $savePath);
                 break;
             case 'png':
-                    $scaleQuality = round(($imageQuality/100) * 9);
-                    $invertScaleQuality = 9 - $scaleQuality;
-                    imagepng($this->image_resized, $savePath, $invertScaleQuality);
-                break;
-            default:
-                // invalid type
-                return false;
+                $scaleQuality = round(($imageQuality/100) * 9);
+                $invertScaleQuality = 9 - $scaleQuality;
+                $ret_val = imagepng($this->image_resized, $savePath, $invertScaleQuality);
                 break;
         }
 
@@ -807,10 +805,10 @@ final class ImageResizer extends CI_Model
         $path   = is_file($savePath) ? realpath($savePath) : $savePath;
 
         // destroy resource to make memory freely
-        imagedestroy($this->image_resized);
+        @imagedestroy($this->image_resized);
         $this->image_resized = null;
 
-        return array(
+        return ! $ret_val ? false : array(
             'width' => $width,
             'height' => $height,
             'path' => $path,
@@ -818,12 +816,12 @@ final class ImageResizer extends CI_Model
     }
 
     /**
-     * Optimize Image Only
+     * Optimize Image Only & save into Target
      *
      * @param null|string $savePath
      * @param bool $overwrite overwrite even exists
      *
-     * @return bool
+     * @return bool|array
      */
     public function optimizeTo($savePath = null, $overwrite = false)
     {
@@ -875,9 +873,21 @@ final class ImageResizer extends CI_Model
             }
 
             $ret_val = $image_source->writeImageFile($fp);
+            $width   = $image_source->getImageWidth();
+            $height  = $image_source->getImageHeight();
+
             @fclose($fp);
             $image_source->clear();
             $image_source = null;
+            $path   = is_file($savePath) ? realpath($savePath) : $savePath;
+            if ($ret_val) {
+                return array(
+                    'width' => $width,
+                    'height' => $height,
+                    'path' => $path,
+                );
+            }
+
             return $ret_val;
         }
 
@@ -905,7 +915,14 @@ final class ImageResizer extends CI_Model
                 break;
         }
 
-        return $ret_val;
+        // destroy resource to make memory freely
+        @imagedestroy($image_source);
+        $path   = is_file($savePath) ? realpath($savePath) : $savePath;
+        return ! $ret_val ? false : array(
+            'width' => $this->width,
+            'height' => $this->height,
+            'path' => $path,
+        );
     }
 
     /**
