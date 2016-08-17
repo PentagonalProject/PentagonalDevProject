@@ -742,7 +742,7 @@ final class ImageResizer extends CI_Model
 
             $width  = $this->image_resized->getImageWidth();
             $height = $this->image_resized->getImageHeight();
-            $path = is_file($savepath) ? realpath($savepath) : $savepath;
+            $path = is_file($savePath) ? realpath($savePath) : $savePath;
 
             $this->image_resized->clear();
             $this->image_resized = null;
