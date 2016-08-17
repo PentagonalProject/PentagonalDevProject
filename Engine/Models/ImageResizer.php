@@ -6,7 +6,7 @@
  *     $im = new ImageResizer();
  *     // array if success
  *     $result = $im->create('/path/to/file/source.png')
- *         ->resize(100, 200, 'landscape');
+ *         ->resize(100, 200, 'landscape')
  *         ->saveTo('/path/of/target/target_save.png', 100, true);
  *
  * @purpose Resize and saves image
