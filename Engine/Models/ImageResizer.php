@@ -193,6 +193,13 @@ final class ImageResizer extends CI_Model
     private static $imagick_exist;
 
     /**
+     * Allowed output result
+     *
+     * @var array
+     */
+    protected $allowed_extensions_output = array('jpg', 'jpeg', 'wbmp', 'bmp', 'gif', 'xbm', 'png');
+
+    /**
      * Last image size set
      *
      * @var array
@@ -303,6 +310,13 @@ final class ImageResizer extends CI_Model
          * Set Property
          */
         $this->resource = $this->image_type_function[$this->image_type]($this->source_file);
+        /**
+         * if image type PNG save Alpha Blending
+         */
+        if ($this->image_type == 'IMAGETYPE_PNG') {
+            imagealphablending($this->resource, true); // setting alpha blending on
+            imagesavealpha($this->resource, true); // save alphablending setting (important)
+        }
         $this->width  = imagesx($this->resource);
         $this->height = imagesy($this->resource);
         $this->ready = true;
@@ -710,6 +724,14 @@ final class ImageResizer extends CI_Model
                 return false;
             }
         }
+        // check if image output type allowed
+        if (!in_array($extension, $this->allowed_extensions_output)) {
+            trigger_error(
+                'Invalid file type of target',
+                E_USER_WARNING
+            );
+            return false;
+        }
 
         $dirname = dirname($savePath);
         if (!$dirname || ! ($dirname = realpath($dirname))) {
@@ -793,6 +815,97 @@ final class ImageResizer extends CI_Model
             'height' => $height,
             'path' => $path,
         );
+    }
+
+    /**
+     * Optimize Image Only
+     *
+     * @param null|string $savePath
+     * @param bool $overwrite overwrite even exists
+     *
+     * @return bool
+     */
+    public function optimizeTo($savePath = null, $overwrite = false)
+    {
+        if (!$this->isReady()) {
+            return false;
+        }
+
+        if (! $savePath) {
+            $savePath = $this->source_file;
+        } elseif (file_exists($savePath)) {
+            if (!$overwrite) {
+                return false;
+            }
+        }
+
+        if (!is_writable($savePath)) {
+            trigger_error(
+                'Target file exist! could not to be replace',
+                E_USER_WARNING
+            );
+            return false;
+        }
+
+        // Get extension
+        $extension = pathinfo($savePath, PATHINFO_EXTENSION);
+        // check if image output type allowed
+        if (!in_array($extension, $this->allowed_extensions_output)) {
+            trigger_error(
+                'Invalid file type of target',
+                E_USER_WARNING
+            );
+            return false;
+        }
+
+        if ($this->useImagick()) {
+            /**
+             * @var \Imagick
+             */
+            $image_source = clone $this->resource;
+            $image_source->setImageFormat($extension);
+            if (!$fp = @fopen($savePath, 'wb')) {
+                $image_source->clear();
+                $image_source = null;
+                trigger_error(
+                    'Could not write into your target directory.',
+                    E_USER_WARNING
+                );
+                return false;
+            }
+
+            $ret_val = $image_source->writeImageFile($fp);
+            @fclose($fp);
+            $image_source->clear();
+            $image_source = null;
+            return $ret_val;
+        }
+
+        $image_source = imagecreatetruecolor($this->width, $this->width);
+        imagecopy($image_source, $this->resource, 0, 0, 0, 0, $this->width, $this->width);
+
+        $ret_val = false;
+        switch ($extension) {
+            case 'jpg':
+            case 'jpeg':
+                $ret_val = imagejpeg($image_source, $savePath, 100);
+                break;
+            case 'wbmp':
+            case 'bmp':
+                $ret_val = imagewbmp($image_source, $savePath);
+                break;
+            case 'gif':
+                $ret_val = imagegif($image_source, $savePath);
+                break;
+            case 'xbm':
+                $ret_val = imagexbm($image_source, $savePath);
+                break;
+            case 'png':
+                $ret_val = imagepng($image_source, $savePath, 100);
+                break;
+        }
+
+        return $ret_val;
     }
 
     /**
