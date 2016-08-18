@@ -6,7 +6,7 @@
  * @license GPL3+
  */
 
-domainverifier = function(){},
+var domainverifier = function(){};
     domainverifier.prototype = {
         /**
          * List allowed custom characters on domain
@@ -176,7 +176,7 @@ domainverifier = function(){},
          * @returns {boolean}
          */
         isDomain : function (domainName) {
-            return (this.validate(domainName) != false);
+            return (this.validate(domainName) !== false);
         },
         /**
          * Check if domain valid, only parent allowed
@@ -191,7 +191,7 @@ domainverifier = function(){},
             /**
              * validate if domain is not false (@type {object}) and sub domain is @type {null}
              */
-            return (domainResult != false && domainResult.subdomain === null);
+            return (domainResult !== false && domainResult.subdomain === null);
         },
         /**
          * Check if valid Email
